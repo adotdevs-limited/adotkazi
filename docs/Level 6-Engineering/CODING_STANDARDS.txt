@@ -1,0 +1,745 @@
+# CODING_STANDARDS.md
+
+# AdotKazi Coding Standards
+
+**Version:** 1.0
+**Status:** Platform Standard
+
+---
+
+# Purpose
+
+This document defines the engineering standards used across the entire AdotKazi platform.
+
+Its purpose is to ensure that every feature, service, component, API, database migration, and user interface follows consistent architectural and coding practices.
+
+These standards apply to all contributors, AI coding agents (Claude Code, ChatGPT, GitHub Copilot, Cursor, etc.), and future development teams.
+
+---
+
+# Core Engineering Principles
+
+Every line of code should be:
+
+* Readable
+* Maintainable
+* Predictable
+* Testable
+* Secure
+* Performant
+* Extensible
+* Documented
+
+Code is written for humans first and computers second.
+
+---
+
+# Architecture First
+
+Never write code before understanding the architecture.
+
+Every implementation must follow:
+
+* Domain Model
+* Entity Specifications
+* Database Standards
+* API Specification
+* Authentication
+* Authorization
+* Multi-Tenancy
+* AI Architecture
+
+Business logic must never bypass architectural rules.
+
+---
+
+# Domain-Driven Design
+
+Organize code by business domains.
+
+✅ Good
+
+```text
+src/
+
+    recruitment/
+
+    opportunity/
+
+    ipt/
+
+    ai/
+
+    organizations/
+
+    analytics/
+```
+
+❌ Avoid
+
+```text
+controllers/
+
+models/
+
+helpers/
+
+utils/
+```
+
+The business domain is the primary organizational unit.
+
+---
+
+# Feature-Based Structure
+
+Every domain contains:
+
+```text
+domain/
+
+    entities/
+
+    services/
+
+    repositories/
+
+    api/
+
+    validation/
+
+    dto/
+
+    events/
+
+    permissions/
+
+    tests/
+```
+
+Each feature owns its implementation.
+
+---
+
+# Single Responsibility Principle
+
+Every class, function, and module should have one responsibility.
+
+Avoid large "god" classes.
+
+---
+
+# SOLID Principles
+
+The platform follows:
+
+* Single Responsibility
+* Open/Closed
+* Liskov Substitution
+* Interface Segregation
+* Dependency Inversion
+
+These principles are mandatory.
+
+---
+
+# Clean Architecture
+
+Dependencies flow inward.
+
+```text
+UI
+
+↓
+
+API
+
+↓
+
+Application
+
+↓
+
+Domain
+
+↓
+
+Infrastructure
+```
+
+The Domain Layer must never depend on frameworks.
+
+---
+
+# Business Logic
+
+Business logic belongs only inside domain services.
+
+Never place business logic inside:
+
+* Controllers
+* API Routes
+* UI Components
+* Database Queries
+
+---
+
+# Naming Conventions
+
+Names should be descriptive.
+
+Good:
+
+```text
+createOpportunity()
+
+calculateProfileCompletion()
+
+assignSupervisor()
+
+generateInterviewScore()
+```
+
+Avoid:
+
+```text
+doThing()
+
+temp()
+
+helper()
+
+data()
+```
+
+Names should communicate intent.
+
+---
+
+# File Naming
+
+Use consistent naming.
+
+Examples:
+
+```text
+candidate.service.ts
+
+application.repository.ts
+
+organization.entity.ts
+
+create-opportunity.use-case.ts
+```
+
+Avoid abbreviations unless universally understood.
+
+---
+
+# Folder Naming
+
+Use lowercase.
+
+Example:
+
+```text
+candidate/
+
+organization/
+
+interviews/
+
+analytics/
+```
+
+---
+
+# Function Standards
+
+Functions should:
+
+* Do one thing
+* Be predictable
+* Return consistent results
+* Avoid side effects
+
+Prefer:
+
+```typescript
+calculateMatchScore(candidate, opportunity)
+```
+
+over:
+
+```typescript
+processEverything()
+```
+
+---
+
+# Class Standards
+
+Classes should:
+
+* Be cohesive
+* Hide implementation details
+* Expose minimal public APIs
+
+Large classes should be split.
+
+---
+
+# Interfaces
+
+Prefer interfaces over concrete implementations.
+
+Example:
+
+```typescript
+StorageProvider
+
+EmailProvider
+
+AIProvider
+
+SearchProvider
+```
+
+Infrastructure depends on interfaces.
+
+---
+
+# Dependency Injection
+
+Always inject dependencies.
+
+Never instantiate infrastructure directly.
+
+Good:
+
+```typescript
+constructor(storageProvider: StorageProvider)
+```
+
+Avoid:
+
+```typescript
+new SupabaseStorage()
+```
+
+---
+
+# Error Handling
+
+Errors should be:
+
+* Predictable
+* Typed
+* Actionable
+
+Never expose internal errors to users.
+
+Every error should contain:
+
+* Code
+* Message
+* Context
+* Timestamp
+
+---
+
+# Logging
+
+Use structured logging.
+
+Every log should include:
+
+* Request ID
+* Organization ID
+* User ID
+* Module
+* Severity
+* Timestamp
+
+Never log passwords, tokens, or secrets.
+
+---
+
+# Validation
+
+Validate all input.
+
+Validation occurs:
+
+* Client
+* API
+* Domain
+
+Never trust client-side validation alone.
+
+---
+
+# API Standards
+
+Follow `API_SPECIFICATION.md`.
+
+Requirements:
+
+* REST-first architecture
+* Versioned endpoints
+* Consistent response format
+* Cursor pagination
+* Typed errors
+
+Never return inconsistent JSON structures.
+
+---
+
+# Database Standards
+
+Follow `DATABASE_STANDARDS.md`.
+
+Requirements:
+
+* UUID primary keys
+* Foreign keys
+* Indexes
+* Soft deletes
+* Audit fields
+
+Never bypass repositories.
+
+---
+
+# Multi-Tenancy
+
+Every organization-owned query must include:
+
+```text
+organization_id
+```
+
+Never allow cross-tenant queries.
+
+Tenant isolation is mandatory.
+
+---
+
+# Security
+
+Never:
+
+* Hardcode secrets
+* Store plaintext passwords
+* Trust client permissions
+* Expose internal IDs unnecessarily
+
+Always:
+
+* Validate permissions
+* Sanitize inputs
+* Escape outputs
+* Use HTTPS
+* Use parameterized queries
+
+---
+
+# Authentication
+
+Follow `AUTHENTICATION.md`.
+
+Requirements:
+
+* Secure sessions
+* MFA-ready
+* OAuth-ready
+* Global accounts
+
+---
+
+# Authorization
+
+Every action requires authorization.
+
+Authorization checks occur before business logic executes.
+
+Never rely on UI restrictions.
+
+---
+
+# AI Standards
+
+All AI functionality must:
+
+* Use the AI Platform
+* Be provider-independent
+* Be asynchronous where appropriate
+* Require human review for business decisions
+
+AI never performs irreversible actions automatically.
+
+---
+
+# Event-Driven Development
+
+Significant business actions publish domain events.
+
+Example:
+
+```text
+ApplicationSubmitted
+
+InterviewScheduled
+
+PlacementCompleted
+
+OfferAccepted
+```
+
+Consumers react to events.
+
+Publishers remain unaware of consumers.
+
+---
+
+# Background Jobs
+
+Long-running operations must execute asynchronously.
+
+Examples:
+
+* AI Processing
+* Email Delivery
+* Report Generation
+* Search Indexing
+* Analytics Aggregation
+
+Never block user requests unnecessarily.
+
+---
+
+# Performance
+
+Optimize for:
+
+* Fast queries
+* Lazy loading
+* Pagination
+* Background processing
+* Caching
+
+Avoid premature optimization.
+
+Measure before optimizing.
+
+---
+
+# Caching
+
+Cache:
+
+* Organization settings
+* Feature flags
+* Public opportunities
+* Search metadata
+* AI configuration
+
+Never cache sensitive user-specific data without proper invalidation.
+
+---
+
+# File Storage
+
+Use the Document Service.
+
+Business modules never communicate directly with storage providers.
+
+Store only:
+
+```text
+document_id
+```
+
+---
+
+# Testing
+
+Every feature should include:
+
+* Unit Tests
+* Integration Tests
+* End-to-End Tests
+
+Critical business logic requires high test coverage.
+
+---
+
+# Documentation
+
+Every public API, service, and domain should be documented.
+
+Major architectural decisions should include an Architecture Decision Record (ADR).
+
+---
+
+# Configuration
+
+Configuration belongs in environment variables.
+
+Never hardcode:
+
+* API Keys
+* Secrets
+* URLs
+* Database Credentials
+
+Provide sensible defaults for local development where appropriate.
+
+---
+
+# Environment Management
+
+Support:
+
+* Development
+* Testing
+* Staging
+* Production
+
+Environment-specific behavior should be configuration-driven.
+
+---
+
+# Git Standards
+
+Use Conventional Commits.
+
+Examples:
+
+```text
+feat(recruitment): add opportunity templates
+
+fix(interviews): prevent duplicate scheduling
+
+refactor(ai): simplify provider selection
+
+docs(api): update authentication examples
+
+test(ipt): add placement lifecycle tests
+```
+
+---
+
+# Code Reviews
+
+Every pull request should verify:
+
+* Architecture compliance
+* Security
+* Performance
+* Readability
+* Test coverage
+* Documentation
+* Tenant isolation
+
+---
+
+# Accessibility
+
+Frontend development must:
+
+* Meet WCAG 2.1 AA
+* Support keyboard navigation
+* Support screen readers
+* Maintain color contrast
+* Use semantic HTML
+
+Accessibility is a product requirement.
+
+---
+
+# Internationalization
+
+All user-facing strings should support localization.
+
+Never hardcode display text inside business logic.
+
+---
+
+# Observability
+
+Every service should expose:
+
+* Health checks
+* Metrics
+* Structured logs
+* Error reporting
+* Tracing
+
+Production systems must be observable.
+
+---
+
+# Cloud Independence
+
+The platform must remain independent of:
+
+* Supabase
+* Vercel
+* PostgreSQL vendor
+* AI provider
+* Email provider
+* Storage provider
+
+Infrastructure should be replaceable through adapters.
+
+---
+
+# Technical Debt
+
+Technical debt must be:
+
+* Documented
+* Prioritized
+* Tracked
+
+Temporary workarounds require explicit justification.
+
+---
+
+# AI Coding Agent Rules
+
+When AI agents generate code, they must:
+
+* Follow this document
+* Respect the Domain Model
+* Respect Entity Specifications
+* Never bypass repositories
+* Never bypass authorization
+* Never violate tenant isolation
+* Generate production-ready code
+* Prefer readability over cleverness
+* Include tests for business logic
+* Avoid introducing unnecessary dependencies
+
+Generated code should be indistinguishable from hand-written production code.
+
+---
+
+# Definition of Done
+
+A feature is considered complete only when:
+
+* Architecture guidelines are followed.
+* Domain rules are respected.
+* Authorization is enforced.
+* Tenant isolation is verified.
+* Validation is implemented.
+* Tests pass.
+* Documentation is updated.
+* Domain events are published where required.
+* Performance has been considered.
+* Security review passes.
+* Code review is approved.
+
+No feature is complete until it meets these standards.

@@ -1,0 +1,715 @@
+# TESTING_STRATEGY.md
+
+# AdotKazi Testing Strategy
+
+**Version:** 1.0
+**Status:** Platform Standard
+
+---
+
+# Purpose
+
+This document defines the testing strategy for the AdotKazi platform.
+
+Its objective is to ensure every feature is reliable, secure, scalable, and maintainable while enabling rapid development with confidence.
+
+Testing is a first-class engineering practice—not a final development phase.
+
+---
+
+# Vision
+
+Every production deployment should be backed by automated testing that verifies business rules, security, multi-tenancy, integrations, and user experience.
+
+The goal is to catch defects before they reach production.
+
+---
+
+# Testing Principles
+
+The platform follows these principles:
+
+* Test behavior, not implementation.
+* Automate everything possible.
+* Keep tests deterministic.
+* Write tests alongside features.
+* Favor fast feedback.
+* Prevent regressions.
+* Validate business rules.
+* Continuously run tests in CI/CD.
+
+---
+
+# Testing Pyramid
+
+```text
+                    E2E Tests
+                ─────────────────
+             Integration Tests
+         ───────────────────────────
+               Unit Tests
+    ───────────────────────────────────
+```
+
+Approximate distribution:
+
+* Unit Tests → 70%
+* Integration Tests → 20%
+* End-to-End Tests → 10%
+
+---
+
+# Types of Testing
+
+The platform includes:
+
+* Unit Testing
+* Integration Testing
+* End-to-End Testing
+* API Testing
+* Database Testing
+* Authentication Testing
+* Authorization Testing
+* Multi-Tenancy Testing
+* Security Testing
+* Performance Testing
+* Load Testing
+* Accessibility Testing
+* AI Testing
+* Search Testing
+* File Storage Testing
+* Notification Testing
+* Workflow Testing
+* Regression Testing
+* Smoke Testing
+
+---
+
+# Unit Testing
+
+Purpose:
+
+Verify individual business logic in isolation.
+
+Examples:
+
+* Opportunity matching
+* Candidate scoring
+* IPT progress calculations
+* Interview scheduling rules
+* Recommendation algorithms
+
+Requirements:
+
+* No external services
+* Mock infrastructure
+* Fast execution
+* Independent
+* Deterministic
+
+Target coverage:
+
+> 90% of domain logic
+
+---
+
+# Integration Testing
+
+Purpose:
+
+Verify collaboration between components.
+
+Examples:
+
+* API → Database
+* Recruitment → Notification
+* Interview → Calendar
+* AI → Recommendation Engine
+* Search indexing
+* Workflow automation
+
+Real databases should be used where practical.
+
+External services should be mocked unless specifically testing integrations.
+
+---
+
+# End-to-End Testing
+
+Purpose:
+
+Validate complete user journeys.
+
+Example flows:
+
+Candidate:
+
+```text
+Register
+
+↓
+
+Complete Profile
+
+↓
+
+Search Opportunity
+
+↓
+
+Apply
+
+↓
+
+Receive Email
+
+↓
+
+Track Status
+```
+
+Recruiter:
+
+```text
+Create Opportunity
+
+↓
+
+Publish
+
+↓
+
+Review Applications
+
+↓
+
+Schedule Interview
+
+↓
+
+Hire Candidate
+```
+
+IPT Student:
+
+```text
+Apply
+
+↓
+
+Placement
+
+↓
+
+Daily Logs
+
+↓
+
+Weekly Reports
+
+↓
+
+Final Report
+
+↓
+
+Evaluation
+
+↓
+
+Certificate
+```
+
+---
+
+# API Testing
+
+Every endpoint should verify:
+
+* Success responses
+* Validation
+* Authentication
+* Authorization
+* Rate limiting
+* Error handling
+* Pagination
+* Tenant isolation
+
+APIs must follow `API_SPECIFICATION.md`.
+
+---
+
+# Database Testing
+
+Validate:
+
+* Constraints
+* Foreign keys
+* Soft deletes
+* Indexes
+* Cascading rules
+* Transactions
+* Migrations
+* Rollbacks
+
+Database migrations must be reversible whenever feasible.
+
+---
+
+# Authentication Testing
+
+Verify:
+
+* Registration
+* Login
+* Logout
+* Password reset
+* Email verification
+* Session expiration
+* OAuth
+* MFA
+* Magic Links
+
+Authentication failures should never leak sensitive information.
+
+---
+
+# Authorization Testing
+
+Every protected action should verify:
+
+* Correct role
+* Correct permission
+* Correct organization
+* Correct ownership
+
+Examples:
+
+A recruiter from Organization A must never access Organization B resources.
+
+---
+
+# Multi-Tenancy Testing
+
+Critical requirement.
+
+Every domain must verify:
+
+* Organization isolation
+* Query isolation
+* Storage isolation
+* Analytics isolation
+* Search isolation
+* Notification isolation
+
+Cross-tenant data leakage is a release blocker.
+
+---
+
+# Security Testing
+
+Validate:
+
+* SQL Injection
+* XSS
+* CSRF
+* SSRF
+* Path Traversal
+* File Upload Security
+* Authentication bypass
+* Authorization bypass
+* Rate limiting
+* Input validation
+
+Security tests run automatically in CI.
+
+---
+
+# Performance Testing
+
+Measure:
+
+* API response time
+* Search latency
+* Dashboard load time
+* AI response latency
+* File upload speed
+* Database performance
+
+Performance budgets should be defined and monitored.
+
+---
+
+# Load Testing
+
+Simulate:
+
+* Thousands of concurrent users
+* Large recruitment campaigns
+* Mass applications
+* Heavy AI usage
+* Bulk notifications
+
+The platform should degrade gracefully under load.
+
+---
+
+# Stress Testing
+
+Determine:
+
+* Maximum throughput
+* Breaking points
+* Recovery behavior
+* Queue performance
+* Database limits
+
+Stress testing is performed before major releases.
+
+---
+
+# Accessibility Testing
+
+Verify:
+
+* Keyboard navigation
+* Screen reader compatibility
+* Color contrast
+* Focus management
+* Semantic HTML
+* Responsive layouts
+
+Target:
+
+WCAG 2.1 AA compliance.
+
+---
+
+# AI Testing
+
+Validate:
+
+* Prompt correctness
+* Structured outputs
+* Cost tracking
+* Provider failover
+* Response quality
+* Timeout handling
+* Hallucination safeguards
+
+AI-generated content must never bypass human review where required.
+
+---
+
+# Search Testing
+
+Verify:
+
+* Index creation
+* Index updates
+* Relevance
+* Autocomplete
+* Filters
+* Pagination
+* Tenant isolation
+
+---
+
+# File Storage Testing
+
+Validate:
+
+* Uploads
+* Downloads
+* Virus scanning integration
+* Access control
+* Expiring URLs
+* Large files
+* Duplicate uploads
+
+Files should never be accessible without authorization unless explicitly public.
+
+---
+
+# Notification Testing
+
+Test:
+
+* Email delivery
+* Templates
+* Retries
+* Queue failures
+* Scheduled notifications
+* Duplicate prevention
+
+Future:
+
+* SMS
+* WhatsApp
+* Push Notifications
+
+---
+
+# Workflow Testing
+
+Verify:
+
+* Trigger execution
+* Conditions
+* Actions
+* Retry policies
+* Failure recovery
+* Long-running workflows
+
+---
+
+# Analytics Testing
+
+Verify:
+
+* Event collection
+* KPI calculations
+* Dashboard accuracy
+* Report generation
+* Export functionality
+
+Analytics should never affect transactional performance.
+
+---
+
+# CMS Testing
+
+Validate:
+
+* Publishing workflow
+* Version history
+* Localization
+* SEO metadata
+* Page rendering
+* Media management
+
+---
+
+# Candidate Portal Testing
+
+Test:
+
+* Registration
+* Profile updates
+* Opportunity search
+* Applications
+* Interview tracking
+* IPT reporting
+* Notifications
+
+---
+
+# Super Admin Testing
+
+Verify:
+
+* Organization management
+* Feature flags
+* Impersonation
+* Audit logs
+* Platform settings
+* Monitoring dashboards
+
+---
+
+# Regression Testing
+
+Every release must execute regression suites covering:
+
+* Recruitment
+* IPT
+* AI
+* CMS
+* Authentication
+* Authorization
+* Notifications
+* Search
+* Analytics
+
+Regression failures block deployment.
+
+---
+
+# Smoke Testing
+
+After deployment verify:
+
+* Login
+* API health
+* Database connectivity
+* Search
+* Notifications
+* File uploads
+* AI Platform
+* Opportunity creation
+
+Smoke tests run automatically after every deployment.
+
+---
+
+# Test Data
+
+Test data should:
+
+* Be deterministic
+* Be isolated
+* Never use production data
+* Include realistic scenarios
+* Cover edge cases
+
+Factories and seeders should generate consistent datasets.
+
+---
+
+# Mocking Strategy
+
+Mock:
+
+* Email providers
+* AI providers
+* Payment providers (future)
+* External APIs
+* Calendar integrations
+
+Avoid mocking business logic.
+
+---
+
+# Continuous Integration
+
+Every pull request automatically runs:
+
+* Linting
+* Type checking
+* Unit tests
+* Integration tests
+* Security scans
+* Build validation
+
+No code may be merged with failing checks.
+
+---
+
+# Continuous Delivery
+
+Before production deployment:
+
+* All automated tests pass.
+* Smoke tests pass.
+* Security scans pass.
+* Database migrations validate successfully.
+* Performance budgets remain within limits.
+
+---
+
+# Coverage Goals
+
+Recommended minimum coverage:
+
+| Layer              |   Target |
+| ------------------ | -------: |
+| Domain Logic       |     90%+ |
+| Services           |     85%+ |
+| API                |     80%+ |
+| Repositories       |     75%+ |
+| UI Components      |     70%+ |
+| Critical Workflows | 100% E2E |
+
+Coverage is a guide, not the only quality metric.
+
+---
+
+# Test Environments
+
+Supported environments:
+
+* Local Development
+* Continuous Integration
+* Staging
+* Production Smoke
+
+Each environment should mirror production as closely as practical.
+
+---
+
+# Observability During Testing
+
+Capture:
+
+* Structured logs
+* Metrics
+* Traces
+* Screenshots (E2E)
+* Videos (critical workflows)
+* Network requests
+
+Test failures should provide actionable diagnostics.
+
+---
+
+# Release Gates
+
+A release may proceed only if:
+
+* Unit tests pass.
+* Integration tests pass.
+* E2E tests pass.
+* Security scans pass.
+* Performance checks pass.
+* Tenant isolation tests pass.
+* Critical workflows succeed.
+* Code review is approved.
+
+---
+
+# AI Coding Agent Responsibilities
+
+When generating code, AI assistants must:
+
+* Generate accompanying tests for new business logic.
+* Update existing tests when behavior changes.
+* Avoid brittle tests tied to implementation details.
+* Use descriptive test names.
+* Respect domain boundaries.
+* Verify authorization and tenant isolation.
+* Never reduce test coverage without justification.
+
+---
+
+# Future Expansion
+
+The testing architecture supports:
+
+* Chaos Engineering
+* Contract Testing
+* Visual Regression Testing
+* Mobile Application Testing
+* Browser Compatibility Testing
+* Mutation Testing
+* Canary Release Validation
+* Blue/Green Deployment Verification
+* Synthetic Production Monitoring
+
+---
+
+# Definition of Done
+
+A feature is considered production-ready only when:
+
+* Unit tests cover business logic.
+* Integration tests verify domain interactions.
+* End-to-end workflows are validated.
+* Authentication and authorization are tested.
+* Multi-tenant isolation is verified.
+* Security tests pass.
+* Performance remains within acceptable thresholds.
+* Accessibility requirements are satisfied.
+* Documentation is updated.
+* All CI/CD quality gates pass.
+
+Testing is a mandatory part of feature completion, not an optional activity.

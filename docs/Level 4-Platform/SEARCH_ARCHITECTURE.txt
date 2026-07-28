@@ -1,0 +1,642 @@
+# SEARCH_ARCHITECTURE.md
+
+# AdotKazi Search Architecture
+
+## Purpose
+
+This document defines the search architecture for the AdotKazi platform.
+
+Search is implemented as a dedicated platform service that provides fast, relevant, secure, and tenant-aware search capabilities across all modules.
+
+The transactional database remains the source of truth.
+
+Search indexes are optimized read models.
+
+---
+
+# Goals
+
+The Search Platform must be:
+
+* Fast
+* Accurate
+* Tenant-aware
+* AI-ready
+* Scalable
+* Fault tolerant
+* Cost-efficient
+* Replaceable
+
+---
+
+# Search Architecture
+
+```text
+                      User
+
+                        │
+
+                 Search Request
+
+                        │
+
+                Search Gateway
+
+                        │
+
+     ┌──────────────────┼──────────────────┐
+
+     │                  │                  │
+
+ Meilisearch      PostgreSQL        Vector Search
+
+     │                  │                  │
+
+     └──────────────────┼──────────────────┘
+
+                        │
+
+                Search Response
+```
+
+Each search engine serves a different purpose.
+
+---
+
+# Search Technologies
+
+## PostgreSQL
+
+Used for:
+
+* Primary keys
+* UUID lookups
+* Exact filtering
+* Authorization checks
+* Transactions
+
+Examples
+
+* Find candidate by ID
+* Load opportunity details
+* Verify permissions
+
+---
+
+## Meilisearch
+
+Primary full-text search engine.
+
+Used for:
+
+* Opportunities
+* Candidates
+* Organizations
+* Departments
+* Skills
+* Reports
+* Notifications
+
+Capabilities
+
+* Typo tolerance
+* Autocomplete
+* Ranking
+* Faceted filtering
+* Synonyms
+* Highlighting
+
+---
+
+## Vector Search
+
+Supports semantic retrieval.
+
+Examples
+
+* Similar candidates
+* Similar opportunities
+* AI knowledge retrieval
+* Resume similarity
+* Report similarity
+* Recommendation engine
+
+Vector search is optional for MVP but fully supported by the architecture.
+
+---
+
+# Search Flow
+
+```text
+User
+
+↓
+
+API
+
+↓
+
+Authorization
+
+↓
+
+Tenant Context
+
+↓
+
+Search Service
+
+↓
+
+Search Provider
+
+↓
+
+Results
+
+↓
+
+Permission Filtering
+
+↓
+
+Response
+```
+
+Authorization always executes before returning results.
+
+---
+
+# Search Domains
+
+The platform indexes:
+
+## Recruitment
+
+* Opportunities
+* Candidates
+* Applications
+* Interviews
+* Skills
+
+---
+
+## IPT
+
+* Placements
+* Daily Logs
+* Weekly Reports
+* Final Reports
+* Evaluations
+
+---
+
+## Platform
+
+* Organizations
+* Branches
+* Departments
+* Users
+
+---
+
+## AI
+
+* Prompt Templates
+* Knowledge Articles
+* AI Recommendations
+
+---
+
+## Communication
+
+* Notifications
+* Templates
+
+---
+
+## Analytics
+
+* Saved Reports
+* Dashboards
+
+---
+
+# Search Documents
+
+Search indexes contain optimized documents rather than raw database rows.
+
+Example Opportunity Document
+
+```json
+{
+  "id": "...",
+  "organizationId": "...",
+  "title": "Senior Backend Engineer",
+  "department": "Engineering",
+  "employmentType": "Full-time",
+  "location": "Dar es Salaam",
+  "skills": [
+    "Node.js",
+    "PostgreSQL"
+  ],
+  "status": "Published"
+}
+```
+
+Search documents are denormalized for speed.
+
+---
+
+# Search Indexes
+
+Recommended indexes
+
+```text
+organizations
+
+users
+
+opportunities
+
+candidates
+
+applications
+
+placements
+
+reports
+
+skills
+
+notifications
+```
+
+Indexes are independent.
+
+Rebuilding one index does not affect others.
+
+---
+
+# Index Synchronization
+
+Search indexes are synchronized asynchronously.
+
+Flow
+
+```text
+Database Updated
+
+↓
+
+Domain Event
+
+↓
+
+Search Queue
+
+↓
+
+Indexer
+
+↓
+
+Meilisearch
+
+↓
+
+Ready
+```
+
+The application never writes directly to the search engine.
+
+---
+
+# Search Events
+
+Examples
+
+* OpportunityPublished
+* OpportunityUpdated
+* CandidateCreated
+* CandidateUpdated
+* PlacementCompleted
+* ReportSubmitted
+
+Each event updates relevant search indexes.
+
+---
+
+# Tenant Isolation
+
+Every indexed document contains:
+
+* organization_id
+
+Every query automatically filters by:
+
+```text
+organization_id
+```
+
+Cross-tenant search results are impossible.
+
+---
+
+# Permission Filtering
+
+Search results must also respect authorization.
+
+Example
+
+A recruiter searches for:
+
+```text
+Frontend
+```
+
+Only opportunities and candidates the recruiter is authorized to access are returned.
+
+---
+
+# Full-Text Search
+
+Supported capabilities
+
+* Typo tolerance
+* Prefix search
+* Phrase search
+* Ranking
+* Synonyms
+* Stop words
+* Language support
+
+---
+
+# Autocomplete
+
+Autocomplete supports:
+
+* Job titles
+* Skills
+* Departments
+* Organizations
+* Locations
+
+Results should appear in under 100 ms where possible.
+
+---
+
+# Faceted Search
+
+Examples
+
+Recruitment
+
+* Department
+* Employment Type
+* Remote Status
+* Experience Level
+
+IPT
+
+* Institution
+* Placement Status
+* Supervisor
+
+Candidate
+
+* Skills
+* Experience
+* Education
+
+---
+
+# Sorting
+
+Supported sorting
+
+* Relevance
+* Date Created
+* Updated Date
+* Alphabetical
+* Salary
+* Deadline
+
+---
+
+# Search Analytics
+
+Track:
+
+* Popular searches
+* Zero-result searches
+* Click-through rate
+* Average response time
+* Search abandonment
+* Most filtered attributes
+
+Analytics help improve relevance over time.
+
+---
+
+# Synonyms
+
+Examples
+
+```text
+Developer
+
+Programmer
+
+Software Engineer
+```
+
+```text
+Internship
+
+Field Training
+
+Industrial Practical Training
+
+IPT
+```
+
+Organizations may define custom synonyms.
+
+---
+
+# Spell Correction
+
+Search should tolerate common spelling mistakes.
+
+Example
+
+```text
+Enginer
+
+↓
+
+Engineer
+```
+
+---
+
+# Highlighting
+
+Matched terms should be highlighted in results where supported.
+
+Example
+
+```text
+Senior Backend Engineer
+```
+
+---
+
+# Search Suggestions
+
+Support:
+
+* Recent searches
+* Trending searches
+* Recommended searches
+* AI-assisted suggestions
+
+Suggestions are organization-aware.
+
+---
+
+# Vector Search
+
+Embeddings support:
+
+* Candidate similarity
+* Opportunity similarity
+* Resume similarity
+* Knowledge retrieval
+* Recommendation engine
+
+Embeddings are generated asynchronously.
+
+---
+
+# AI Search
+
+The AI Platform may perform Retrieval-Augmented Generation (RAG).
+
+Workflow
+
+```text
+Question
+
+↓
+
+Vector Search
+
+↓
+
+Relevant Documents
+
+↓
+
+Context Builder
+
+↓
+
+LLM
+
+↓
+
+Answer
+```
+
+Only authorized documents are retrieved.
+
+---
+
+# Performance
+
+Targets
+
+* Autocomplete < 100 ms
+* Full-text search < 200 ms
+* Semantic search < 500 ms
+* Index update latency < 5 seconds
+
+Large indexing operations execute in background workers.
+
+---
+
+# Fault Tolerance
+
+If Meilisearch is unavailable:
+
+* Exact lookups continue through PostgreSQL.
+* Critical workflows remain operational.
+* Search requests degrade gracefully.
+* Index synchronization resumes automatically after recovery.
+
+---
+
+# Security
+
+Search must enforce:
+
+* Authentication
+* Authorization
+* Tenant isolation
+* Input validation
+* Rate limiting
+* Audit logging
+
+Search indexes never expose hidden or sensitive fields.
+
+---
+
+# Monitoring
+
+Track:
+
+* Index size
+* Indexing latency
+* Failed indexing jobs
+* Search latency
+* Query volume
+* Cache hit rate
+* Engine availability
+
+Alerts should be generated for degraded performance.
+
+---
+
+# Future Expansion
+
+The architecture supports:
+
+* Cross-language search
+* Image search
+* Voice search
+* Resume OCR search
+* AI semantic ranking
+* Personalized search ranking
+* Federated search
+* Enterprise knowledge search
+* Hybrid lexical/vector ranking
+
+---
+
+# Definition of Done
+
+The Search Platform is considered production-ready when:
+
+* Search is isolated as a platform service.
+* PostgreSQL remains the source of truth.
+* Meilisearch indexes are asynchronously synchronized.
+* Vector search supports semantic retrieval.
+* Every search is tenant-aware.
+* Authorization is enforced before results are returned.
+* Search analytics are collected.
+* Search degrades gracefully during outages.
+* Monitoring and alerting are in place.
+* The architecture remains provider-independent.

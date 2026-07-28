@@ -1,0 +1,223 @@
+# AdotKazi Product Vision
+
+## Overview
+
+**AdotKazi** is a modern, AI-powered Recruitment and Applicant Tracking Platform (ATS) built to help organizations recruit exceptional talent through a faster, smarter, and more collaborative hiring process.
+
+Designed as a multi-tenant SaaS platform from day one, AdotKazi enables every organization to operate a fully branded careers portal, manage recruitment workflows, collaborate across hiring teams, and deliver an outstanding candidate experience—all from a single platform.
+
+Adotdevs Limited is the first organization using AdotKazi, but the platform is architected to support thousands of independent organizations with complete isolation of data, branding, workflows, integrations, and configuration.
+
+---
+
+# Vision
+
+To become the leading recruitment platform in East Africa and expand globally by making hiring simpler, smarter, and more accessible for organizations of every size.
+
+AdotKazi aims to modernize recruitment by replacing fragmented hiring processes with an intelligent, collaborative platform that empowers organizations to hire the right people while providing candidates with a professional and transparent application experience.
+
+---
+
+# Mission
+
+Recruitment should not depend on spreadsheets, email threads, paper documents, or disconnected tools.
+
+AdotKazi exists to provide one unified recruitment operating system where organizations can publish opportunities, evaluate candidates, collaborate with hiring teams, automate repetitive tasks, and make informed hiring decisions with the assistance of artificial intelligence.
+
+The platform is designed to reduce administrative work while improving recruitment quality, speed, transparency, and collaboration.
+
+---
+
+# Product Philosophy
+
+Every feature developed for AdotKazi should follow these principles:
+
+* Simplicity over complexity.
+* AI should assist people—not replace human decision-making.
+* Security and privacy are non-negotiable.
+* Multi-tenancy is a core architectural principle, not an afterthought.
+* Every organization should control its own branding, workflows, permissions, and configuration.
+* Candidate experience is as important as recruiter experience.
+* Build for long-term scalability rather than short-term convenience.
+* Create reusable, extensible foundations before adding features.
+
+---
+
+# Target Market
+
+### Primary Market
+
+Organizations across East Africa, including:
+
+* Technology companies
+* Digital agencies
+* Startups
+* SMEs
+* NGOs
+* Healthcare organizations
+* Educational institutions
+* Retail businesses
+* Manufacturing companies
+
+### Secondary Market
+
+As the platform matures, AdotKazi will expand to support organizations worldwide through localization, configurable workflows, and scalable cloud infrastructure.
+
+---
+
+# The Problem
+
+Many organizations still manage recruitment using disconnected systems such as:
+
+* Email
+* Spreadsheets
+* Messaging applications
+* Printed documents
+* Shared folders
+* Manual reporting
+
+These processes create duplicated work, poor collaboration, inconsistent communication, and a frustrating experience for both recruiters and applicants.
+
+Internship and Industrial Practical Training (IPT) recruitment is particularly underserved, often relying on paper applications and manual record keeping.
+
+Organizations need a platform that unifies recruitment without introducing unnecessary complexity.
+
+---
+
+# The Solution
+
+AdotKazi provides one centralized recruitment platform where organizations can:
+
+* Create branded careers websites.
+* Publish multiple types of opportunities.
+* Manage applicants from a single dashboard.
+* Track candidates through customizable hiring pipelines.
+* Recruit both employees and interns using dedicated workflows.
+* Collaborate across hiring teams.
+* Automate recruitment communication.
+* Generate recruitment insights through analytics.
+* Use AI to improve productivity and decision-making.
+
+Every organization operates independently while benefiting from a secure, scalable SaaS platform.
+
+---
+
+# Opportunity Types
+
+AdotKazi supports multiple recruitment programs through a unified Opportunity model, including:
+
+* Full-Time Employment
+* Part-Time Employment
+* Contract Positions
+* Internship / Industrial Practical Training (IPT)
+* Graduate Programs
+* Apprenticeships
+* Volunteer Opportunities
+
+Organizations can enable, disable, or customize opportunity types according to their recruitment needs.
+
+---
+
+# Candidate Experience
+
+Applicants should enjoy a simple, transparent, and reusable experience.
+
+Candidates maintain one global AdotKazi profile that can be used to apply across multiple organizations without repeatedly entering the same information.
+
+Applicants can:
+
+* Create a reusable profile.
+* Upload resumes and supporting documents.
+* Allow AI to extract information from their CV for review before submission.
+* Track application progress.
+* Receive recruitment updates.
+* Manage documents.
+* Download internship completion certificates where applicable.
+
+Candidates always retain control over their information before submitting an application.
+
+---
+
+# AI Strategy
+
+Artificial Intelligence is designed to enhance—not replace—human recruiters.
+
+AdotKazi uses AI to:
+
+* Parse resumes.
+* Extract candidate information.
+* Recommend candidate-job matches.
+* Generate candidate summaries.
+* Assist with internship reports.
+* Draft recruitment emails.
+* Suggest interview questions.
+* Detect duplicate applications.
+* Surface recruitment insights.
+
+AI provides recommendations while all hiring decisions remain under human control.
+
+---
+
+# Integrations
+
+AdotKazi is designed to integrate with the tools organizations already use.
+
+Initial integrations include:
+
+* Google Workspace
+* Google Meet
+* Zoom
+* WhatsApp
+
+The architecture should remain open for future integrations through APIs and webhooks.
+
+---
+
+# Business Model
+
+AdotKazi will operate as a Software-as-a-Service (SaaS) platform.
+
+Organizations receive a free trial before selecting a subscription plan that matches their hiring needs.
+
+The platform should be architected to support:
+
+* Trial periods
+* Subscription plans
+* Usage limits
+* Feature flags
+* Future billing integrations
+
+---
+
+# Product Scope
+
+AdotKazi is intentionally focused on recruitment.
+
+The platform is **not** intended to become a complete Human Resource Management System (HRMS).
+
+Instead, it specializes in delivering best-in-class capabilities for:
+
+* Careers websites
+* Applicant Tracking
+* Internship (IPT) recruitment
+* Hiring collaboration
+* Recruitment analytics
+* AI-assisted recruitment
+
+This focused approach allows AdotKazi to remain intuitive while continuously improving recruitment workflows.
+
+---
+
+# Definition of Success
+
+AdotKazi succeeds when organizations can:
+
+* Launch a branded careers portal within minutes.
+* Recruit employees and interns through one platform.
+* Reduce administrative workload through automation and AI.
+* Collaborate efficiently throughout the hiring process.
+* Deliver a transparent and professional candidate experience.
+* Make faster, better-informed hiring decisions.
+* Scale recruitment without changing platforms.
+
+Success is measured not only by the number of hires made through the platform, but by the quality, efficiency, and consistency of the recruitment experience delivered to every organization and every candidate.

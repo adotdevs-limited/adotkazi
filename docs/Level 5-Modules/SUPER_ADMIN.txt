@@ -1,0 +1,532 @@
+# SUPER_ADMIN.md
+
+# AdotKazi Super Administration Domain
+
+## Purpose
+
+The Super Administration Domain is responsible for managing the AdotKazi platform itself.
+
+Unlike Organization Administration, which manages a single tenant, the Super Administration Domain manages the entire SaaS platform, including organizations, platform users, subscriptions, infrastructure settings, feature rollouts, system health, AI providers, and global governance.
+
+The Super Admin never directly manages an organization's day-to-day recruitment activities unless explicitly performing support or impersonation.
+
+---
+
+# Vision
+
+Provide a secure, scalable, and auditable control center for operating AdotKazi as a global SaaS platform.
+
+The Super Admin Console should function as the platform's "mission control."
+
+---
+
+# Goals
+
+The Super Administration Domain must:
+
+* Manage all organizations
+* Manage platform-wide configuration
+* Monitor system health
+* Control feature rollouts
+* Manage AI providers
+* Manage integrations
+* Support customer success
+* Support billing (future)
+* Support platform analytics
+* Be fully audited
+
+---
+
+# Core Principles
+
+## Platform-Level Authority
+
+Super Administrators operate above every organization.
+
+They manage the platform—not the organizations' business operations.
+
+Example:
+
+```text id="sa1"
+Platform
+
+├── Organization A
+
+├── Organization B
+
+├── Organization C
+
+└── Organization D
+```
+
+Organizations remain isolated from each other.
+
+---
+
+## Least Privilege
+
+Even Super Admins should have scoped permissions.
+
+Examples:
+
+* Platform Owner
+* Platform Administrator
+* Support Engineer
+* DevOps Engineer
+* Finance Administrator
+* Customer Success
+* Security Administrator
+* Read-Only Auditor
+
+No role automatically has unrestricted access.
+
+---
+
+# Platform Dashboard
+
+The Super Admin Dashboard displays:
+
+* Organizations
+* Active Users
+* Active Opportunities
+* Applications Today
+* Active IPT Placements
+* API Usage
+* AI Usage
+* Storage Usage
+* System Health
+* Background Jobs
+* Error Rate
+
+The dashboard provides a real-time overview of the entire platform.
+
+---
+
+# Organization Management
+
+Super Admins can:
+
+* Create organizations
+* Suspend organizations
+* Reactivate organizations
+* Archive organizations
+* Verify organizations
+* View organization metadata
+* Reset organization configuration
+* Transfer ownership (future)
+
+Business data remains organization-owned.
+
+---
+
+# Organization Support
+
+Support capabilities include:
+
+* View organization configuration
+* Troubleshoot integrations
+* Reset email settings
+* Reprocess background jobs
+* Unlock organization
+
+Direct modification of recruitment data should require explicit audit approval.
+
+---
+
+# User Management
+
+Platform administrators can:
+
+* View users
+* Suspend users
+* Reactivate users
+* Reset authentication
+* Force password reset
+* Disable compromised accounts
+
+Super Admins cannot access private user data beyond authorized support requirements.
+
+---
+
+# Global Feature Flags
+
+Manage platform-wide feature availability.
+
+Examples:
+
+* AI Platform
+* IPT Module
+* CMS
+* Recommendation Engine
+* Workflow Engine
+* Public APIs
+* Beta Features
+
+Features may be enabled:
+
+* Globally
+* Per Organization
+* Per Subscription Plan
+
+---
+
+# AI Management
+
+Manage:
+
+* AI Providers
+* API Keys
+* Model Availability
+* Cost Controls
+* Token Limits
+* Prompt Templates
+* AI Feature Rollouts
+
+Future providers:
+
+* OpenAI
+* Anthropic
+* Google
+* Azure OpenAI
+* Local Models
+
+The AI Platform remains provider-independent.
+
+---
+
+# Integration Management
+
+Platform-level integrations:
+
+* Resend
+* Google OAuth
+* GitHub OAuth
+* Google Meet
+* Zoom
+* Webhooks
+
+Future:
+
+* Microsoft 365
+* Slack
+* WhatsApp Business
+* LinkedIn
+
+---
+
+# Platform Configuration
+
+Global settings include:
+
+* Supported Languages
+* Default Timezone
+* Maintenance Mode
+* Registration Policies
+* Default Security Policies
+* Platform Branding
+* Default Email Templates
+
+Organization overrides remain supported.
+
+---
+
+# Subscription Management (Future)
+
+Manage:
+
+* Plans
+* Trials
+* Billing Status
+* Feature Limits
+* Storage Limits
+* AI Credits
+* API Limits
+
+The architecture supports billing without coupling to business domains.
+
+---
+
+# System Health
+
+Monitor:
+
+* API Availability
+* Database Health
+* Queue Health
+* Search Index Health
+* Storage Health
+* AI Provider Status
+* Notification Delivery
+* Background Workers
+
+Health information is available in real time.
+
+---
+
+# Background Jobs
+
+Manage:
+
+* Retry failed jobs
+* Cancel jobs
+* View queues
+* Queue statistics
+* Dead-letter queues
+
+Background processing remains isolated from user traffic.
+
+---
+
+# Analytics
+
+Platform analytics include:
+
+* Organizations
+* Active Users
+* Monthly Active Organizations
+* Opportunity Volume
+* Application Volume
+* AI Usage
+* API Requests
+* Storage Consumption
+* Notification Delivery
+* Search Queries
+
+No organization can view another organization's analytics.
+
+---
+
+# Audit Center
+
+Every administrative action is audited.
+
+Examples:
+
+* Organization Suspended
+* Feature Enabled
+* User Locked
+* API Key Rotated
+* AI Model Changed
+* Maintenance Mode Enabled
+
+Audit logs are immutable.
+
+---
+
+# Security Center
+
+Manage:
+
+* Suspicious Logins
+* Failed Login Attempts
+* MFA Adoption
+* Active Sessions
+* Security Alerts
+* IP Restrictions
+* API Key Monitoring
+
+Security events are centralized.
+
+---
+
+# Platform Monitoring
+
+Monitor:
+
+* CPU Usage
+* Memory Usage
+* Database Performance
+* Queue Throughput
+* Response Time
+* Error Rates
+* Storage Growth
+* AI Latency
+
+Future integrations with external monitoring tools are supported.
+
+---
+
+# Customer Success
+
+Support capabilities:
+
+* View organization status
+* Trial expiration
+* Feature adoption
+* Usage statistics
+* Organization health score (future)
+
+Customer Success personnel do not gain access to confidential recruitment data.
+
+---
+
+# Maintenance Mode
+
+The platform supports:
+
+* Global Maintenance
+* Organization Maintenance
+* Read-Only Mode
+* Scheduled Maintenance
+
+Maintenance events notify affected users automatically.
+
+---
+
+# Impersonation
+
+Authorized support staff may temporarily impersonate organization administrators.
+
+Requirements:
+
+* Explicit permission
+* Time-limited sessions
+* Visible impersonation banner
+* Complete audit logging
+
+Impersonation must never expose passwords or authentication secrets.
+
+---
+
+# Notifications
+
+Platform notifications include:
+
+* Service outages
+* AI provider failures
+* Queue failures
+* Security incidents
+* Maintenance announcements
+
+Notifications integrate with the Notification System.
+
+---
+
+# AI Integration
+
+The AI Platform assists Super Admins with:
+
+* Platform health summaries
+* Usage analysis
+* Cost optimization
+* Error clustering
+* Capacity recommendations
+* Trend analysis
+
+AI recommendations never perform administrative actions automatically.
+
+---
+
+# Search Integration
+
+Searchable entities:
+
+* Organizations
+* Users
+* Audit Logs
+* Feature Flags
+* Integrations
+* Background Jobs
+
+Search results are permission-aware.
+
+---
+
+# Workflow Integration
+
+Examples:
+
+* Notify admins when trials expire.
+* Suspend overdue trial organizations.
+* Rotate API keys automatically.
+* Schedule maintenance windows.
+* Alert on unusual AI usage.
+
+Automation is handled by the Workflow Engine.
+
+---
+
+# Security
+
+The Super Administration Domain enforces:
+
+* Mandatory Multi-Factor Authentication
+* Role-Based Access Control
+* Just-in-Time Privileged Access (future)
+* Session Monitoring
+* IP Restrictions (optional)
+* Audit Logging
+* Sensitive Action Confirmation
+
+High-risk actions require additional verification.
+
+---
+
+# Domain Events
+
+Examples:
+
+* OrganizationCreated
+* OrganizationSuspended
+* FeatureFlagUpdated
+* PlatformMaintenanceStarted
+* PlatformMaintenanceEnded
+* AIProviderUpdated
+* SubscriptionPlanChanged
+* PlatformUserSuspended
+* APIKeyRotated
+* SystemAlertGenerated
+
+These events are consumed by:
+
+* Analytics Platform
+* Notification System
+* Workflow Engine
+* AI Platform
+* Security Monitoring
+
+---
+
+# Performance
+
+The Super Administration Domain should:
+
+* Cache platform configuration.
+* Stream system metrics in real time.
+* Separate operational queries from transactional workloads.
+* Process administrative tasks asynchronously where appropriate.
+* Scale independently of organization traffic.
+
+---
+
+# Future Expansion
+
+The architecture supports:
+
+* Multi-Region Operations
+* Multi-Cloud Deployments
+* Enterprise Customer Management
+* White-Label SaaS
+* Marketplace Administration
+* Billing Console
+* Licensing
+* Compliance Center
+* Data Residency Controls
+* SOC 2 / ISO 27001 Management
+* Disaster Recovery Dashboard
+
+---
+
+# Definition of Done
+
+The Super Administration Domain is considered production-ready when:
+
+* Platform administrators can manage organizations without violating tenant isolation.
+* Platform configuration is centralized.
+* Feature flags are managed globally and per organization.
+* AI providers, integrations, and infrastructure settings are configurable.
+* Platform analytics and health monitoring are available.
+* Support impersonation is secure and fully audited.
+* Notifications, Analytics, Search, AI Platform, and Workflow Engine are integrated.
+* All privileged actions are logged and protected by strong security controls.
+* The architecture supports future enterprise SaaS operations without major redesign.

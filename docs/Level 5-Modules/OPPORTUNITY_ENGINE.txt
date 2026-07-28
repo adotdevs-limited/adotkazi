@@ -1,0 +1,568 @@
+# OPPORTUNITY_ENGINE.md
+
+# AdotKazi Opportunity Engine
+
+## Purpose
+
+The Opportunity Engine is the core domain responsible for creating, managing, publishing, and lifecycle management of all opportunities on the AdotKazi platform.
+
+Rather than treating jobs as the primary entity, AdotKazi treats every opportunity as a first-class domain object.
+
+This enables the platform to support recruitment, industrial training, internships, volunteer programs, graduate programs, and future opportunity types using a single, extensible architecture.
+
+The Opportunity Engine is shared by multiple business domains.
+
+---
+
+# Vision
+
+One engine.
+
+Many opportunity types.
+
+Instead of building separate systems for jobs, internships, and IPT, the platform provides one unified opportunity platform with configurable behavior.
+
+---
+
+# Goals
+
+The Opportunity Engine must:
+
+* Support unlimited opportunity types
+* Be organization-aware
+* Be workflow-driven
+* Be AI-ready
+* Be highly configurable
+* Scale to millions of opportunities
+* Publish domain events
+* Integrate with Search, Analytics, Notifications, AI, and Workflow Engine
+
+---
+
+# High-Level Architecture
+
+```text
+                      Opportunity Engine
+
+                 Opportunity Aggregate
+
+                         │
+
+ ┌──────────────┬──────────────┬──────────────┐
+
+ │              │              │
+
+ Recruitment    IPT        Future Domains
+
+ │              │              │
+
+ Job        Field Training   Scholarship
+
+ Internship Industrial Training Competition
+
+ Contract   Placement         Volunteer
+
+ Graduate Program             Fellowship
+```
+
+The Opportunity Engine owns the lifecycle of opportunities.
+
+Other domains extend its behavior.
+
+---
+
+# Opportunity Philosophy
+
+Every opportunity represents a real-world opportunity offered by an organization.
+
+Examples include:
+
+* Full-Time Job
+* Part-Time Job
+* Contract
+* Temporary Position
+* Internship
+* Industrial Practical Training (IPT)
+* Field Training
+* Apprenticeship
+* Graduate Program
+* Volunteer Position
+
+Future:
+
+* Scholarship
+* Fellowship
+* Research Position
+* Accelerator Program
+* Competition
+* Mentorship Program
+* Hackathon
+
+The engine should support new opportunity types through configuration rather than code changes wherever possible.
+
+---
+
+# Opportunity Lifecycle
+
+```text
+Draft
+
+↓
+
+Review
+
+↓
+
+Scheduled
+
+↓
+
+Published
+
+↓
+
+Receiving Applications
+
+↓
+
+Paused
+
+↓
+
+Closed
+
+↓
+
+Archived
+```
+
+Organizations may customize transitions.
+
+---
+
+# Opportunity Aggregate
+
+The Opportunity aggregate is the root entity.
+
+Responsibilities include:
+
+* Opportunity information
+* Publication state
+* Hiring workflow
+* Eligibility
+* Visibility
+* Deadlines
+* Locations
+* Departments
+* Skills
+* Attachments
+
+The aggregate owns all business rules related to opportunities.
+
+---
+
+# Opportunity Types
+
+The engine supports configurable opportunity types.
+
+Each type defines:
+
+* Required fields
+* Optional fields
+* Workflow
+* Eligibility
+* Required documents
+* Application form
+* AI prompts
+* Notifications
+
+Organizations may enable or disable supported opportunity types.
+
+---
+
+# Opportunity Templates
+
+Organizations can create reusable templates.
+
+Examples:
+
+* Software Engineer
+* AI Engineer
+* Sales Executive
+* Industrial Training
+* Marketing Internship
+
+Templates include:
+
+* Description
+* Responsibilities
+* Requirements
+* Benefits
+* Skills
+* Hiring workflow
+* Screening questions
+
+Templates reduce repetitive work.
+
+---
+
+# Opportunity Status
+
+Supported states:
+
+* Draft
+* Pending Review
+* Scheduled
+* Published
+* Paused
+* Closed
+* Archived
+
+Only Published opportunities accept applications.
+
+---
+
+# Publication
+
+Organizations may:
+
+* Publish immediately
+* Schedule publication
+* Schedule closing
+* Pause applications
+* Reopen opportunities
+
+Publication automatically updates Search indexes.
+
+---
+
+# Visibility
+
+Supported visibility levels:
+
+* Public
+* Organization Only
+* Invitation Only
+* Private Draft
+
+Visibility controls discovery and application access.
+
+---
+
+# Eligibility Rules
+
+Organizations may define:
+
+* Education level
+* Graduation year
+* Skills
+* Experience
+* Certifications
+* Institution
+* Age (where legally permitted)
+* Country
+* Region
+
+Eligibility is validated during application.
+
+---
+
+# Application Configuration
+
+Each opportunity controls its application experience.
+
+Examples:
+
+Required documents:
+
+* Resume
+* Cover Letter
+* Transcript
+* Recommendation Letter
+* Portfolio
+
+Custom questions:
+
+* Short answer
+* Multiple choice
+* Boolean
+* File upload
+
+Organizations choose which fields are mandatory or optional.
+
+---
+
+# Workflow Assignment
+
+Every opportunity references a workflow.
+
+Examples:
+
+Recruitment Workflow
+
+```text
+Applied
+
+↓
+
+Screening
+
+↓
+
+Interview
+
+↓
+
+Offer
+
+↓
+
+Hired
+```
+
+IPT Workflow
+
+```text
+Applied
+
+↓
+
+Placement Review
+
+↓
+
+Supervisor Assignment
+
+↓
+
+Placement Active
+
+↓
+
+Reports
+
+↓
+
+Evaluation
+
+↓
+
+Completed
+```
+
+Workflows are configurable per opportunity.
+
+---
+
+# Hiring Team
+
+Each opportunity defines its responsible team.
+
+Roles may include:
+
+* Recruiter
+* Hiring Manager
+* Supervisor
+* Reviewer
+* Interviewer
+* Observer
+
+Permissions are inherited from organization roles.
+
+---
+
+# AI Integration
+
+The Opportunity Engine integrates with the AI Platform.
+
+Capabilities include:
+
+* Generate descriptions
+* Improve wording
+* Suggest requirements
+* Recommend skills
+* Estimate salary ranges
+* Suggest interview questions
+* Generate screening questions
+* Improve SEO
+
+All AI output requires user review.
+
+---
+
+# Recommendation Engine
+
+The engine produces recommendations for:
+
+Candidates:
+
+* Recommended opportunities
+
+Organizations:
+
+* Recommended candidates
+
+Recruiters:
+
+* Similar opportunities
+* Related skills
+* Missing requirements
+
+Recommendations improve continuously through user interactions.
+
+---
+
+# Search Integration
+
+Every published opportunity is indexed.
+
+Indexed fields include:
+
+* Title
+* Department
+* Skills
+* Location
+* Type
+* Status
+* Organization
+* Employment Type
+
+Search supports:
+
+* Full-text
+* Filters
+* Autocomplete
+* Semantic search
+
+---
+
+# Notification Integration
+
+Domain events trigger notifications.
+
+Examples:
+
+* Opportunity Published
+* Deadline Approaching
+* Opportunity Closed
+* Application Received
+
+Notification delivery is handled by the Notification System.
+
+---
+
+# Analytics Integration
+
+Metrics include:
+
+* Views
+* Applications
+* Conversion rate
+* Time to fill
+* Source effectiveness
+* Drop-off rate
+* Popular skills
+* Deadline performance
+
+Analytics consume Opportunity events.
+
+---
+
+# Domain Events
+
+Examples:
+
+* OpportunityCreated
+* OpportunityUpdated
+* OpportunityPublished
+* OpportunityPaused
+* OpportunityClosed
+* OpportunityArchived
+* OpportunityDeleted
+* OpportunityViewed
+* OpportunityShared
+
+Events are consumed by:
+
+* Search
+* Analytics
+* AI
+* Notification System
+* Workflow Engine
+
+---
+
+# Security
+
+The Opportunity Engine enforces:
+
+* Tenant isolation
+* Organization ownership
+* Role-based authorization
+* Audit logging
+* Soft deletion
+
+Unauthorized users cannot modify opportunities.
+
+---
+
+# Performance
+
+The engine should:
+
+* Support millions of opportunities.
+* Cache frequently accessed metadata.
+* Publish events asynchronously.
+* Optimize read-heavy queries.
+* Use cursor pagination.
+* Index searchable attributes.
+
+---
+
+# Cloud Portability
+
+The Opportunity Engine must remain independent of:
+
+* Supabase
+* Vercel
+* Storage provider
+* Search provider
+
+Business logic must be infrastructure-agnostic.
+
+---
+
+# Future Expansion
+
+The architecture supports:
+
+* Internal mobility
+* Scholarship management
+* Volunteer management
+* Fellowships
+* Competitions
+* Research opportunities
+* Accelerator programs
+* Mentorship programs
+* Campus recruitment
+* Government opportunities
+* Public opportunity marketplace
+
+Future opportunity types should be introduced through configuration rather than structural redesign.
+
+---
+
+# Definition of Done
+
+The Opportunity Engine is considered production-ready when:
+
+* All opportunity types share a unified domain model.
+* Organizations can configure supported opportunity types.
+* Opportunity templates are reusable.
+* Workflows are configurable.
+* Eligibility rules are enforced.
+* Application forms are configurable.
+* AI, Search, Analytics, Notifications, and Workflow Engine are integrated.
+* Domain events are published for significant state changes.
+* Tenant isolation is enforced.
+* The engine remains extensible without requiring architectural changes for new opportunity types.

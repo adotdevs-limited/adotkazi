@@ -1,0 +1,483 @@
+# AI_ENTITIES.md
+
+# Artificial Intelligence Entity Specifications
+
+## Purpose
+
+The AI bounded context provides intelligent capabilities across the AdotKazi platform while ensuring that AI remains an assistant rather than a decision-maker.
+
+AI services are shared across all bounded contexts, including:
+
+* Recruitment
+* Internship (IPT)
+* Communication
+* Analytics
+* CMS
+* Platform
+
+The AI domain owns AI requests, processing, outputs, feedback, models, prompts, and recommendations.
+
+It never owns business entities.
+
+---
+
+# AI Philosophy
+
+Artificial Intelligence must:
+
+* Assist users.
+* Increase productivity.
+* Reduce repetitive work.
+* Improve decision quality.
+
+Artificial Intelligence must never:
+
+* Hire candidates.
+* Reject candidates.
+* Approve placements.
+* Modify business records automatically.
+* Replace human judgement.
+
+Every AI-generated output must be reviewable and editable before acceptance.
+
+---
+
+# Entity Relationships
+
+```text
+AI
+│
+├── AIRequest
+│   ├── AIJob
+│   ├── AIResponse
+│   ├── AIRecommendation
+│   └── AIFeedback
+│
+├── PromptTemplate
+│
+├── AIModel
+│
+├── AIUsage
+│
+└── AIKnowledgeBase (Future)
+```
+
+---
+
+# AIRequest
+
+## Purpose
+
+Represents a request submitted to the AI platform.
+
+Every AI interaction begins with an AIRequest.
+
+---
+
+## Aggregate Root
+
+Yes
+
+---
+
+## Owner
+
+Organization
+
+---
+
+## Fields
+
+| Field              | Type      |
+| ------------------ | --------- |
+| id                 | UUIDv7    |
+| organization_id    | UUID      |
+| requested_by       | UUID      |
+| module             | Enum      |
+| task_type          | Enum      |
+| prompt_template_id | UUID      |
+| model_id           | UUID      |
+| input_reference    | UUID      |
+| status             | Enum      |
+| priority           | Enum      |
+| requested_at       | Timestamp |
+| completed_at       | Timestamp |
+
+---
+
+## Relationships
+
+Has One:
+
+* AI Job
+
+Has One:
+
+* AI Response
+
+Has Many:
+
+* AI Recommendations
+
+* AI Feedback
+
+---
+
+## Business Rules
+
+Every request is immutable after submission.
+
+Requests remain part of audit history.
+
+---
+
+## Domain Events
+
+* AIRequestCreated
+* AIRequestStarted
+* AIRequestCompleted
+* AIRequestFailed
+
+---
+
+# AIJob
+
+## Purpose
+
+Represents background execution.
+
+Allows asynchronous processing.
+
+---
+
+## Fields
+
+* id
+* request_id
+* queue
+* retries
+* started_at
+* finished_at
+* processing_time_ms
+* status
+
+---
+
+## Business Rules
+
+Heavy AI processing always runs asynchronously.
+
+---
+
+# AIResponse
+
+## Purpose
+
+Stores AI-generated output.
+
+---
+
+## Fields
+
+| Field            | Type      |
+| ---------------- | --------- |
+| id               | UUIDv7    |
+| request_id       | UUID      |
+| output           | JSONB     |
+| confidence_score | Decimal   |
+| tokens_input     | Integer   |
+| tokens_output    | Integer   |
+| total_cost       | Decimal   |
+| currency         | String    |
+| generated_at     | Timestamp |
+
+---
+
+## Business Rules
+
+Responses never overwrite business records.
+
+Users decide whether to accept them.
+
+---
+
+# AIRecommendation
+
+## Purpose
+
+Represents structured AI suggestions.
+
+Examples:
+
+* Recommended candidate
+* Suggested skills
+* Missing requirements
+* Better job description
+* Better report wording
+
+---
+
+## Fields
+
+* request_id
+* recommendation_type
+* confidence
+* data
+* accepted_at
+* rejected_at
+
+---
+
+## Business Rules
+
+Recommendations are optional.
+
+Users always remain in control.
+
+---
+
+# AIFeedback
+
+## Purpose
+
+Improves AI quality.
+
+---
+
+## Fields
+
+* request_id
+* user_id
+* rating
+* feedback
+* accepted
+* created_at
+
+---
+
+## Business Rules
+
+Feedback never modifies existing responses.
+
+---
+
+# PromptTemplate
+
+## Purpose
+
+Stores reusable AI prompts.
+
+Examples:
+
+* Resume Parser
+* Interview Questions
+* Weekly Report
+* Candidate Summary
+* Job Description
+* Email Draft
+* Candidate Comparison
+
+---
+
+## Fields
+
+* id
+* name
+* module
+* version
+* prompt
+* variables
+* active
+
+---
+
+## Business Rules
+
+Prompt templates support versioning.
+
+Historical AI requests always reference the template version used.
+
+---
+
+# AIModel
+
+## Purpose
+
+Represents available AI providers.
+
+Examples:
+
+* GPT
+* Claude
+* Gemini
+* Local LLM
+
+---
+
+## Fields
+
+* id
+* provider
+* model_name
+* version
+* supports_streaming
+* supports_vision
+* supports_function_calling
+* supports_embeddings
+* active
+
+---
+
+## Business Rules
+
+Changing providers must not affect business logic.
+
+Models remain interchangeable.
+
+---
+
+# AIUsage
+
+## Purpose
+
+Tracks AI consumption.
+
+Supports future billing and analytics.
+
+---
+
+## Fields
+
+* organization_id
+* request_id
+* model_id
+* tokens_input
+* tokens_output
+* estimated_cost
+* processing_time
+* created_at
+
+---
+
+## Business Rules
+
+Usage records are immutable.
+
+---
+
+# AIKnowledgeBase (Future)
+
+## Purpose
+
+Stores indexed organizational knowledge.
+
+Future uses include:
+
+* Company policies
+* Recruitment guides
+* Employee handbook
+* Internship handbook
+* Internal documentation
+
+Supports Retrieval-Augmented Generation (RAG).
+
+---
+
+# AI Task Types
+
+Supported tasks include:
+
+Recruitment
+
+* Resume Parsing
+* Candidate Summary
+* Job Description
+* Candidate Matching
+* Interview Questions
+* Candidate Comparison
+* Skill Extraction
+
+IPT
+
+* Daily Log Improvement
+* Weekly Report
+* Final Report
+* Grammar Correction
+* Learning Objective Suggestions
+
+Communication
+
+* Email Drafting
+* Response Suggestions
+
+Analytics
+
+* Hiring Insights
+* Recruitment Trends
+* Performance Summary
+
+Platform
+
+* Search Assistance
+* Knowledge Retrieval
+* Future AI Assistant
+
+---
+
+# Shared AI Standards
+
+All AI entities must:
+
+* Support tenant isolation.
+* Support audit logging.
+* Never expose prompts between organizations.
+* Respect feature flags.
+* Allow provider replacement.
+* Store model version.
+* Track processing cost.
+* Support asynchronous execution.
+
+---
+
+# Performance Considerations
+
+* Queue long-running requests.
+* Cache repeated prompt templates.
+* Stream large responses where supported.
+* Record latency metrics.
+* Monitor token usage.
+* Archive historical AI responses according to retention policies.
+
+---
+
+# Security
+
+Prompt injection protection must be implemented.
+
+Sensitive organizational data must never leak between tenants.
+
+AI providers must receive only the minimum information necessary for the requested task.
+
+Personally identifiable information should be masked or minimized whenever practical.
+
+---
+
+# Future Expansion
+
+The AI bounded context is designed to support:
+
+* AI Agents
+* Multi-agent workflows
+* Voice assistants
+* OCR document extraction
+* CV parsing from scanned PDFs
+* Semantic search
+* Embedding storage
+* Autonomous workflow recommendations
+* Internal knowledge assistants
+* AI-powered recruitment analytics
+* AI interview coaching
+* AI placement coaching
+* Custom organization AI models
+* Retrieval-Augmented Generation (RAG)
+* MCP-compatible AI tools

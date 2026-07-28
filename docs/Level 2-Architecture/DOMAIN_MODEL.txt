@@ -1,0 +1,573 @@
+# DOMAIN_MODEL.md
+
+# AdotKazi Domain Model
+
+## Purpose
+
+This document defines the business language of AdotKazi.
+
+It describes the core business concepts, ownership rules, relationships, lifecycle rules, and domain boundaries that govern the platform.
+
+This document is the source of truth for:
+
+* Database design
+* APIs
+* Services
+* Business rules
+* Authorization
+* Events
+* Future features
+
+Implementation details must never contradict the domain model.
+
+---
+
+# Domain Philosophy
+
+AdotKazi is a Talent Acquisition Platform.
+
+The platform manages opportunities, applications, recruitment workflows, interviews, and internship placements through one unified domain model.
+
+Every feature should extend the domain rather than introducing isolated business concepts.
+
+---
+
+# Bounded Contexts
+
+The platform is divided into bounded contexts.
+
+## Platform
+
+Responsible for:
+
+* Global users
+* Organizations
+* Memberships
+* Authentication
+* Billing (future)
+* Platform administration
+
+---
+
+## Recruitment
+
+Responsible for:
+
+* Opportunities
+* Applications
+* Candidates
+* Recruiters
+* Pipelines
+* Interviews
+* Hiring
+
+---
+
+## Internship (IPT)
+
+Responsible for:
+
+* Student placements
+* University information
+* Supervisors
+* Daily logbooks
+* Evaluations
+* Reports
+* Certificates
+
+---
+
+## AI
+
+Responsible for:
+
+* Resume parsing
+* Candidate summaries
+* Matching
+* Report generation
+* Email drafting
+* Recommendations
+
+AI never owns business data.
+
+AI assists other bounded contexts.
+
+---
+
+## Communication
+
+Responsible for:
+
+* Emails
+* Notifications
+* Templates
+* Future messaging providers
+
+---
+
+## Administration
+
+Responsible for:
+
+* Audit logs
+* Settings
+* Integrations
+* Feature flags
+* System configuration
+
+---
+
+# Core Aggregates
+
+## Organization
+
+Represents a company using AdotKazi.
+
+Owns:
+
+* Branches
+* Departments
+* Recruiters
+* Opportunities
+* Pipelines
+* Branding
+* Settings
+* Analytics
+
+Organization is the primary aggregate root for tenant-owned data.
+
+---
+
+## Branch
+
+Represents a physical or operational location belonging to an organization.
+
+Examples:
+
+* Headquarters
+* Regional Office
+* Branch Office
+
+Opportunities may belong to a branch.
+
+Branches inherit organization ownership.
+
+---
+
+## Department
+
+Represents an organizational department.
+
+Examples:
+
+* Engineering
+* Marketing
+* Finance
+* Human Resources
+
+Departments are organization-wide and may be assigned to opportunities.
+
+---
+
+## Membership
+
+Represents a user's relationship with an organization.
+
+Contains:
+
+* Role
+* Permissions
+* Status
+* Invitation state
+
+A user may have multiple memberships across different organizations.
+
+---
+
+## Opportunity
+
+Represents any recruitment opportunity.
+
+Supported types include:
+
+* Full-Time
+* Part-Time
+* Contract
+* Internship (IPT)
+* Graduate Program
+* Apprenticeship
+* Volunteer
+
+Every opportunity belongs to:
+
+* Organization
+* Department
+* Optional Branch
+
+Every opportunity has:
+
+* Hiring pipeline
+* Recruiters
+* Applications
+* Status
+* Visibility
+
+Opportunity is a primary aggregate root.
+
+---
+
+## Candidate
+
+Represents a person seeking opportunities.
+
+Candidates own:
+
+* Personal information
+* Skills
+* Resume
+* Portfolio
+* Experience
+* Education
+* Certifications
+
+Candidates maintain one reusable global profile.
+
+Candidates may apply to multiple organizations and multiple opportunities.
+
+---
+
+## Application
+
+Represents a candidate applying for an opportunity.
+
+Application belongs to:
+
+* Candidate
+* Opportunity
+
+Application owns:
+
+* Current pipeline stage
+* Status
+* Notes
+* Attachments
+* Interview history
+* Timeline
+
+Applications are immutable records of recruitment activity.
+
+---
+
+## Pipeline
+
+Represents the hiring workflow.
+
+Organizations own reusable pipeline templates.
+
+Every opportunity references one pipeline.
+
+Opportunities may customize pipeline stages without affecting the template.
+
+---
+
+## Interview
+
+Represents an interview event.
+
+Belongs to:
+
+* Application
+
+Contains:
+
+* Interviewers
+* Schedule
+* Feedback
+* Scores
+* Outcome
+
+Multiple interviews may exist for one application.
+
+---
+
+## Placement (IPT)
+
+Represents an accepted internship placement.
+
+Contains:
+
+* Student
+* Supervisor
+* Organization
+* Branch
+* Department
+* Start date
+* End date
+* Objectives
+
+Placement begins only after a successful internship application.
+
+---
+
+## Supervisor
+
+Represents an employee responsible for supervising interns.
+
+Supervisors may oversee multiple placements.
+
+Supervisors complete:
+
+* Evaluations
+* Approvals
+* Feedback
+
+---
+
+## Evaluation
+
+Represents structured assessment.
+
+Supports:
+
+* Internship evaluation
+* Interview evaluation
+* Candidate scoring
+
+Evaluations remain immutable after final submission.
+
+---
+
+# Supporting Aggregates
+
+## Document
+
+Represents any uploaded or generated document.
+
+Supported types include:
+
+* Resume
+* Cover Letter
+* Certificate
+* Transcript
+* Introduction Letter
+* Contract
+* Offer Letter
+* Generated Report
+
+Documents have:
+
+* Owner
+* Type
+* Storage location
+* Metadata
+* Permissions
+* Version history
+
+Business entities reference documents rather than storing file information directly.
+
+---
+
+## Notification
+
+Represents communication delivered to users.
+
+Version 1 supports email.
+
+Future providers:
+
+* WhatsApp
+* SMS
+* Push
+
+Notifications remain provider-independent.
+
+---
+
+## Email Template
+
+Represents reusable communication templates.
+
+Organizations own their templates.
+
+Templates support variables and localization.
+
+---
+
+## AI Task
+
+Represents AI processing requests.
+
+Examples:
+
+* Resume parsing
+* Candidate summary
+* Report generation
+
+AI Tasks store requests and results but never modify business entities directly without user confirmation.
+
+---
+
+## Audit Event
+
+Represents immutable historical records.
+
+Examples:
+
+* Opportunity published
+* Candidate applied
+* Interview scheduled
+* Offer accepted
+
+Audit events cannot be modified.
+
+---
+
+## Integration
+
+Represents external services.
+
+Examples:
+
+* Google Workspace
+* Google Meet
+* Zoom
+* WhatsApp
+
+Integrations remain isolated from core business logic.
+
+---
+
+# Ownership Rules
+
+Platform owns:
+
+* Global users
+* Organizations
+* Memberships
+
+Organizations own:
+
+* Branches
+* Departments
+* Opportunities
+* Pipelines
+* Recruiters
+* Branding
+
+Candidates own:
+
+* Personal profile
+* Resume
+* Portfolio
+* Education
+* Experience
+
+Applications own:
+
+* Recruitment history
+* Status
+* Interviews
+* Timeline
+
+Documents own:
+
+* Files
+* Metadata
+* Versions
+
+---
+
+# Relationships
+
+One Organization
+
+→ Many Branches
+
+One Organization
+
+→ Many Departments
+
+One Organization
+
+→ Many Memberships
+
+One Organization
+
+→ Many Opportunities
+
+One Opportunity
+
+→ Many Applications
+
+One Candidate
+
+→ Many Applications
+
+One Application
+
+→ Many Interviews
+
+One Placement
+
+→ One Supervisor
+
+One Candidate
+
+→ Many Placements (over time)
+
+One User
+
+→ Many Memberships
+
+One Membership
+
+→ One Organization
+
+---
+
+# Domain Events
+
+Important business events include:
+
+* OrganizationCreated
+* MembershipAccepted
+* OpportunityPublished
+* OpportunityClosed
+* ApplicationSubmitted
+* CandidateShortlisted
+* InterviewScheduled
+* InterviewCompleted
+* OfferCreated
+* OfferAccepted
+* PlacementStarted
+* PlacementCompleted
+* EvaluationSubmitted
+* CertificateGenerated
+
+Future automation should subscribe to these events.
+
+---
+
+# Business Invariants
+
+The following rules must always hold true:
+
+* Every tenant-owned record belongs to exactly one organization.
+* Every application belongs to exactly one candidate and one opportunity.
+* Every opportunity belongs to exactly one organization.
+* A candidate owns only one global profile.
+* Organizations cannot modify candidate-owned profile data.
+* AI cannot make hiring decisions.
+* Deleted records must preserve audit history.
+* Business entities never communicate directly with external providers.
+* Every critical action creates an audit event.
+
+---
+
+# Future Evolution
+
+The domain model is designed for long-term growth.
+
+Future features—including recruitment agencies, university partnerships, public APIs, automation, billing, and marketplace integrations—must extend the existing domain model rather than replacing it.
+
+Changes to the domain should prioritize backward compatibility, maintainability, and consistency across the platform.

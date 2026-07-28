@@ -1,0 +1,538 @@
+# AUTHORIZATION.md
+
+# AdotKazi Authorization Architecture
+
+## Purpose
+
+This document defines the authorization architecture for the AdotKazi platform.
+
+Authorization determines **what an authenticated user is allowed to do** after their identity has been verified.
+
+Authentication is defined separately in **AUTHENTICATION.md**.
+
+The authorization system is designed to support:
+
+* Multi-tenancy
+* Fine-grained permissions
+* Enterprise scalability
+* Future SaaS growth
+* Least privilege security
+
+---
+
+# Authorization Principles
+
+Authorization follows five principles:
+
+1. Least Privilege
+2. Explicit Permission Assignment
+3. Tenant Isolation
+4. Resource Ownership
+5. Deny by Default
+
+Unless a permission is explicitly granted, access is denied.
+
+---
+
+# Authorization Model
+
+AdotKazi uses a **Hybrid Authorization Model** consisting of:
+
+```text
+Authentication
+        │
+        ▼
+Organization Membership
+        │
+        ▼
+Role Assignment
+        │
+        ▼
+Permission Resolution
+        │
+        ▼
+Policy Evaluation
+        │
+        ▼
+Resource Ownership Check
+        │
+        ▼
+Access Granted / Denied
+```
+
+---
+
+# Core Components
+
+The authorization system consists of:
+
+* User
+* Organization
+* Membership
+* Role
+* Permission
+* RolePermission
+* UserPermission (optional)
+* Policy
+* PermissionGroup
+
+Authorization decisions are always evaluated within the context of an organization.
+
+---
+
+# Organization Membership
+
+Authorization is organization-specific.
+
+A user may belong to multiple organizations.
+
+Example:
+
+```text
+John Smith
+
+Organization A
+Recruiter
+
+Organization B
+Hiring Manager
+
+Organization C
+Viewer
+```
+
+Each membership has independent permissions.
+
+---
+
+# Role-Based Access Control (RBAC)
+
+Roles are collections of permissions.
+
+Roles simplify administration.
+
+Examples:
+
+Platform
+
+* Super Admin
+* Support Engineer
+
+Organization
+
+* Owner
+* Admin
+* Recruiter
+* Hiring Manager
+* Interviewer
+* Supervisor
+* Viewer
+
+Candidate
+
+* Candidate
+
+Future
+
+* University Coordinator
+* Lecturer
+* External Evaluator
+
+---
+
+# Permission-Based Access Control (PBAC)
+
+Permissions define specific capabilities.
+
+Permission naming convention:
+
+```text
+resource.action
+```
+
+Examples:
+
+```text
+organization.view
+organization.update
+
+job.create
+job.publish
+job.archive
+
+candidate.view
+candidate.update
+candidate.delete
+
+application.review
+application.reject
+application.export
+
+placement.create
+placement.evaluate
+
+analytics.view
+
+ai.generate
+
+communication.send
+
+report.export
+```
+
+Permissions are additive.
+
+---
+
+# Permission Groups
+
+Permissions are grouped logically.
+
+Examples:
+
+Recruitment
+
+* job.*
+* application.*
+* interview.*
+
+IPT
+
+* placement.*
+* report.*
+* evaluation.*
+
+Analytics
+
+* dashboard.*
+* report.*
+
+Communication
+
+* notification.*
+* template.*
+
+Administration
+
+* audit.*
+* system.*
+
+AI
+
+* ai.*
+
+Groups simplify role management.
+
+---
+
+# Resource Ownership
+
+Every tenant-owned resource contains:
+
+```text
+organization_id
+```
+
+Before checking permissions, the system verifies:
+
+* Resource belongs to the active organization.
+* User belongs to the active organization.
+
+Cross-tenant access is prohibited.
+
+---
+
+# Context-Aware Policies
+
+Some permissions require additional evaluation.
+
+Examples:
+
+Recruiter
+
+May edit only opportunities within assigned departments.
+
+Hiring Manager
+
+May approve offers only for their hiring team.
+
+Supervisor
+
+May evaluate only placements assigned to them.
+
+Candidate
+
+May view only their own applications.
+
+Support Engineer
+
+May access customer organizations only through an authorized support session.
+
+---
+
+# Policy Evaluation
+
+Authorization evaluates the following in order:
+
+1. User authenticated.
+2. Active organization selected.
+3. Membership exists.
+4. Account active.
+5. Required permission assigned.
+6. Policy conditions satisfied.
+7. Resource ownership verified.
+
+Only then is access granted.
+
+---
+
+# Permission Inheritance
+
+Permissions inherit through roles.
+
+Example:
+
+```text
+Organization Admin
+
+↓
+
+Recruiter Permissions
+
+↓
+
+Interviewer Permissions
+
+↓
+
+Viewer Permissions
+```
+
+Inheritance should be explicit and documented.
+
+---
+
+# Organization Switching
+
+Users authenticate once.
+
+They may switch organizations without logging in again.
+
+Each switch loads:
+
+* Membership
+* Roles
+* Permissions
+* Policies
+
+Authorization is recalculated immediately.
+
+---
+
+# Candidate Authorization
+
+Candidates have a limited permission scope.
+
+Examples:
+
+Allowed
+
+* View opportunities
+* Submit applications
+* Upload documents
+* Track application status
+* Withdraw application
+* Update profile
+
+Denied
+
+* View other candidates
+* View recruiter data
+* Access analytics
+* Manage opportunities
+
+---
+
+# Platform Administrators
+
+Platform administrators are not organization administrators.
+
+Platform administrators manage:
+
+* Organizations
+* Platform settings
+* Incidents
+* Feature definitions
+* Support sessions
+
+Platform administrators do not automatically access customer data.
+
+Customer data access requires an approved support session.
+
+---
+
+# Support Sessions
+
+Temporary access for support staff.
+
+Requirements:
+
+* Explicit authorization
+* Time-limited
+* Fully audited
+* Revocable
+* Read-only by default
+
+Every support action generates audit events.
+
+---
+
+# API Authorization
+
+Every API endpoint declares required permissions.
+
+Example:
+
+```text
+POST /jobs
+
+Required Permission
+
+job.create
+```
+
+Permission checks occur before business logic executes.
+
+---
+
+# UI Authorization
+
+The frontend must hide unauthorized functionality.
+
+However:
+
+Frontend authorization improves usability.
+
+Backend authorization enforces security.
+
+The backend remains the source of truth.
+
+---
+
+# Feature Flags
+
+Authorization integrates with feature flags.
+
+Example:
+
+```text
+Recruitment AI
+
+Permission
+
+ai.generate
+
+AND
+
+Feature Enabled
+```
+
+Both conditions must be satisfied.
+
+---
+
+# Audit Requirements
+
+Every authorization-sensitive action generates an audit event.
+
+Examples:
+
+* Permission granted
+* Permission revoked
+* Role assigned
+* Organization switched
+* Support session started
+* Policy denied
+
+Audit events are immutable.
+
+---
+
+# Security Requirements
+
+Authorization must enforce:
+
+* Deny by default
+* Least privilege
+* Tenant isolation
+* Resource ownership
+* Policy evaluation
+* Permission validation on every request
+
+Never trust client-side permission checks.
+
+---
+
+# Performance
+
+Authorization should:
+
+* Cache resolved permissions per session.
+* Invalidate cache after permission changes.
+* Minimize database lookups.
+* Support millions of permission evaluations efficiently.
+
+Permission resolution must remain deterministic.
+
+---
+
+# Future Expansion
+
+The authorization architecture is designed to support:
+
+* Attribute-Based Access Control (ABAC)
+* Time-based permissions
+* IP restrictions
+* Department-level permissions
+* Branch-level permissions
+* Data masking policies
+* Field-level permissions
+* Approval-based authorization
+* Enterprise SSO group mapping
+* SCIM role synchronization
+* API scopes
+* Service accounts
+* External partner access
+
+---
+
+# Example Permission Matrix
+
+| Role               | Jobs      | Applications | Interviews | IPT       | Analytics | Admin   |
+| ------------------ | --------- | ------------ | ---------- | --------- | --------- | ------- |
+| Super Admin        | ✓         | ✓            | ✓          | ✓         | ✓         | ✓       |
+| Organization Owner | ✓         | ✓            | ✓          | ✓         | ✓         | Limited |
+| Admin              | ✓         | ✓            | ✓          | ✓         | ✓         | Limited |
+| Recruiter          | ✓         | ✓            | ✓          | Limited   | Limited   | ✗       |
+| Hiring Manager     | Assigned  | Assigned     | ✓          | ✗         | Limited   | ✗       |
+| Interviewer        | View      | Assigned     | ✓          | ✗         | ✗         | ✗       |
+| Supervisor         | ✗         | ✗            | ✗          | Assigned  | Limited   | ✗       |
+| Candidate          | Apply     | Own          | Own        | Own       | ✗         | ✗       |
+| Viewer             | Read Only | Read Only    | Read Only  | Read Only | Read Only | ✗       |
+
+---
+
+# Definition of Done
+
+Authorization is considered production-ready when:
+
+* Every request requires authentication.
+* Every request evaluates organization membership.
+* Permissions are resolved through roles.
+* Resource ownership is enforced.
+* Tenant isolation is guaranteed.
+* Policy checks are executed consistently.
+* Audit events are generated.
+* Platform administrators are isolated from tenant data.
+* Support access is temporary and audited.
+* Backend remains the source of truth for all authorization decisions.

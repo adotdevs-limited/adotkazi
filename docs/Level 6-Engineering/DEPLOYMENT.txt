@@ -1,0 +1,816 @@
+# DEPLOYMENT.md
+
+# AdotKazi Deployment Architecture
+
+**Version:** 1.0
+**Status:** Platform Standard
+
+---
+
+# Purpose
+
+This document defines the deployment architecture, infrastructure strategy, release process, environments, scalability model, and operational standards for the AdotKazi platform.
+
+The deployment architecture is designed to support the platform from its first customer to millions of users while remaining cloud-provider independent.
+
+The initial deployment target is:
+
+* **Frontend:** Vercel
+* **Backend:** Vercel
+* **Database:** Supabase PostgreSQL
+* **Storage:** Supabase Storage
+* **Cache:** Redis (Upstash initially)
+* **Email:** Resend
+
+However, the architecture must allow migration to a VPS, dedicated servers, Kubernetes, or any cloud provider with minimal code changes.
+
+---
+
+# Deployment Philosophy
+
+The platform must be:
+
+* Cloud agnostic
+* Infrastructure independent
+* Horizontally scalable
+* Zero-downtime deployable
+* Container-ready
+* CI/CD driven
+* Cost-efficient
+* Production-first
+
+Infrastructure should never leak into business logic.
+
+---
+
+# Deployment Architecture
+
+```text id="dep1"
+Users
+
+↓
+
+CDN
+
+↓
+
+Frontend (Next.js)
+
+↓
+
+API Gateway
+
+↓
+
+Backend Services
+
+↓
+
+PostgreSQL
+
+Redis
+
+Object Storage
+
+Background Workers
+
+↓
+
+External Providers
+
+AI
+
+Email
+
+Calendar
+
+OAuth
+
+Search
+```
+
+---
+
+# Initial Infrastructure
+
+## Frontend
+
+Technology:
+
+* Next.js
+* React
+* TypeScript
+
+Hosting:
+
+* Vercel
+
+Responsibilities:
+
+* Candidate Portal
+* Recruiter Dashboard
+* Organization Dashboard
+* Super Admin
+* Careers Websites
+
+---
+
+## Backend
+
+Technology:
+
+* Next.js Route Handlers or API Layer
+* TypeScript
+
+Hosting:
+
+* Vercel
+
+Responsibilities:
+
+* REST APIs
+* Authentication
+* Business Logic
+* Domain Services
+
+---
+
+## Database
+
+Technology:
+
+* PostgreSQL
+
+Initial Provider:
+
+* Supabase
+
+Requirements:
+
+* Automatic backups
+* PITR (Point-in-Time Recovery)
+* Row-level security where applicable
+* UUID primary keys
+
+The application must not depend on Supabase-specific business logic.
+
+---
+
+## Storage
+
+Initial Provider:
+
+* Supabase Storage
+
+Stores:
+
+* Resumes
+* Reports
+* Certificates
+* Images
+* Company Logos
+* Documents
+
+Future providers:
+
+* AWS S3
+* Cloudflare R2
+* Google Cloud Storage
+* Azure Blob Storage
+* MinIO
+
+The platform communicates through the Storage Provider interface.
+
+---
+
+## Cache
+
+Initial Provider:
+
+* Upstash Redis
+
+Used for:
+
+* Sessions
+* Rate Limiting
+* Search Cache
+* Feature Flags
+* Organization Settings
+* Temporary Tokens
+
+Redis should be replaceable.
+
+---
+
+## Email
+
+Initial Provider:
+
+* Resend
+
+Future providers:
+
+* Amazon SES
+* SendGrid
+* Mailgun
+* Postmark
+
+The Communication Domain abstracts provider implementation.
+
+---
+
+## AI
+
+Initial Providers:
+
+* OpenAI
+* Anthropic
+
+Future:
+
+* Google Gemini
+* Azure OpenAI
+* Self-hosted Models
+
+AI provider switching requires configuration only.
+
+---
+
+# Environments
+
+The platform supports:
+
+```text id="dep2"
+Local Development
+
+↓
+
+Testing
+
+↓
+
+Staging
+
+↓
+
+Production
+```
+
+Each environment has isolated:
+
+* Database
+* Storage
+* Cache
+* Secrets
+* OAuth Credentials
+* AI Keys
+
+---
+
+# Environment Variables
+
+Examples:
+
+```text id="dep3"
+DATABASE_URL
+
+REDIS_URL
+
+STORAGE_PROVIDER
+
+EMAIL_PROVIDER
+
+AI_PROVIDER
+
+JWT_SECRET
+
+NEXTAUTH_SECRET
+
+APP_URL
+
+SEARCH_PROVIDER
+```
+
+No secrets may be committed to source control.
+
+---
+
+# Infrastructure Independence
+
+Business code must never directly reference:
+
+* Supabase SDK
+* Vercel SDK
+* AWS SDK
+* Google SDK
+
+Infrastructure is accessed only through adapters.
+
+Example:
+
+```text id="dep4"
+Recruitment Service
+
+↓
+
+Storage Interface
+
+↓
+
+Supabase Adapter
+
+↓
+
+Future:
+
+S3 Adapter
+```
+
+Changing providers should not require business logic changes.
+
+---
+
+# Containers
+
+Every service should be container-ready.
+
+Requirements:
+
+* Dockerfile
+* Docker Compose (development)
+* Health checks
+* Environment variables
+* Non-root containers
+
+Future:
+
+* Kubernetes
+* Nomad
+* Docker Swarm
+
+---
+
+# CI/CD
+
+Every commit triggers:
+
+```text id="dep5"
+Install
+
+↓
+
+Lint
+
+↓
+
+Type Check
+
+↓
+
+Tests
+
+↓
+
+Build
+
+↓
+
+Security Scan
+
+↓
+
+Deploy
+```
+
+Production deployments require all quality gates to pass.
+
+---
+
+# Deployment Strategy
+
+Recommended:
+
+* Rolling Deployment
+
+Future support:
+
+* Blue/Green Deployment
+* Canary Releases
+* Progressive Delivery
+
+Deployments should avoid downtime.
+
+---
+
+# Database Migrations
+
+Requirements:
+
+* Version-controlled
+* Automated
+* Reversible where practical
+* Transactional
+
+Migrations execute before application startup.
+
+---
+
+# Seeding
+
+Support:
+
+* Development Seed
+* Testing Seed
+* Demo Data
+* Initial Production Organization
+
+Initial production seed:
+
+Organization:
+
+* Adotdevs Limited
+
+Departments:
+
+* Engineering
+* Design
+* Marketing
+
+Sample opportunities may be created for development only.
+
+---
+
+# Background Workers
+
+Separate worker processes handle:
+
+* AI Processing
+* Email Delivery
+* Search Indexing
+* Analytics
+* File Processing
+* Report Generation
+* Scheduled Jobs
+
+Workers scale independently.
+
+---
+
+# Scheduled Jobs
+
+Examples:
+
+* Daily Reports
+* Weekly IPT Reminders
+* Expired Opportunities
+* Trial Expiration
+* Cleanup Tasks
+* Search Optimization
+
+Jobs should be idempotent.
+
+---
+
+# File Delivery
+
+Static assets:
+
+* CDN cached
+
+Private files:
+
+* Signed URLs
+* Authenticated downloads
+
+Public assets should be aggressively cached.
+
+---
+
+# CDN Strategy
+
+Use CDN for:
+
+* Images
+* JavaScript
+* CSS
+* Fonts
+* Public Documents
+
+Private documents bypass CDN where necessary.
+
+---
+
+# Monitoring
+
+Monitor:
+
+* API latency
+* Error rate
+* Queue health
+* Database performance
+* Cache performance
+* Worker health
+* Search health
+* AI latency
+
+Metrics should be centralized.
+
+---
+
+# Logging
+
+Use structured logs containing:
+
+* Timestamp
+* Request ID
+* Organization ID
+* User ID
+* Service
+* Severity
+
+Logs should integrate with centralized observability tools.
+
+---
+
+# Health Checks
+
+Every service exposes:
+
+```text id="dep6"
+/health
+
+/ready
+
+/live
+```
+
+Health endpoints must not expose sensitive information.
+
+---
+
+# Auto Scaling
+
+The architecture supports:
+
+Frontend:
+
+* Automatic scaling
+
+Backend:
+
+* Horizontal scaling
+
+Workers:
+
+* Independent scaling
+
+Database:
+
+* Read replicas (future)
+
+Storage:
+
+* Unlimited object storage
+
+---
+
+# Backup Strategy
+
+Database:
+
+* Daily backups
+* Point-in-time recovery
+
+Storage:
+
+* Versioning
+* Replication (provider-dependent)
+
+Configuration:
+
+* Infrastructure as Code (future)
+
+Backup restoration should be tested periodically.
+
+---
+
+# Disaster Recovery
+
+Recovery objectives should include:
+
+* Database restoration
+* Storage restoration
+* Configuration restoration
+* Secret recovery
+
+Disaster recovery procedures should be documented and rehearsed.
+
+---
+
+# Domain Deployment Independence
+
+Each domain remains independently deployable in the future.
+
+Examples:
+
+* Recruitment
+* IPT
+* AI
+* CMS
+* Analytics
+* Search
+
+The initial implementation remains a modular monolith.
+
+---
+
+# Security During Deployment
+
+Every deployment must:
+
+* Verify secrets
+* Run migrations safely
+* Validate environment variables
+* Execute automated tests
+* Run dependency vulnerability scans
+
+Production deployments require approval where appropriate.
+
+---
+
+# Performance Optimization
+
+Enable:
+
+* Response compression
+* CDN caching
+* Image optimization
+* Code splitting
+* Tree shaking
+* Lazy loading
+
+Measure performance continuously.
+
+---
+
+# Release Process
+
+```text id="dep7"
+Feature Branch
+
+↓
+
+Pull Request
+
+↓
+
+Code Review
+
+↓
+
+CI Pipeline
+
+↓
+
+Staging
+
+↓
+
+QA Verification
+
+↓
+
+Production Approval
+
+↓
+
+Production Deployment
+
+↓
+
+Smoke Tests
+
+↓
+
+Monitoring
+```
+
+---
+
+# Rollback Strategy
+
+Every deployment must support rollback.
+
+Rollback includes:
+
+* Previous application version
+* Database compatibility
+* Feature flag disablement
+* Worker rollback
+
+Emergency rollback should be executable within minutes.
+
+---
+
+# Cost Optimization
+
+To support millions of users while controlling costs:
+
+* Cache aggressively.
+* Use asynchronous processing.
+* Minimize database queries.
+* Optimize storage lifecycle.
+* Batch analytics events.
+* Avoid unnecessary AI requests.
+* Scale workers independently.
+* Use provider abstraction to negotiate pricing or migrate providers.
+
+---
+
+# Future Infrastructure
+
+The architecture supports migration to:
+
+Cloud Providers:
+
+* AWS
+* Google Cloud
+* Microsoft Azure
+* DigitalOcean
+* Hetzner
+
+Deployment Platforms:
+
+* Kubernetes
+* Docker
+* VPS
+* Bare Metal
+* Railway
+* Fly.io
+
+No business logic changes should be required.
+
+---
+
+# Infrastructure as Code
+
+Future infrastructure should be managed using:
+
+* Terraform
+* OpenTofu
+* Pulumi
+
+Infrastructure changes should be version-controlled.
+
+---
+
+# Observability
+
+The platform should support:
+
+* Metrics
+* Logs
+* Traces
+* Alerts
+* Dashboards
+
+Recommended integrations:
+
+* OpenTelemetry
+* Grafana
+* Prometheus
+* Loki
+* Sentry
+
+These tools should remain replaceable.
+
+---
+
+# AI Coding Agent Rules
+
+When generating deployment-related code, AI assistants must:
+
+* Never hardcode secrets.
+* Respect provider abstraction layers.
+* Avoid vendor lock-in.
+* Generate environment-aware configuration.
+* Keep deployments reproducible.
+* Ensure compatibility with modular monolith architecture.
+* Prepare services for future horizontal scaling.
+
+---
+
+# Definition of Done
+
+The deployment architecture is considered production-ready when:
+
+* Multiple environments are fully isolated.
+* CI/CD automates testing, building, and deployment.
+* Infrastructure providers are abstracted.
+* Storage, email, AI, cache, and search are replaceable.
+* Health checks, monitoring, and logging are implemented.
+* Zero-downtime deployments are supported.
+* Rollback procedures are documented.
+* Security validation is integrated into deployments.
+* The platform can migrate from Vercel/Supabase to VPS or Kubernetes without changes to business logic.
+* The architecture is capable of supporting millions of users while maintaining operational efficiency.

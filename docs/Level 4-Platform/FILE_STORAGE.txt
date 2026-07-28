@@ -1,0 +1,579 @@
+# FILE_STORAGE.md
+
+# AdotKazi File Storage Architecture
+
+## Purpose
+
+This document defines the file storage architecture for the AdotKazi platform.
+
+The File Storage Platform is responsible for securely storing, managing, and serving all user-uploaded files while remaining independent of any specific cloud provider.
+
+Business modules never interact directly with storage providers.
+
+Instead, they communicate with the Document Service.
+
+---
+
+# Goals
+
+The storage platform must be:
+
+* Secure
+* Scalable
+* Tenant-aware
+* Provider-independent
+* Versioned
+* Auditable
+* Cost-efficient
+* Future-proof
+
+---
+
+# Architecture Overview
+
+```text
+                    Business Modules
+
+   Recruitment   IPT   AI   Communication   Platform
+
+                  │
+
+                  ▼
+
+             Document Service
+
+                  │
+
+     ┌────────────┼────────────┐
+
+     │            │            │
+
+ Metadata DB   Storage API   Security
+
+                  │
+
+                  ▼
+
+         Storage Provider Adapter
+
+                  │
+
+     ┌────────────┼────────────┐
+
+     │            │            │
+
+ Supabase      Amazon S3     Cloudflare R2
+
+     │
+
+     └──── Future Providers ────► MinIO, Azure Blob, GCS
+```
+
+The Document Service is the only component allowed to communicate with storage providers.
+
+---
+
+# Storage Strategy
+
+Separate:
+
+* Metadata
+* Binary file
+
+Metadata is stored in PostgreSQL.
+
+Binary files are stored in object storage.
+
+Business entities reference only:
+
+```text
+document_id
+```
+
+---
+
+# Document Model
+
+Every uploaded file has a corresponding document record.
+
+Example fields:
+
+* id
+* organization_id
+* owner_id
+* filename
+* original_filename
+* mime_type
+* extension
+* size_bytes
+* checksum
+* provider
+* storage_path
+* visibility
+* version
+* status
+* created_at
+
+---
+
+# Storage Providers
+
+Initial provider:
+
+* Supabase Storage
+
+Future providers:
+
+* Amazon S3
+* Cloudflare R2
+* MinIO
+* Azure Blob Storage
+* Google Cloud Storage
+
+Storage providers are interchangeable.
+
+---
+
+# Supported File Types
+
+Examples include:
+
+Documents
+
+* PDF
+* DOCX
+* XLSX
+* PPTX
+* TXT
+
+Images
+
+* PNG
+* JPG
+* JPEG
+* SVG
+* WebP
+
+Archives
+
+* ZIP
+
+Future
+
+* Audio
+* Video
+
+Unsupported file types should be rejected.
+
+---
+
+# Upload Flow
+
+```text
+Client
+
+↓
+
+Authentication
+
+↓
+
+Authorization
+
+↓
+
+Validation
+
+↓
+
+Virus Scan Queue
+
+↓
+
+Storage Provider
+
+↓
+
+Metadata Saved
+
+↓
+
+Domain Event
+
+↓
+
+Success Response
+```
+
+---
+
+# Download Flow
+
+```text
+Client
+
+↓
+
+Authorization
+
+↓
+
+Document Service
+
+↓
+
+Permission Check
+
+↓
+
+Signed URL Generated
+
+↓
+
+Temporary Download
+```
+
+The storage provider is never exposed directly.
+
+---
+
+# Storage Paths
+
+Recommended structure:
+
+```text
+organizations/
+
+   {organization_id}/
+
+      documents/
+
+         {document_id}
+```
+
+Examples:
+
+```text
+organizations/org_123/documents/doc_456
+```
+
+Storage paths never contain sensitive information.
+
+---
+
+# Visibility
+
+Supported visibility levels:
+
+* Private
+* Organization
+* Public (rare)
+
+Private is the default.
+
+---
+
+# Access Control
+
+Before serving a file, verify:
+
+1. User authenticated.
+2. Organization context established.
+3. Membership valid.
+4. Permission granted.
+5. Document ownership confirmed.
+
+Only then is access allowed.
+
+---
+
+# Signed URLs
+
+Private files are accessed through signed URLs.
+
+Requirements:
+
+* Time-limited
+* Single purpose
+* HTTPS only
+* Short expiration
+
+Direct public URLs are discouraged for private content.
+
+---
+
+# File Validation
+
+Every upload is validated.
+
+Checks include:
+
+* MIME type
+* Extension
+* Maximum size
+* Filename normalization
+* Duplicate detection
+* Malformed files
+
+Invalid uploads are rejected.
+
+---
+
+# Virus Scanning
+
+Every uploaded file enters a virus scanning queue.
+
+States:
+
+* Pending
+* Clean
+* Infected
+* Failed
+
+Only clean files become downloadable.
+
+Future implementations may use ClamAV or commercial scanning services.
+
+---
+
+# Checksums
+
+Generate checksums for every file.
+
+Recommended algorithm:
+
+* SHA-256
+
+Checksums support:
+
+* Duplicate detection
+* Integrity verification
+* Migration validation
+
+---
+
+# Versioning
+
+Documents support version history.
+
+Example:
+
+```text
+Resume
+
+Version 1
+
+↓
+
+Version 2
+
+↓
+
+Version 3
+```
+
+Older versions remain accessible according to retention policies.
+
+---
+
+# File Replacement
+
+Replacing a file creates a new version.
+
+The original document identifier remains unchanged.
+
+This preserves references from business entities.
+
+---
+
+# Image Processing
+
+Optional processing:
+
+* Thumbnail generation
+* Image resizing
+* Format optimization
+* Compression
+
+Original files are always preserved.
+
+---
+
+# Storage Quotas
+
+Future SaaS plans may define:
+
+* Total storage
+* Maximum upload size
+* Monthly bandwidth
+* Number of documents
+
+Quota enforcement occurs before upload.
+
+---
+
+# Lifecycle Management
+
+Document states:
+
+* Uploading
+* Pending Scan
+* Available
+* Archived
+* Deleted
+
+Soft deletion is preferred.
+
+Physical deletion follows retention policies.
+
+---
+
+# Retention
+
+Retention policies may differ by document type.
+
+Examples:
+
+* Resumes
+* IPT Reports
+* Certificates
+* Audit attachments
+
+Expired files are removed according to organization policies and legal requirements.
+
+---
+
+# Tenant Isolation
+
+Every document belongs to exactly one organization.
+
+Every storage operation includes:
+
+* organization_id
+* document_id
+
+Cross-tenant access is prohibited.
+
+---
+
+# Audit Logging
+
+Every storage action generates an audit event.
+
+Examples:
+
+* Upload
+* Download
+* Preview
+* Replace
+* Delete
+* Restore
+* Share
+
+Audit records are immutable.
+
+---
+
+# Events
+
+Examples:
+
+* DocumentUploaded
+* DocumentScanned
+* DocumentAvailable
+* DocumentDeleted
+* DocumentRestored
+* DocumentDownloaded
+
+Other bounded contexts consume these events when needed.
+
+---
+
+# Performance
+
+Recommended practices:
+
+* Multipart uploads for large files
+* Streaming downloads
+* CDN for public assets
+* Compression where appropriate
+* Background processing for thumbnails
+* Metadata caching
+
+Large files should never be fully loaded into application memory.
+
+---
+
+# Security
+
+The storage platform must implement:
+
+* HTTPS only
+* Signed URLs
+* MIME validation
+* Virus scanning
+* Tenant isolation
+* Authorization checks
+* Encryption at rest
+* Encryption in transit
+* Filename sanitization
+
+Sensitive files must never be publicly accessible by default.
+
+---
+
+# Cloud Portability
+
+The platform must support migration between providers without changing business logic.
+
+Only the Storage Provider Adapter communicates with provider-specific APIs.
+
+The Document Service remains unchanged.
+
+---
+
+# Monitoring
+
+Track:
+
+* Upload success rate
+* Download success rate
+* Storage usage
+* Virus scan failures
+* Average upload time
+* Average download time
+* Provider latency
+* Failed transfers
+
+---
+
+# Future Expansion
+
+The architecture supports:
+
+* OCR
+* Digital signatures
+* Watermarking
+* Media transcoding
+* Document classification
+* AI document extraction
+* Content moderation
+* Cross-region replication
+* Cold storage tiers
+
+---
+
+# Definition of Done
+
+The File Storage Platform is considered production-ready when:
+
+* Business modules reference only `document_id`.
+* Metadata is separated from binary storage.
+* Files are validated before upload.
+* Virus scanning is implemented.
+* Access is controlled through signed URLs.
+* Versioning is supported.
+* Audit logs are generated.
+* Tenant isolation is enforced.
+* Storage providers are interchangeable.
+* The architecture remains cloud-independent.

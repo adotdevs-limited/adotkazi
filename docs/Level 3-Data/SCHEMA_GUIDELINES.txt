@@ -1,0 +1,603 @@
+# SCHEMA_GUIDELINES.md
+
+# AdotKazi Schema Guidelines
+
+## Purpose
+
+This document defines the implementation standards for the AdotKazi database schema.
+
+It establishes consistent conventions for:
+
+* Prisma models
+* Database tables
+* Relationships
+* Constraints
+* Indexes
+* Migrations
+* Performance
+* Future evolution
+
+Every database model must comply with these guidelines.
+
+---
+
+# Guiding Principles
+
+The schema must be:
+
+* Tenant-aware
+* Normalized
+* Scalable
+* Secure
+* Maintainable
+* Cloud-agnostic
+* Future-proof
+
+Business logic belongs in the application layer.
+
+Data integrity belongs in the database.
+
+---
+
+# Schema Organization
+
+The Prisma schema should be organized by bounded context.
+
+Recommended structure:
+
+```text
+prisma/
+├── schema.prisma
+├── models/
+│   ├── platform.prisma
+│   ├── recruitment.prisma
+│   ├── ipt.prisma
+│   ├── ai.prisma
+│   ├── communication.prisma
+│   ├── analytics.prisma
+│   ├── administration.prisma
+│   ├── integration.prisma
+│   ├── documents.prisma
+│   └── shared.prisma
+├── migrations/
+└── seed/
+```
+
+If Prisma's tooling requires a single schema file, generate it from these modular definitions during the build process.
+
+---
+
+# Naming Conventions
+
+## Models
+
+Use PascalCase.
+
+Examples
+
+* Organization
+* Opportunity
+* Application
+* Placement
+* Notification
+
+---
+
+## Database Tables
+
+Use:
+
+* plural
+* snake_case
+
+Examples
+
+* organizations
+* opportunities
+* applications
+* placements
+* notifications
+
+---
+
+## Fields
+
+Use:
+
+snake_case
+
+Examples
+
+* organization_id
+* created_at
+* updated_at
+* deleted_at
+
+---
+
+## Relations
+
+Relation fields use singular names.
+
+Examples
+
+```text
+organization
+candidate
+pipeline
+placement
+```
+
+Collection fields use plural names.
+
+Examples
+
+```text
+applications
+interviews
+daily_logs
+weekly_reports
+```
+
+---
+
+# Primary Keys
+
+Every model uses:
+
+UUID Version 7
+
+Example
+
+```text
+id UUID
+```
+
+Auto-incrementing IDs are prohibited for business entities.
+
+---
+
+# Tenant Ownership
+
+Every tenant-owned model includes:
+
+```text
+organization_id
+```
+
+Examples
+
+* Opportunity
+* Candidate
+* Placement
+* Notification
+* Dashboard
+
+Platform-owned entities omit organization ownership where appropriate.
+
+---
+
+# Audit Fields
+
+Every mutable business entity includes:
+
+```text
+created_at
+created_by
+
+updated_at
+updated_by
+
+deleted_at
+deleted_by
+```
+
+Immutable entities (for example, AuditEvent) may omit update fields.
+
+---
+
+# Soft Deletes
+
+Business entities should implement soft deletion.
+
+Soft deletion updates:
+
+```text
+deleted_at
+deleted_by
+```
+
+Records remain queryable for auditing and historical reporting.
+
+Hard deletion is reserved for maintenance or legal obligations.
+
+---
+
+# Relationship Rules
+
+Prefer explicit foreign keys.
+
+Every relationship must define ownership clearly.
+
+Examples
+
+```text
+Organization
+
+hasMany Branches
+
+Branch
+
+belongsTo Organization
+```
+
+Avoid ambiguous or bidirectional ownership.
+
+---
+
+# Many-to-Many Relationships
+
+Always use explicit junction models.
+
+Example
+
+```text
+CandidateSkill
+
+candidate_id
+
+skill_id
+
+years_experience
+
+proficiency
+```
+
+Avoid implicit many-to-many relationships.
+
+Explicit junction entities allow future metadata without schema redesign.
+
+---
+
+# Lookup Data
+
+Use lookup tables for configurable values.
+
+Examples
+
+* Skills
+* Departments
+* Languages
+* Countries
+
+Use enums only for stable platform concepts.
+
+Examples
+
+* OpportunityType
+* NotificationChannel
+* UserStatus
+
+---
+
+# JSON Usage
+
+JSONB is permitted only for flexible data.
+
+Examples
+
+* AI responses
+* Webhook payloads
+* Notification metadata
+* Dynamic form responses
+
+Never use JSON to replace normalized relationships.
+
+---
+
+# Indexing Guidelines
+
+Every model should include indexes appropriate to expected query patterns.
+
+Minimum indexes:
+
+* Primary key
+* organization_id (where applicable)
+* created_at
+* updated_at
+
+Recommended composite indexes:
+
+```text
+organization_id + status
+
+organization_id + created_at
+
+candidate_id + organization_id
+
+opportunity_id + status
+
+placement_id + status
+```
+
+Review indexes periodically using production query analysis.
+
+---
+
+# Unique Constraints
+
+Apply unique constraints only where required.
+
+Examples
+
+```text
+organization.slug
+
+user.email
+
+permission.key
+
+feature_flag.key
+```
+
+Use composite uniqueness when ownership matters.
+
+Example
+
+```text
+organization_id + department_name
+```
+
+---
+
+# Cascade Rules
+
+Use cascading deletes sparingly.
+
+Safe examples:
+
+* Temporary tokens
+* Sessions
+* Invitations
+
+Avoid cascading deletes for business history such as:
+
+* Applications
+* Interviews
+* Reports
+* Audit events
+
+Historical records should remain intact.
+
+---
+
+# Versioning
+
+Support optimistic concurrency for frequently edited entities.
+
+Preferred approach:
+
+```text
+version
+
+or
+
+updated_at comparison
+```
+
+Concurrent updates should fail gracefully.
+
+---
+
+# File References
+
+Business entities reference documents through IDs.
+
+Example
+
+```text
+resume_document_id
+
+logo_document_id
+
+certificate_document_id
+```
+
+The Document domain manages storage.
+
+Business modules never reference physical storage directly.
+
+---
+
+# Timeline History
+
+Business history should use dedicated timeline entities.
+
+Examples
+
+* RecruitmentTimeline
+* PlacementTimeline
+
+Do not overload audit logs with business workflow history.
+
+---
+
+# Event Generation
+
+Important state changes generate domain events.
+
+Examples
+
+```text
+OpportunityPublished
+
+ApplicationSubmitted
+
+PlacementStarted
+
+InterviewScheduled
+
+CertificateIssued
+```
+
+Events are consumed asynchronously by:
+
+* Analytics
+* Communication
+* AI
+* Workflow Automation
+
+---
+
+# Search Synchronization
+
+Search indexes are derived from the transactional database.
+
+Updates should occur asynchronously.
+
+The database remains the source of truth.
+
+---
+
+# Analytics
+
+Operational models should never contain reporting fields.
+
+Examples to avoid:
+
+```text
+application_count
+
+candidate_total
+
+monthly_hires
+```
+
+Analytics derives these values from events and aggregations.
+
+---
+
+# Security Guidelines
+
+Sensitive fields must be protected.
+
+Examples
+
+* Password hashes
+* API secrets
+* OAuth tokens
+
+Personally identifiable information (PII) should be isolated where practical and never exposed unnecessarily.
+
+---
+
+# Migration Standards
+
+Every schema change requires:
+
+* Prisma migration
+* Code review
+* Rollback strategy (where practical)
+* Updated documentation
+
+Never modify historical migrations.
+
+Never edit production schemas manually.
+
+---
+
+# Seed Data
+
+Seed scripts should contain only deterministic reference data.
+
+Examples
+
+* Permissions
+* Roles
+* Opportunity types
+* Notification channels
+* Countries
+
+Business records must never be included in seed data.
+
+---
+
+# Performance Guidelines
+
+Avoid:
+
+* N+1 queries
+* SELECT *
+* Unbounded pagination
+* Redundant indexes
+
+Prefer:
+
+* Cursor pagination
+* Composite indexes
+* Read-optimized queries
+* Background processing for expensive operations
+
+---
+
+# Cloud Portability
+
+The schema must not depend on vendor-specific database features unless absolutely necessary.
+
+AdotKazi should support migration between:
+
+* Supabase PostgreSQL
+* Self-hosted PostgreSQL
+* Managed PostgreSQL services
+
+without requiring schema redesign.
+
+---
+
+# Documentation Requirements
+
+Every model should include documentation covering:
+
+* Purpose
+* Ownership
+* Relationships
+* Constraints
+* Lifecycle
+* Business rules
+* Domain events
+
+Schema documentation should remain synchronized with implementation.
+
+---
+
+# Future Evolution
+
+Schema changes must preserve backward compatibility whenever possible.
+
+When breaking changes are unavoidable:
+
+* Introduce new fields first.
+* Migrate data safely.
+* Deprecate old fields.
+* Remove obsolete structures only after successful migration.
+
+Schema evolution should prioritize stability for existing tenants.
+
+---
+
+# Definition of Done
+
+A schema change is complete only when:
+
+* Prisma model is updated.
+* Migration is created and reviewed.
+* Constraints are validated.
+* Indexes are appropriate.
+* Documentation is updated.
+* Tests pass.
+* Seed data is updated if necessary.
+* Performance impact is evaluated.
+* Security implications are reviewed.
+* Backward compatibility is considered.
+
+A schema change is not complete simply because it compiles.

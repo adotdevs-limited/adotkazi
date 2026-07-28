@@ -1,0 +1,534 @@
+# NOTIFICATION_SYSTEM.md
+
+# AdotKazi Notification System Architecture
+
+## Purpose
+
+This document defines the notification architecture for the AdotKazi platform.
+
+The Notification System is a centralized platform service responsible for delivering communications to users across multiple channels.
+
+Business domains never send notifications directly. Instead, they publish domain events, which are processed by the Notification Center.
+
+---
+
+# Goals
+
+The Notification System must be:
+
+* Event-driven
+* Reliable
+* Multi-channel
+* Tenant-aware
+* Scalable
+* Auditable
+* Extensible
+* Provider-agnostic
+
+---
+
+# Architecture Overview
+
+```text
+                   Domain Events
+                         │
+ ┌───────────────────────┼───────────────────────┐
+ │                       │                       │
+Recruitment             IPT                     AI
+ │                       │                       │
+ └───────────────────────┼───────────────────────┘
+                         │
+                  Notification Center
+                         │
+     ┌───────────┬───────────┬───────────┬───────────┐
+     │           │           │           │
+   Email     In-App     WhatsApp      SMS
+     │           │           │           │
+     └───────────┴───────────┴───────────┘
+```
+
+The Notification Center decides:
+
+* Whether a notification should be sent
+* Which recipients receive it
+* Which channels are used
+* Which template is rendered
+* When delivery occurs
+
+---
+
+# Notification Channels
+
+## Email
+
+Primary communication channel.
+
+Examples:
+
+* Application confirmation
+* Interview invitation
+* Offer letter
+* Password reset
+* Weekly IPT reminders
+* Organization invitations
+
+Provider (initial):
+
+* Resend
+
+Future:
+
+* Amazon SES
+* Postmark
+* SendGrid
+
+---
+
+## In-App Notifications
+
+Displayed inside the platform.
+
+Examples:
+
+* New application
+* Interview feedback submitted
+* Daily log approved
+* AI report ready
+* Organization invitation
+
+Supports:
+
+* Read status
+* Archive
+* Mark all as read
+
+---
+
+## WhatsApp
+
+Future integration.
+
+Examples:
+
+* Interview reminder
+* Placement reminder
+* Offer accepted confirmation
+
+Messages should be template-based where required.
+
+---
+
+## SMS
+
+Reserved for critical notifications.
+
+Examples:
+
+* MFA verification
+* Emergency maintenance
+* Time-sensitive reminders
+
+---
+
+## Push Notifications
+
+Future mobile support.
+
+Examples:
+
+* Interview starting soon
+* Report approved
+* Candidate assigned
+
+---
+
+# Notification Types
+
+Examples include:
+
+Recruitment
+
+* Application Submitted
+* Application Reviewed
+* Interview Scheduled
+* Interview Reminder
+* Offer Sent
+* Offer Accepted
+* Offer Rejected
+
+IPT
+
+* Placement Started
+* Daily Log Reminder
+* Weekly Report Reminder
+* Supervisor Feedback
+* Final Evaluation
+* Certificate Issued
+
+Platform
+
+* Invitation
+* Password Reset
+* Email Verification
+* MFA Enabled
+* Organization Suspended
+
+AI
+
+* AI Report Ready
+* Resume Summary Ready
+* Recommendation Available
+
+Administration
+
+* Maintenance Notice
+* Billing Reminder (future)
+* Subscription Expiring (future)
+
+---
+
+# Notification Lifecycle
+
+```text
+Domain Event
+
+↓
+
+Notification Created
+
+↓
+
+Recipient Resolution
+
+↓
+
+Preference Evaluation
+
+↓
+
+Template Rendering
+
+↓
+
+Channel Selection
+
+↓
+
+Delivery Queue
+
+↓
+
+Provider
+
+↓
+
+Delivery Result
+
+↓
+
+Audit Log
+```
+
+---
+
+# Domain Events
+
+Notifications are triggered by domain events.
+
+Examples:
+
+* ApplicationSubmitted
+* InterviewScheduled
+* PlacementStarted
+* DailyLogApproved
+* AIRequestCompleted
+* InvitationAccepted
+
+Business modules never call notification providers directly.
+
+---
+
+# Recipient Resolution
+
+Recipients may include:
+
+* Candidate
+* Recruiter
+* Hiring Manager
+* Interviewer
+* Supervisor
+* Organization Owner
+* Platform Administrator
+
+Recipient resolution is rule-based.
+
+---
+
+# User Preferences
+
+Users may configure:
+
+* Email notifications
+* In-app notifications
+* WhatsApp (future)
+* SMS (future)
+
+Users may also configure:
+
+* Immediate delivery
+* Daily digest
+* Weekly digest
+
+Critical security notifications cannot be disabled.
+
+---
+
+# Notification Templates
+
+Templates are versioned.
+
+Each template contains:
+
+* Identifier
+* Organization
+* Language
+* Subject
+* Body
+* Variables
+* Version
+
+Templates support branding.
+
+---
+
+# Multi-Language Support
+
+Templates support multiple languages.
+
+Initial languages:
+
+* English
+* Swahili
+
+Future languages may be added without changing business logic.
+
+---
+
+# Branding
+
+Organizations may customize:
+
+* Logo
+* Colors
+* Email sender
+* Footer
+* Signature
+* Reply-to address
+
+Branding is applied during template rendering.
+
+---
+
+# Delivery Queue
+
+Notifications are queued before delivery.
+
+Queue responsibilities:
+
+* Retry failed deliveries
+* Schedule delayed notifications
+* Batch notifications
+* Rate limiting
+
+Long-running deliveries never block user requests.
+
+---
+
+# Retry Policy
+
+Transient failures are retried automatically.
+
+Recommended strategy:
+
+* Exponential backoff
+* Maximum retry attempts
+* Dead-letter queue after repeated failure
+
+Permanent failures are logged without retry.
+
+---
+
+# Scheduled Notifications
+
+Examples:
+
+* Interview reminders
+* Weekly IPT reminders
+* Trial expiration reminders
+* Daily digest
+* Weekly digest
+
+Scheduling uses UTC internally with organization timezone conversion.
+
+---
+
+# Notification Preferences
+
+Preference hierarchy:
+
+1. Platform-required notifications
+2. Organization policies
+3. User preferences
+
+Organization-required notifications override user preferences when legally or operationally necessary.
+
+---
+
+# Read Status
+
+In-app notifications support:
+
+* Unread
+* Read
+* Archived
+
+Read timestamps are stored.
+
+---
+
+# Delivery Status
+
+Each delivery tracks:
+
+* Pending
+* Queued
+* Sending
+* Delivered
+* Failed
+* Cancelled
+
+Delivery history is retained for auditing.
+
+---
+
+# Security
+
+Notifications must:
+
+* Never expose cross-tenant data
+* Never include secrets
+* Use signed verification links
+* Expire sensitive links
+* Validate recipients
+
+---
+
+# Tenant Isolation
+
+Every notification includes:
+
+* organization_id
+* recipient_id
+
+Organizations cannot view notifications belonging to another organization.
+
+---
+
+# Audit Logging
+
+Every notification action is logged.
+
+Examples:
+
+* Created
+* Sent
+* Delivered
+* Opened (where supported)
+* Failed
+* Cancelled
+
+Audit records are immutable.
+
+---
+
+# Analytics
+
+Track:
+
+* Delivery rate
+* Open rate
+* Click rate
+* Failure rate
+* Bounce rate
+* Retry count
+* Provider latency
+
+Analytics are available per organization.
+
+---
+
+# Performance
+
+The Notification System should:
+
+* Queue all outbound messages
+* Batch digest notifications
+* Cache rendered templates where appropriate
+* Process deliveries asynchronously
+* Scale horizontally
+
+---
+
+# Provider Abstraction
+
+The platform communicates through provider adapters.
+
+Example:
+
+```text
+Notification Center
+
+↓
+
+Email Provider Interface
+
+↓
+
+Resend
+```
+
+Future providers can be added without changing business logic.
+
+---
+
+# Future Expansion
+
+The architecture supports:
+
+* Slack
+* Microsoft Teams
+* Discord
+* Telegram
+* Mobile push notifications
+* Browser push notifications
+* Voice calls
+* Rich notifications
+* Customer webhooks
+* Marketing campaigns (optional module)
+
+---
+
+# Definition of Done
+
+The Notification System is considered production-ready when:
+
+* Notifications are event-driven.
+* Business modules never call providers directly.
+* Multiple channels are supported.
+* Templates are versioned.
+* Branding is organization-aware.
+* User preferences are respected.
+* Deliveries are queued and retryable.
+* Audit logs are generated.
+* Analytics are collected.
+* Tenant isolation is enforced.

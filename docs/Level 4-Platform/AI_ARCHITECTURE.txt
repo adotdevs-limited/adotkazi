@@ -1,0 +1,464 @@
+# AI_ARCHITECTURE.md
+
+# AdotKazi AI Platform Architecture
+
+## Purpose
+
+This document defines the architecture of the AdotKazi AI Platform.
+
+AI is implemented as a shared platform service that supports every bounded context without embedding AI logic directly into business modules.
+
+The platform is designed to be:
+
+* Provider-agnostic
+* Modular
+* Secure
+* Observable
+* Cost-efficient
+* Scalable
+
+---
+
+# Vision
+
+AI should enhance human decision-making, not replace it.
+
+Examples include:
+
+* Writing better job descriptions
+* Matching candidates to opportunities
+* Summarizing CVs
+* Assisting recruiters
+* Helping IPT students write reports
+* Supporting supervisors with evaluations
+* Generating interview summaries
+* Producing recruitment insights
+* Powering recommendations
+
+All AI output is advisory unless explicitly confirmed by a user.
+
+---
+
+# High-Level Architecture
+
+```text
+                           AI Platform
+
+ ┌────────────────────────────────────────────────────┐
+ │                                                    │
+ │ Prompt Service                                     │
+ │ Context Builder                                    │
+ │ Recommendation Engine                              │
+ │ AI Orchestrator                                    │
+ │ Model Router                                       │
+ │ Embedding Service                                  │
+ │ Vector Search                                      │
+ │ Response Cache                                     │
+ │ Safety & Moderation                                │
+ │ Usage Tracking                                     │
+ │ Evaluation                                         │
+ │                                                    │
+ └────────────────────────────────────────────────────┘
+              ▲            ▲            ▲
+              │            │            │
+Recruitment   IPT   Communication   Analytics
+```
+
+---
+
+# AI Principles
+
+The AI platform must be:
+
+* Explainable
+* Auditable
+* Privacy-aware
+* Deterministic where possible
+* Cost-aware
+* Replaceable
+* Continuously improvable
+
+---
+
+# AI Capabilities
+
+## Recruitment
+
+* Job description generation
+* Candidate matching
+* Resume summarization
+* Skill extraction
+* Interview question generation
+* Interview summary generation
+* Candidate comparison
+* Offer drafting
+* Recruiter assistant
+
+---
+
+## IPT
+
+* Weekly report drafting
+* Final report assistance
+* Grammar correction
+* Formatting
+* Learning objective suggestions
+* Reflection assistance
+* Supervisor summary generation
+* Evaluation assistance
+
+AI never submits reports automatically.
+
+Students remain responsible for submitted work.
+
+---
+
+## Communication
+
+* Email drafting
+* Email rewriting
+* Tone adjustment
+* Translation
+* Notification generation
+
+---
+
+## Analytics
+
+Generate insights such as:
+
+* Hiring bottlenecks
+* Slow recruitment stages
+* Candidate source performance
+* Department trends
+* Placement completion trends
+
+---
+
+## Recommendation Engine
+
+Recommend:
+
+* Opportunities
+* Candidates
+* Supervisors
+* Learning resources
+* Skills to acquire
+* Similar applicants
+
+Recommendations improve through user feedback.
+
+---
+
+# AI Orchestrator
+
+The orchestrator coordinates every AI request.
+
+Responsibilities:
+
+* Authentication
+* Authorization
+* Context loading
+* Prompt generation
+* Model selection
+* Tool invocation
+* Safety validation
+* Response storage
+* Event publishing
+
+Business modules never call providers directly.
+
+---
+
+# Prompt Service
+
+Prompt templates are managed centrally.
+
+Templates contain:
+
+* Identifier
+* Version
+* Variables
+* Supported models
+* Temperature
+* Token limits
+
+Prompt versioning allows safe improvements without changing application code.
+
+---
+
+# Context Builder
+
+Before invoking a model, the platform gathers relevant context.
+
+Examples:
+
+Recruitment
+
+* Opportunity
+* Candidate profile
+* Skills
+* Previous interviews
+
+IPT
+
+* Placement
+* Daily logs
+* Weekly reports
+* Learning objectives
+
+Communication
+
+* Organization branding
+* Preferred tone
+* Language
+
+Only authorized data is included.
+
+---
+
+# Model Router
+
+The router selects the most appropriate model.
+
+Selection criteria include:
+
+* Task type
+* Cost
+* Latency
+* Context size
+* Required reasoning
+
+The routing strategy is configurable.
+
+---
+
+# AI Providers
+
+The architecture supports multiple providers.
+
+Primary:
+
+* OpenAI
+
+Future:
+
+* Anthropic
+* Google Gemini
+* Mistral
+* Open-source models
+
+Providers can be added or replaced without changing business modules.
+
+---
+
+# Embeddings
+
+Embeddings are used for:
+
+* Semantic search
+* Candidate similarity
+* Opportunity similarity
+* Knowledge retrieval
+* Recommendations
+
+Embeddings are generated asynchronously.
+
+---
+
+# Vector Search
+
+Vector storage powers Retrieval-Augmented Generation (RAG).
+
+Supported sources include:
+
+* Job descriptions
+* Resumes
+* IPT reports
+* Company knowledge
+* Policies
+* Templates
+
+Only organization-scoped data is searchable.
+
+---
+
+# Response Cache
+
+Cache reusable responses where appropriate.
+
+Examples:
+
+* Job description suggestions
+* Skill extraction
+* Resume summaries
+
+Cache invalidation occurs when source data changes.
+
+---
+
+# Human-in-the-Loop
+
+AI suggestions require user review before affecting business records.
+
+Examples:
+
+* Generated emails
+* Reports
+* Evaluations
+* Recommendations
+* Interview summaries
+
+Automatic execution is reserved for low-risk tasks.
+
+---
+
+# AI Usage Tracking
+
+Track:
+
+* Organization
+* User
+* Feature
+* Model
+* Tokens
+* Latency
+* Cost
+* Success
+* Failure
+
+Usage data supports analytics and future billing.
+
+---
+
+# Cost Management
+
+Implement:
+
+* Token limits
+* Monthly quotas
+* Organization budgets (future)
+* Prompt optimization
+* Caching
+* Streaming responses
+* Background processing
+
+Expensive operations should run asynchronously.
+
+---
+
+# Safety
+
+Every AI response passes through safety validation.
+
+Checks include:
+
+* Prompt injection
+* Harmful content
+* Personally identifiable information (PII)
+* Cross-tenant leakage
+* Unsupported output
+
+Unsafe responses are blocked or flagged.
+
+---
+
+# Tenant Isolation
+
+Every AI request includes:
+
+* organization_id
+* user_id
+
+Models must never receive data belonging to another organization.
+
+Cached responses and embeddings are tenant-aware.
+
+---
+
+# Privacy
+
+Sensitive information should be minimized before sending prompts to external providers.
+
+The platform should support provider-side data retention controls where available.
+
+Users must be informed when AI-generated content is being displayed.
+
+---
+
+# AI Events
+
+Examples:
+
+* AIRequestCreated
+* AIRequestCompleted
+* AIRequestFailed
+* RecommendationGenerated
+* ReportDraftGenerated
+* ResumeSummarized
+* CandidateMatched
+
+Events are consumed by Analytics and Administration.
+
+---
+
+# Observability
+
+Every AI request includes:
+
+* Request ID
+* Correlation ID
+* Organization ID
+* User ID
+* Prompt Version
+* Model
+* Duration
+* Token Usage
+* Estimated Cost
+
+---
+
+# Performance
+
+Target principles:
+
+* Stream responses where appropriate.
+* Queue long-running tasks.
+* Cache deterministic outputs.
+* Reuse embeddings.
+* Batch embedding requests.
+* Avoid duplicate AI calls.
+
+---
+
+# Future Capabilities
+
+The architecture supports future additions including:
+
+* Voice interviews
+* Speech-to-text
+* Text-to-speech
+* Multilingual assistants
+* Autonomous recruiter agents
+* Supervisor copilots
+* Resume parsing pipelines
+* Internal knowledge assistants
+* Fine-tuned models
+* Private LLM deployment
+
+---
+
+# Definition of Done
+
+The AI platform is considered production-ready when:
+
+* AI logic is centralized.
+* Business modules never call providers directly.
+* Prompt templates are versioned.
+* Context is securely constructed.
+* Model routing is configurable.
+* AI usage is tracked.
+* Costs are measurable.
+* Responses are moderated.
+* Tenant isolation is enforced.
+* AI remains replaceable without impacting business domains.

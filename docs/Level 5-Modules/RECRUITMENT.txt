@@ -1,0 +1,493 @@
+# RECRUITMENT.md
+
+# AdotKazi Recruitment Domain
+
+## Purpose
+
+The Recruitment domain manages the complete hiring lifecycle for organizations using AdotKazi.
+
+It enables organizations to create opportunities, receive applications, evaluate candidates, schedule interviews, issue offers, hire successful applicants, and manage recruitment workflows.
+
+The Recruitment domain is one of the core business domains of the platform.
+
+---
+
+# Goals
+
+The Recruitment domain must:
+
+* Support multiple opportunity types
+* Provide a modern Applicant Tracking System (ATS)
+* Scale to millions of applications
+* Support configurable hiring workflows
+* Be tenant-aware
+* Integrate with AI, Notifications, Analytics, and Workflow Engine
+
+---
+
+# Core Concept
+
+The central aggregate is **Opportunity**.
+
+Every recruitment process begins with an Opportunity.
+
+Opportunity types include:
+
+* Full-Time
+* Part-Time
+* Contract
+* Temporary
+* Internship
+* Graduate Program
+* Industrial Practical Training (IPT)
+* Field Training
+* Apprenticeship
+* Volunteer
+
+Future opportunity types can be added without schema redesign.
+
+---
+
+# Recruitment Lifecycle
+
+```text
+Opportunity Created
+        │
+        ▼
+Published
+        │
+        ▼
+Applications Received
+        │
+        ▼
+Screening
+        │
+        ▼
+Shortlisting
+        │
+        ▼
+Interview Process
+        │
+        ▼
+Assessment (Optional)
+        │
+        ▼
+Offer
+        │
+        ▼
+Accepted
+        │
+        ▼
+Hired
+        │
+        ▼
+Onboarding (Future)
+```
+
+---
+
+# Opportunity
+
+The Opportunity aggregate contains:
+
+* Basic Information
+* Department
+* Branch
+* Hiring Team
+* Employment Type
+* Work Arrangement
+* Skills
+* Salary
+* Benefits
+* Requirements
+* Application Settings
+* Workflow
+* Status
+
+An Opportunity belongs to exactly one organization.
+
+---
+
+# Opportunity Status
+
+Supported states:
+
+* Draft
+* Scheduled
+* Published
+* Paused
+* Closed
+* Archived
+
+Only Published opportunities are publicly visible.
+
+---
+
+# Application
+
+An Application represents a candidate's submission to one Opportunity.
+
+Each application includes:
+
+* Candidate
+* Resume
+* Cover Letter
+* Documents
+* Answers
+* Status
+* Source
+* Timeline
+
+A candidate may apply to multiple opportunities.
+
+---
+
+# Candidate
+
+A Candidate is a reusable profile owned by the applicant.
+
+The profile contains:
+
+* Personal Information
+* Contact Details
+* Education
+* Experience
+* Skills
+* Certifications
+* Languages
+* Portfolio
+* Resume
+* Documents
+* Preferences
+
+Candidates own their profile and reuse it across applications.
+
+---
+
+# Hiring Pipeline
+
+Every organization may configure its own recruitment pipeline.
+
+Example:
+
+```text
+Applied
+
+↓
+
+Screening
+
+↓
+
+Shortlisted
+
+↓
+
+HR Interview
+
+↓
+
+Technical Interview
+
+↓
+
+Assessment
+
+↓
+
+Final Interview
+
+↓
+
+Offer
+
+↓
+
+Hired
+```
+
+Pipeline stages are configurable per organization.
+
+---
+
+# Hiring Team
+
+Each opportunity has a hiring team.
+
+Roles include:
+
+* Recruiter
+* Hiring Manager
+* Interviewer
+* Observer
+
+Responsibilities:
+
+* Review applications
+* Leave notes
+* Schedule interviews
+* Submit evaluations
+* Approve offers
+
+---
+
+# Interviews
+
+Supported interview types:
+
+* Phone
+* Video
+* In-Person
+* Technical
+* Panel
+* Assessment Review
+
+Each interview records:
+
+* Schedule
+* Interviewers
+* Feedback
+* Score
+* Recommendation
+
+---
+
+# Assessments
+
+Organizations may attach assessments to opportunities.
+
+Assessment types:
+
+* Technical Test
+* Coding Challenge
+* Written Assignment
+* Portfolio Review
+* Questionnaire
+
+Assessments are optional.
+
+---
+
+# Offers
+
+An offer contains:
+
+* Position
+* Salary
+* Benefits
+* Start Date
+* Expiration Date
+* Status
+
+Offer statuses:
+
+* Draft
+* Sent
+* Accepted
+* Declined
+* Expired
+* Withdrawn
+
+---
+
+# Candidate Timeline
+
+Every application maintains a timeline.
+
+Examples:
+
+* Applied
+* Resume Reviewed
+* Interview Scheduled
+* Interview Completed
+* Assessment Submitted
+* Offer Sent
+* Offer Accepted
+
+Timeline events are immutable.
+
+---
+
+# Collaboration
+
+Recruitment supports collaboration through:
+
+* Notes
+* Mentions
+* Assignments
+* Internal comments
+* Activity history
+
+Internal collaboration is never visible to candidates.
+
+---
+
+# Candidate Communication
+
+Supported communications:
+
+* Application confirmation
+* Status updates
+* Interview invitations
+* Interview reminders
+* Assessment instructions
+* Offer emails
+* Rejection emails
+
+Notifications are handled by the Notification System.
+
+---
+
+# AI Integration
+
+The Recruitment domain integrates with the AI Platform.
+
+Capabilities include:
+
+* Job description generation
+* Resume summarization
+* Candidate matching
+* Skill extraction
+* Interview question generation
+* Interview summary generation
+* Candidate ranking
+* Offer drafting
+
+AI suggestions require human review before affecting business records.
+
+---
+
+# Search Integration
+
+Recruitment entities are indexed for search.
+
+Search supports:
+
+* Opportunities
+* Candidates
+* Skills
+* Applications
+
+Search remains tenant-aware.
+
+---
+
+# Analytics Integration
+
+Metrics include:
+
+* Applications per opportunity
+* Time to hire
+* Time in stage
+* Offer acceptance rate
+* Source effectiveness
+* Recruiter performance
+* Pipeline conversion
+* Hiring velocity
+
+Analytics consume recruitment domain events.
+
+---
+
+# Workflow Integration
+
+Organizations may automate recruitment workflows.
+
+Examples:
+
+* Notify recruiter when a new application arrives.
+* Schedule interview reminders.
+* Escalate applications waiting too long.
+* Send rejection email after final decision.
+
+Automation is managed by the Workflow Engine.
+
+---
+
+# Security
+
+The Recruitment domain enforces:
+
+* Tenant isolation
+* Role-based authorization
+* Resource ownership
+* Audit logging
+* Secure document access
+
+Recruiters cannot access another organization's recruitment data.
+
+---
+
+# Domain Events
+
+Examples:
+
+* OpportunityCreated
+* OpportunityPublished
+* OpportunityClosed
+* ApplicationSubmitted
+* ApplicationWithdrawn
+* CandidateShortlisted
+* InterviewScheduled
+* InterviewCompleted
+* AssessmentSubmitted
+* OfferCreated
+* OfferAccepted
+* OfferDeclined
+* CandidateHired
+
+These events are consumed by:
+
+* Notification System
+* Analytics
+* AI Platform
+* Workflow Engine
+* Search Platform
+
+---
+
+# Performance
+
+The Recruitment domain should:
+
+* Support cursor pagination.
+* Index frequently queried fields.
+* Use asynchronous processing for heavy tasks.
+* Cache read-heavy reference data.
+* Optimize candidate search.
+
+---
+
+# Future Expansion
+
+The architecture supports:
+
+* Internal hiring
+* Employee referrals
+* Campus recruitment
+* Recruitment agencies
+* Talent pools
+* Career fairs
+* Bulk hiring
+* Executive search
+* Candidate CRM
+* Onboarding
+* Background checks
+* Electronic signatures
+
+---
+
+# Definition of Done
+
+The Recruitment domain is considered production-ready when:
+
+* Opportunities support multiple opportunity types.
+* Organizations can configure hiring pipelines.
+* Candidates maintain reusable profiles.
+* Applications follow configurable workflows.
+* Interviews and assessments are managed.
+* Offers are fully tracked.
+* AI, Search, Analytics, Notifications, and Workflow Engine are integrated.
+* Tenant isolation is enforced.
+* Audit logging is enabled.
+* Domain events are published for all significant state changes.

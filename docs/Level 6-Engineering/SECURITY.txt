@@ -1,0 +1,767 @@
+# SECURITY.md
+
+# AdotKazi Security Architecture & Standards
+
+**Version:** 1.0
+**Status:** Platform Standard
+
+---
+
+# Purpose
+
+This document defines the security architecture, principles, policies, and implementation standards for the AdotKazi platform.
+
+Security is a platform-wide responsibility—not a single feature. Every domain, service, API, database, and user interaction must follow these standards.
+
+---
+
+# Security Objectives
+
+The platform must ensure:
+
+* Confidentiality
+* Integrity
+* Availability
+* Privacy
+* Accountability
+* Non-repudiation
+
+Every architectural decision should improve at least one of these objectives without unnecessarily compromising another.
+
+---
+
+# Security Principles
+
+AdotKazi follows these principles:
+
+* Zero Trust Architecture
+* Least Privilege
+* Defense in Depth
+* Secure by Default
+* Principle of Explicit Access
+* Privacy by Design
+* Security as Code
+* Fail Securely
+
+Security should be built into the platform, not added later.
+
+---
+
+# Security Architecture
+
+```text id="sec1"
+Client
+
+↓
+
+Authentication
+
+↓
+
+Authorization
+
+↓
+
+API Gateway
+
+↓
+
+Application Services
+
+↓
+
+Domain Services
+
+↓
+
+Repositories
+
+↓
+
+Database
+
+↓
+
+Encrypted Storage
+```
+
+Every request passes through authentication and authorization before business logic executes.
+
+---
+
+# Identity & Authentication
+
+Authentication is defined in `AUTHENTICATION.md`.
+
+Supported methods:
+
+* Email & Password
+* Magic Links
+* OAuth Providers
+* Multi-Factor Authentication (MFA)
+
+Future:
+
+* Enterprise SSO
+* SAML
+* SCIM
+* Passkeys (WebAuthn)
+
+Passwords are never stored in plaintext.
+
+---
+
+# Authorization
+
+Authorization is defined in `AUTHORIZATION.md`.
+
+The platform uses:
+
+* Role-Based Access Control (RBAC)
+* Permission-Based Access
+* Resource Ownership
+* Organization Membership
+* Tenant Isolation
+
+Every request must be authorized.
+
+---
+
+# Multi-Tenant Isolation
+
+Every organization is isolated.
+
+Every tenant-owned resource includes:
+
+```text id="sec2"
+organization_id
+```
+
+Isolation applies to:
+
+* Database queries
+* File storage
+* Search indexes
+* Analytics
+* Notifications
+* AI Context
+
+Cross-tenant access is prohibited unless explicitly supported by platform architecture.
+
+---
+
+# Data Classification
+
+Platform data is categorized as:
+
+## Public
+
+Examples:
+
+* Public opportunity listings
+* Careers pages
+* Help articles
+
+---
+
+## Internal
+
+Examples:
+
+* Organization settings
+* Analytics
+* Internal documentation
+
+---
+
+## Confidential
+
+Examples:
+
+* Candidate information
+* Resumes
+* Interview notes
+* AI prompts
+* Reports
+
+---
+
+## Restricted
+
+Examples:
+
+* Password hashes
+* API keys
+* OAuth secrets
+* Encryption keys
+* Access tokens
+
+Restricted data receives the highest level of protection.
+
+---
+
+# Password Security
+
+Requirements:
+
+* Strong hashing (Argon2id or bcrypt with appropriate cost factor)
+* Minimum password requirements
+* Password reset tokens
+* Password expiration optional (organization policy)
+* Password history (future)
+
+Passwords are never reversible.
+
+---
+
+# Multi-Factor Authentication
+
+Support:
+
+* Authenticator Apps (TOTP)
+* Email Verification
+* Backup Recovery Codes
+
+Future:
+
+* WebAuthn / Passkeys
+* Hardware Security Keys
+
+MFA is mandatory for:
+
+* Super Admins
+* Organization Owners
+
+Organizations may require MFA for all users.
+
+---
+
+# Session Management
+
+Requirements:
+
+* Secure session tokens
+* HttpOnly cookies (where applicable)
+* Secure cookie flag
+* SameSite protection
+* Session expiration
+* Device tracking
+* Session revocation
+
+Users may terminate active sessions.
+
+---
+
+# API Security
+
+Every API must support:
+
+* HTTPS only
+* Authentication
+* Authorization
+* Rate limiting
+* Input validation
+* Output sanitization
+* Structured errors
+
+Never expose internal stack traces.
+
+---
+
+# Input Validation
+
+Validate:
+
+* Body
+* Query parameters
+* Route parameters
+* Headers
+* Uploaded files
+
+Validation occurs before domain logic.
+
+---
+
+# Output Encoding
+
+Escape all user-generated content before rendering.
+
+Protect against:
+
+* Cross-Site Scripting (XSS)
+* HTML Injection
+* Script Injection
+
+---
+
+# SQL Injection Protection
+
+Requirements:
+
+* Parameterized queries
+* ORM/Query Builder protections
+* No string-concatenated SQL
+* Input validation
+
+Raw SQL should be reviewed carefully.
+
+---
+
+# Cross-Site Request Forgery (CSRF)
+
+Where applicable:
+
+* CSRF Tokens
+* SameSite Cookies
+* Origin Validation
+
+Public APIs using bearer tokens generally do not require CSRF protection.
+
+---
+
+# Cross-Site Scripting (XSS)
+
+Mitigations:
+
+* Output encoding
+* Content Security Policy (CSP)
+* Sanitized HTML
+* Trusted rendering components
+
+User HTML should be sanitized before storage or rendering.
+
+---
+
+# Content Security Policy
+
+Recommended directives:
+
+* Restrict script sources
+* Restrict frame sources
+* Restrict object embedding
+* Restrict inline scripts where practical
+
+CSP should evolve with the frontend architecture.
+
+---
+
+# File Upload Security
+
+Every upload must include:
+
+* File size validation
+* MIME type validation
+* Extension validation
+* Malware scanning integration
+* Secure storage
+* Access control
+
+Executable files are not permitted unless explicitly supported.
+
+---
+
+# Document Access
+
+Documents are accessed through signed URLs or authenticated endpoints.
+
+Direct storage bucket exposure is prohibited.
+
+Organizations cannot access another organization's files.
+
+---
+
+# Encryption
+
+## Data in Transit
+
+All traffic uses HTTPS/TLS.
+
+HTTP should redirect to HTTPS.
+
+---
+
+## Data at Rest
+
+Sensitive storage should be encrypted.
+
+Examples:
+
+* Documents
+* Backups
+* Database storage
+* Object storage
+
+---
+
+## Secrets
+
+Secrets include:
+
+* API Keys
+* OAuth Secrets
+* Encryption Keys
+* AI Keys
+* Database Credentials
+
+Secrets must never appear in source code.
+
+---
+
+# Secrets Management
+
+Secrets should be managed using secure secret stores or environment variables.
+
+Rotation should be supported without code changes.
+
+---
+
+# Logging
+
+Logs should include:
+
+* Timestamp
+* User ID
+* Organization ID
+* Request ID
+* IP Address (where appropriate)
+* Module
+* Severity
+
+Never log:
+
+* Passwords
+* Tokens
+* Secret Keys
+* Full payment data (future)
+
+Sensitive fields should be masked.
+
+---
+
+# Audit Logging
+
+Audit all privileged actions.
+
+Examples:
+
+* Login
+* Permission Changes
+* Role Changes
+* Organization Creation
+* Interview Decisions
+* Offer Approval
+* Feature Flag Changes
+
+Audit logs are immutable.
+
+---
+
+# Rate Limiting
+
+Protect:
+
+* Login
+* Registration
+* Password Reset
+* Public APIs
+* AI Requests
+* Search APIs
+
+Limits should be configurable.
+
+---
+
+# Brute Force Protection
+
+Mitigations:
+
+* Progressive delays
+* Temporary lockouts
+* CAPTCHA (future)
+* IP reputation (future)
+
+Suspicious activity should generate alerts.
+
+---
+
+# Bot Protection
+
+Protect public forms using:
+
+* Rate limiting
+* Honeypots
+* CAPTCHA integration (optional)
+* Spam detection
+
+Organizations may enable stricter controls.
+
+---
+
+# AI Security
+
+The AI Platform must:
+
+* Validate prompts
+* Filter sensitive data
+* Log AI usage
+* Prevent prompt injection where feasible
+* Enforce organization boundaries
+
+AI must never access data from another organization.
+
+---
+
+# Notification Security
+
+Protect against:
+
+* Email spoofing
+* Unauthorized notifications
+* Duplicate delivery
+* Sensitive content leakage
+
+Support:
+
+* SPF
+* DKIM
+* DMARC
+
+---
+
+# Search Security
+
+Search indexes must:
+
+* Respect permissions
+* Respect organization boundaries
+* Exclude restricted data
+* Filter deleted records
+
+Search should never leak unauthorized information.
+
+---
+
+# Infrastructure Security
+
+Requirements:
+
+* Private networking where appropriate
+* Firewall rules
+* Automatic backups
+* Monitoring
+* DDoS protection
+* Secure container configuration
+
+Infrastructure should be replaceable without changing application logic.
+
+---
+
+# Backup Security
+
+Backups should be:
+
+* Encrypted
+* Verified
+* Versioned
+* Access-controlled
+
+Restoration procedures should be tested regularly.
+
+---
+
+# Disaster Recovery
+
+The platform should support:
+
+* Automated backups
+* Point-in-time recovery
+* Disaster recovery plans
+* Recovery testing
+
+Recovery objectives should be documented.
+
+---
+
+# Dependency Security
+
+Every dependency should be:
+
+* Actively maintained
+* License compliant
+* Automatically scanned
+* Updated regularly
+
+Critical vulnerabilities should be patched promptly.
+
+---
+
+# Security Headers
+
+Recommended headers:
+
+* Content-Security-Policy
+* Strict-Transport-Security
+* X-Content-Type-Options
+* Referrer-Policy
+* Permissions-Policy
+* X-Frame-Options
+
+These should be configured centrally.
+
+---
+
+# Privacy
+
+The platform should support privacy regulations by design.
+
+Capabilities include:
+
+* Data export
+* Account deletion
+* Consent management
+* Configurable data retention
+
+Organization-specific compliance policies should be configurable.
+
+---
+
+# Monitoring
+
+Continuously monitor:
+
+* Failed logins
+* Suspicious activity
+* API abuse
+* Permission failures
+* High AI usage
+* Infrastructure health
+* File upload anomalies
+
+Alerts should integrate with platform monitoring.
+
+---
+
+# Incident Response
+
+Every security incident should support:
+
+* Detection
+* Containment
+* Investigation
+* Recovery
+* Post-incident review
+
+Critical incidents should generate immediate platform alerts.
+
+---
+
+# Security Testing
+
+Every release should include:
+
+* Static Application Security Testing (SAST)
+* Dependency scanning
+* Secret scanning
+* Authentication testing
+* Authorization testing
+* Multi-tenant isolation testing
+* Penetration testing (scheduled)
+* Vulnerability assessment
+
+Security tests are mandatory release gates.
+
+---
+
+# Compliance Readiness
+
+The architecture should be capable of supporting:
+
+* GDPR
+* SOC 2
+* ISO 27001
+* OWASP ASVS
+* OWASP Top 10
+
+Compliance features should be configuration-driven where possible.
+
+---
+
+# Security Responsibilities
+
+## Developers
+
+* Write secure code
+* Validate input
+* Follow coding standards
+* Avoid introducing vulnerabilities
+
+## Reviewers
+
+* Verify security implications
+* Check authorization
+* Check tenant isolation
+* Review sensitive logic
+
+## Platform Administrators
+
+* Monitor incidents
+* Rotate secrets
+* Manage access
+* Maintain infrastructure security
+
+Security is a shared responsibility.
+
+---
+
+# AI Coding Agent Rules
+
+AI-generated code must:
+
+* Never hardcode secrets.
+* Never bypass authorization.
+* Never bypass tenant isolation.
+* Use parameterized queries.
+* Validate all inputs.
+* Escape all outputs.
+* Generate secure defaults.
+* Follow the Security Architecture.
+* Include security-focused tests for sensitive features.
+
+Generated code must prioritize security over convenience.
+
+---
+
+# Future Expansion
+
+The architecture supports:
+
+* WebAuthn / Passkeys
+* Enterprise SSO
+* Hardware Security Keys
+* Advanced Threat Detection
+* SIEM Integration
+* Zero Trust Networking
+* Data Loss Prevention (DLP)
+* Security Operations Center (SOC)
+* Risk-Based Authentication
+* Continuous Authorization
+* Secret Rotation Automation
+
+---
+
+# Definition of Done
+
+A feature is considered secure when:
+
+* Authentication is enforced.
+* Authorization is verified.
+* Tenant isolation is maintained.
+* Input validation is implemented.
+* Sensitive data is encrypted.
+* Secrets are managed securely.
+* Audit logs are generated where required.
+* Security tests pass.
+* No critical vulnerabilities are introduced.
+* The implementation complies with the platform's security standards.
+
+Security is a mandatory quality attribute of every feature and service in the AdotKazi platform.

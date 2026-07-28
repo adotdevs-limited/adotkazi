@@ -1,0 +1,642 @@
+# API_SPECIFICATION.md
+
+# AdotKazi API Specification
+
+## Purpose
+
+This document defines the API architecture, standards, conventions, and design principles for the AdotKazi platform.
+
+The API is the primary interface for:
+
+* Web application
+* Mobile applications (future)
+* Third-party integrations
+* Internal services
+* AI services
+* Automation
+* Enterprise customers
+
+The API must remain stable, secure, scalable, and well-documented.
+
+---
+
+# API Philosophy
+
+The API should be:
+
+* API-first
+* REST-first
+* GraphQL-enabled where beneficial
+* Resource-oriented
+* Versioned
+* Predictable
+* Consistent
+* Backward compatible
+
+The API contract is considered part of the public platform.
+
+Breaking changes are avoided whenever possible.
+
+---
+
+# API Architecture
+
+```text
+                    Client
+                       │
+     ┌─────────────────┼─────────────────┐
+     │                 │                 │
+ REST API         GraphQL API      Webhooks
+     │                 │                 │
+     └─────────────────┼─────────────────┘
+                       │
+               Application Services
+                       │
+               Domain Services
+                       │
+                 PostgreSQL
+```
+
+---
+
+# REST vs GraphQL
+
+## REST
+
+REST is the default.
+
+Used for:
+
+* CRUD operations
+* Authentication
+* File uploads
+* Organization management
+* Recruitment
+* IPT
+* Communication
+* Administration
+* Integrations
+
+---
+
+## GraphQL
+
+GraphQL is optional.
+
+Used for:
+
+* Dashboards
+* Analytics
+* Complex reports
+* AI-assisted views
+* Candidate profile aggregation
+
+Business logic remains identical regardless of API.
+
+---
+
+# Base URL
+
+```text
+https://api.adotkazi.com/v1
+```
+
+Future:
+
+```text
+https://api.company.com
+```
+
+---
+
+# Versioning
+
+Versioning is URL-based.
+
+Example:
+
+```text
+/v1/jobs
+/v1/candidates
+/v1/applications
+```
+
+Major versions introduce breaking changes.
+
+Minor improvements remain backward compatible.
+
+---
+
+# Authentication
+
+Supported methods:
+
+* Secure session cookies
+* Bearer tokens (API)
+* OAuth tokens
+* Service account tokens (future)
+
+Authentication is required unless an endpoint is explicitly public.
+
+---
+
+# Authorization
+
+Every protected endpoint defines required permissions.
+
+Example:
+
+```
+POST /v1/opportunities
+
+Permission:
+
+opportunity.create
+```
+
+Authorization occurs before business logic.
+
+---
+
+# Organization Context
+
+Every authenticated request executes within one active organization.
+
+Organization context may be resolved using:
+
+* Session
+* Custom domain
+* Subdomain
+* Organization identifier
+
+Every request is tenant-scoped.
+
+---
+
+# Resource Naming
+
+Resources use plural nouns.
+
+Examples:
+
+```
+/organizations
+/opportunities
+/applications
+/candidates
+/interviews
+/placements
+/reports
+```
+
+Avoid verbs in URLs.
+
+Preferred:
+
+```
+POST /applications
+```
+
+Not:
+
+```
+POST /submitApplication
+```
+
+---
+
+# HTTP Methods
+
+GET
+
+Retrieve resources
+
+POST
+
+Create resources
+
+PUT
+
+Replace resources
+
+PATCH
+
+Partial updates
+
+DELETE
+
+Soft delete resources
+
+---
+
+# Status Codes
+
+Success
+
+* 200 OK
+* 201 Created
+* 202 Accepted
+* 204 No Content
+
+Client Errors
+
+* 400 Bad Request
+* 401 Unauthorized
+* 403 Forbidden
+* 404 Not Found
+* 409 Conflict
+* 422 Validation Error
+* 429 Too Many Requests
+
+Server Errors
+
+* 500 Internal Server Error
+* 502 Bad Gateway
+* 503 Service Unavailable
+
+---
+
+# Standard Response Format
+
+Success
+
+```json
+{
+  "success": true,
+  "data": {},
+  "meta": {},
+  "links": {}
+}
+```
+
+Error
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "The request could not be processed.",
+    "details": []
+  }
+}
+```
+
+---
+
+# Pagination
+
+Cursor-based pagination is the default.
+
+Response example:
+
+```json
+{
+  "data": [],
+  "meta": {
+    "nextCursor": "...",
+    "previousCursor": "...",
+    "hasNextPage": true
+  }
+}
+```
+
+Offset pagination should be avoided for large datasets.
+
+---
+
+# Filtering
+
+Standard query parameters:
+
+```
+?status=active
+?department=engineering
+?type=internship
+```
+
+Multiple values:
+
+```
+?status=active,published
+```
+
+---
+
+# Sorting
+
+Syntax:
+
+```
+?sort=created_at
+```
+
+Descending:
+
+```
+?sort=-created_at
+```
+
+Multiple:
+
+```
+?sort=department,-created_at
+```
+
+---
+
+# Searching
+
+Global search:
+
+```
+GET /search?q=frontend
+```
+
+Entity search:
+
+```
+GET /candidates?search=john
+```
+
+Search is backed by Meilisearch.
+
+---
+
+# File Uploads
+
+Uploads use multipart/form-data.
+
+Files are stored through the Document domain.
+
+Business entities reference document IDs only.
+
+---
+
+# Idempotency
+
+POST endpoints supporting retries accept:
+
+```
+Idempotency-Key
+```
+
+Required for:
+
+* Payments (future)
+* Application submission
+* Offer creation
+* Invitation sending
+
+---
+
+# Rate Limiting
+
+Default limits:
+
+* Authentication endpoints
+* Public application endpoints
+* AI endpoints
+* Search endpoints
+
+Rate limits are configurable per organization.
+
+---
+
+# Webhooks
+
+Organizations may subscribe to events.
+
+Examples:
+
+* application.created
+* interview.scheduled
+* offer.accepted
+* placement.completed
+
+Webhook payloads are signed.
+
+Failed deliveries are retried with exponential backoff.
+
+---
+
+# API Documentation
+
+REST documentation:
+
+* OpenAPI 3.1
+
+GraphQL documentation:
+
+* Schema introspection
+* SDL
+* Playground (non-production)
+
+SDKs may be generated automatically.
+
+---
+
+# Validation
+
+Validation occurs before business logic.
+
+Validation includes:
+
+* Required fields
+* Type validation
+* Business rules
+* Tenant ownership
+* Authorization
+
+Validation errors use HTTP 422.
+
+---
+
+# API Conventions
+
+* JSON only
+* UTF-8 encoding
+* ISO 8601 timestamps
+* UTC time
+* UUIDv7 identifiers
+* camelCase in JSON
+* snake_case in database
+
+---
+
+# Long-Running Operations
+
+Long-running tasks return:
+
+```
+202 Accepted
+```
+
+Examples:
+
+* AI processing
+* Report generation
+* Bulk imports
+* Search indexing
+
+Clients poll a status endpoint or receive webhook notifications.
+
+---
+
+# Security
+
+The API must implement:
+
+* HTTPS only
+* CSRF protection
+* CORS configuration
+* Rate limiting
+* Input validation
+* Output encoding
+* JWT/session validation
+* Audit logging
+* Tenant isolation
+
+Sensitive fields are never returned unless explicitly authorized.
+
+---
+
+# API Categories
+
+## Platform
+
+* Organizations
+* Users
+* Memberships
+* Roles
+* Permissions
+
+## Recruitment
+
+* Opportunities
+* Applications
+* Candidates
+* Interviews
+* Offers
+
+## IPT
+
+* Placements
+* Daily Logs
+* Reports
+* Evaluations
+* Certificates
+
+## AI
+
+* AI Requests
+* Recommendations
+* Models
+
+## Communication
+
+* Notifications
+* Templates
+* Preferences
+
+## Analytics
+
+* Dashboards
+* KPIs
+* Reports
+* Insights
+
+## Administration
+
+* Audit
+* Settings
+* Health
+* Support
+
+---
+
+# Deprecation Policy
+
+Deprecated endpoints remain supported for at least one major release.
+
+Responses include deprecation headers.
+
+Replacement endpoints are documented before removal.
+
+---
+
+# Observability
+
+Every request includes:
+
+* Request ID
+* Correlation ID
+* Tenant ID
+* User ID (if authenticated)
+
+These identifiers are propagated through logs, events, queues, and background jobs.
+
+---
+
+# Performance
+
+The API should:
+
+* Minimize database round trips.
+* Support HTTP caching where appropriate.
+* Use ETags for cache validation on read-only resources.
+* Enable compression.
+* Stream large downloads when practical.
+* Keep response payloads concise.
+
+---
+
+# Cloud Portability
+
+The API layer must remain independent of:
+
+* Supabase-specific APIs
+* Vercel-specific features
+* Vendor-specific authentication
+
+The platform should run unchanged on:
+
+* Vercel
+* VPS
+* Docker
+* Kubernetes
+* Managed cloud providers
+
+---
+
+# Future Expansion
+
+The API architecture is designed to support:
+
+* Public Developer API
+* Partner API
+* Enterprise API
+* API Gateway
+* GraphQL Federation
+* gRPC internal services
+* Event-driven APIs
+* Real-time subscriptions
+* Mobile SDKs
+* CLI tools
+
+---
+
+# Definition of Done
+
+The API is considered production-ready when:
+
+* Every endpoint is documented.
+* Authentication and authorization are enforced.
+* Organization context is validated.
+* Responses follow the standard format.
+* Validation is consistent.
+* Pagination, filtering, and sorting are standardized.
+* OpenAPI documentation is generated.
+* Audit logging is implemented.
+* Versioning is in place.
+* Breaking changes follow the deprecation policy.

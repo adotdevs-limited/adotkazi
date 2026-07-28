@@ -1,0 +1,710 @@
+# IPT_MODULE.md
+
+# AdotKazi Industrial Practical Training (IPT) Module
+
+## Purpose
+
+The IPT Module manages the complete lifecycle of Industrial Practical Training (IPT), Field Training, Attachments, Internships, and other structured learning placements.
+
+This module is one of the platform's major differentiators.
+
+Unlike traditional ATS systems that stop after placement, the IPT Module manages the entire training journey from application through completion and evaluation.
+
+The module is designed for:
+
+* Students
+* Training Institutions
+* Organizations
+* Supervisors
+* Coordinators
+
+---
+
+# Vision
+
+Create the most complete digital Industrial Practical Training platform in Africa.
+
+The platform should manage:
+
+* Opportunity Discovery
+* Applications
+* Placement
+* Supervision
+* Daily Activities
+* Weekly Reports
+* Final Reports
+* Evaluations
+* Completion
+* Certification
+
+within one unified system.
+
+---
+
+# Goals
+
+The IPT Module must:
+
+* Support Industrial Practical Training
+* Support Field Training
+* Support Internship Programs
+* Support Graduate Attachments
+* Support Apprenticeships
+* Support Multiple Institutions
+* Support Multiple Organizations
+* Be AI-Assisted
+* Be Mobile Friendly
+* Scale to millions of students
+
+---
+
+# Core Philosophy
+
+Traditional recruitment ends at:
+
+```text id="r1u7nd"
+Application
+
+↓
+
+Interview
+
+↓
+
+Hire
+```
+
+IPT continues beyond placement.
+
+```text id="sq4slj"
+Application
+
+↓
+
+Placement
+
+↓
+
+Supervisor Assignment
+
+↓
+
+Training
+
+↓
+
+Daily Logs
+
+↓
+
+Weekly Reports
+
+↓
+
+Final Report
+
+↓
+
+Evaluation
+
+↓
+
+Completion
+
+↓
+
+Certificate
+```
+
+The platform owns the entire journey.
+
+---
+
+# Primary Actors
+
+## Student
+
+Can:
+
+* Apply for opportunities
+* Maintain profile
+* Submit reports
+* Log activities
+* Upload documents
+* View evaluations
+* Track progress
+
+---
+
+## Supervisor
+
+Can:
+
+* Manage assigned students
+* Review reports
+* Approve activities
+* Leave feedback
+* Evaluate students
+* Generate recommendations
+
+---
+
+## Organization Coordinator
+
+Can:
+
+* Manage placements
+* Assign supervisors
+* Monitor progress
+* Review reports
+* Generate statistics
+
+---
+
+## Institution Coordinator
+
+Future feature.
+
+May:
+
+* Monitor students
+* Approve placements
+* Review evaluations
+* Verify completion
+
+---
+
+# IPT Lifecycle
+
+```text id="dhldxw"
+Opportunity Published
+
+↓
+
+Application
+
+↓
+
+Application Review
+
+↓
+
+Placement Approved
+
+↓
+
+Supervisor Assigned
+
+↓
+
+Training Begins
+
+↓
+
+Daily Activities
+
+↓
+
+Weekly Reports
+
+↓
+
+Final Report
+
+↓
+
+Evaluation
+
+↓
+
+Completion
+
+↓
+
+Certificate Issued
+```
+
+---
+
+# Opportunity Integration
+
+The IPT Module uses the Opportunity Engine.
+
+Opportunity Types:
+
+* Industrial Practical Training
+* Field Training
+* Internship
+* Attachment
+* Graduate Training
+
+Each opportunity can define:
+
+* Duration
+* Institution Requirements
+* Required Documents
+* Skills
+* Department
+* Supervisor Capacity
+
+---
+
+# Application Process
+
+Students may apply to IPT opportunities.
+
+Required fields may include:
+
+* Institution
+* Program
+* Level of Study
+* Year of Study
+* Resume
+* Cover Letter
+* Academic Transcript
+* Recommendation Letter
+
+Organizations may customize requirements.
+
+---
+
+# Placement
+
+Placement begins when an application is accepted.
+
+A Placement contains:
+
+* Student
+* Organization
+* Opportunity
+* Department
+* Branch
+* Supervisor
+* Start Date
+* End Date
+* Status
+
+A Placement is the central aggregate of the IPT Module.
+
+---
+
+# Placement Status
+
+Supported states:
+
+* Pending
+* Approved
+* Active
+* Suspended
+* Completed
+* Cancelled
+
+---
+
+# Supervisor Assignment
+
+Organizations assign supervisors.
+
+Supervisor responsibilities:
+
+* Guide students
+* Review work
+* Approve reports
+* Submit evaluations
+* Track attendance
+
+A supervisor may manage multiple students.
+
+Capacity limits may be configured.
+
+---
+
+# Daily Activity Logs
+
+Students submit daily activities.
+
+Fields:
+
+* Date
+* Activity Description
+* Skills Learned
+* Hours Worked
+* Attachments
+* Notes
+
+Daily logs create a permanent training record.
+
+---
+
+# Daily Log Workflow
+
+```text id="x0j7bx"
+Submitted
+
+↓
+
+Supervisor Review
+
+↓
+
+Approved
+
+or
+
+Returned For Revision
+```
+
+---
+
+# Weekly Reports
+
+Students submit weekly reports.
+
+Report contents:
+
+* Activities Performed
+* Skills Acquired
+* Challenges Encountered
+* Solutions Implemented
+* Lessons Learned
+* Supervisor Comments
+
+Organizations may customize templates.
+
+---
+
+# AI-Assisted Weekly Reports
+
+Students may use AI assistance.
+
+Capabilities:
+
+* Grammar correction
+* Formatting
+* Structure suggestions
+* Reflection enhancement
+* Professional writing assistance
+
+AI never submits reports automatically.
+
+Students remain responsible for final submissions.
+
+---
+
+# Final Report
+
+The final report summarizes the entire placement.
+
+Sections may include:
+
+* Introduction
+* Organization Overview
+* Objectives
+* Activities
+* Skills Acquired
+* Challenges
+* Recommendations
+* Conclusion
+
+Templates may vary by institution.
+
+---
+
+# AI Report Assistant
+
+The AI Platform can assist with:
+
+* Report drafting
+* Formatting
+* Grammar
+* Executive summaries
+* Skill extraction
+* Learning outcome analysis
+
+All generated content requires student review.
+
+---
+
+# Attendance Tracking
+
+Organizations may track attendance.
+
+Methods:
+
+* Manual
+* QR Code
+* Biometric Integration (future)
+* GPS Verification (future)
+
+Attendance contributes to evaluations.
+
+---
+
+# Evaluations
+
+Supervisors evaluate students.
+
+Evaluation categories:
+
+* Professionalism
+* Communication
+* Technical Skills
+* Problem Solving
+* Teamwork
+* Attendance
+* Initiative
+* Overall Performance
+
+Organizations may customize criteria.
+
+---
+
+# Evaluation Workflow
+
+```text id="6lz3g0"
+Draft
+
+↓
+
+Submitted
+
+↓
+
+Locked
+
+↓
+
+Archived
+```
+
+Submitted evaluations become immutable.
+
+---
+
+# Feedback System
+
+Supervisors may provide:
+
+* Daily Feedback
+* Weekly Feedback
+* Final Feedback
+
+Feedback remains attached to the placement record.
+
+---
+
+# Completion
+
+A placement is completed when:
+
+* Training period ends
+* Required reports submitted
+* Evaluations completed
+* Supervisor approval granted
+
+Completion triggers certification workflows.
+
+---
+
+# Certificate Generation
+
+The platform may generate:
+
+* Completion Certificates
+* Training Certificates
+* Recommendation Letters
+
+Generated documents are stored through the Document Service.
+
+---
+
+# Recommendation Letters
+
+Supervisors may create:
+
+* Recommendation letters
+* Endorsements
+* References
+
+Templates may be customized by organizations.
+
+---
+
+# Skills Tracking
+
+The system tracks:
+
+* Skills acquired
+* Skills practiced
+* Competencies demonstrated
+* Learning outcomes
+
+Skills contribute to candidate profiles.
+
+---
+
+# Student Portfolio
+
+Students build a portfolio automatically.
+
+Portfolio may include:
+
+* Placements
+* Reports
+* Projects
+* Skills
+* Certificates
+* Evaluations
+
+Future employers may view approved portfolio items.
+
+---
+
+# Analytics
+
+Metrics include:
+
+* Active Placements
+* Completion Rate
+* Report Submission Rate
+* Supervisor Performance
+* Institution Distribution
+* Skill Development Trends
+* Placement Success Rate
+
+Analytics are tenant-aware.
+
+---
+
+# AI Integration
+
+The IPT Module integrates with:
+
+* AI Report Assistant
+* Recommendation Engine
+* Skill Extraction
+* Evaluation Assistance
+* Learning Insights
+
+AI outputs remain advisory.
+
+---
+
+# Notification Integration
+
+Examples:
+
+* Placement Approved
+* Supervisor Assigned
+* Daily Log Reminder
+* Weekly Report Reminder
+* Report Approved
+* Evaluation Submitted
+* Certificate Ready
+
+Notifications are handled by the Notification System.
+
+---
+
+# Search Integration
+
+Searchable entities:
+
+* Placements
+* Reports
+* Students
+* Supervisors
+* Skills
+* Certificates
+
+Search remains tenant-aware.
+
+---
+
+# Workflow Integration
+
+Examples:
+
+* Daily log approval workflow
+* Weekly report review workflow
+* Evaluation workflow
+* Completion workflow
+* Certificate workflow
+
+Automation is managed by the Workflow Engine.
+
+---
+
+# Security
+
+The IPT Module enforces:
+
+* Tenant isolation
+* Supervisor permissions
+* Student ownership
+* Secure document access
+* Audit logging
+
+Students cannot access another student's records.
+
+---
+
+# Domain Events
+
+Examples:
+
+* PlacementCreated
+* PlacementActivated
+* SupervisorAssigned
+* DailyLogSubmitted
+* DailyLogApproved
+* WeeklyReportSubmitted
+* WeeklyReportApproved
+* FinalReportSubmitted
+* EvaluationSubmitted
+* PlacementCompleted
+* CertificateIssued
+
+Events are consumed by:
+
+* Analytics
+* Notifications
+* AI Platform
+* Workflow Engine
+* Search Platform
+
+---
+
+# Future Expansion
+
+The architecture supports:
+
+* University Integrations
+* Government IPT Programs
+* Multi-Institution Management
+* Competency Frameworks
+* Learning Outcome Tracking
+* Digital Logbooks
+* Mobile Application
+* QR Attendance
+* Biometric Attendance
+* E-Signatures
+* Public Verification of Certificates
+
+---
+
+# Definition of Done
+
+The IPT Module is considered production-ready when:
+
+* Students can apply for IPT opportunities.
+* Placements are managed through a structured lifecycle.
+* Supervisors can monitor and evaluate students.
+* Daily logs and weekly reports are supported.
+* Final reports are managed digitally.
+* AI assists report creation and evaluation.
+* Certificates can be generated.
+* Notifications, Search, Analytics, and Workflow Engine are integrated.
+* Domain events are published.
+* Tenant isolation is enforced.
+* The architecture supports future institutional integrations.

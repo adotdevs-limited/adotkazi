@@ -1,0 +1,529 @@
+# INTERVIEWS.md
+
+# AdotKazi Interview Management Domain
+
+## Purpose
+
+The Interview Management Domain manages the complete interview lifecycle for all opportunity types on the AdotKazi platform.
+
+It provides a flexible, configurable interview system that supports recruitment, internships, graduate programs, apprenticeships, and future opportunity types.
+
+The Interview domain owns interview scheduling, interviewer assignments, feedback collection, scorecards, evaluations, and interview decisions.
+
+---
+
+# Vision
+
+Create a modern, collaborative interview platform that enables organizations to conduct structured, fair, and data-driven interviews while integrating seamlessly with Recruitment, AI, Notifications, Analytics, and the Workflow Engine.
+
+---
+
+# Goals
+
+The Interview domain must:
+
+* Support unlimited interview stages
+* Support multiple interview types
+* Support panel interviews
+* Support structured scorecards
+* Support interviewer collaboration
+* Integrate with calendars
+* Integrate with AI
+* Scale to millions of interviews
+* Be fully tenant-aware
+
+---
+
+# Core Philosophy
+
+Interviews are independent domain objects.
+
+Applications move through interview stages, but interviews maintain their own lifecycle, scheduling, participants, feedback, recordings, and outcomes.
+
+---
+
+# Interview Lifecycle
+
+```text
+Application Qualified
+
+↓
+
+Interview Planned
+
+↓
+
+Interview Scheduled
+
+↓
+
+Invitations Sent
+
+↓
+
+Interview Confirmed
+
+↓
+
+Interview Conducted
+
+↓
+
+Feedback Submitted
+
+↓
+
+Decision Recorded
+
+↓
+
+Next Stage or Completed
+```
+
+---
+
+# Interview Aggregate
+
+The Interview aggregate is responsible for:
+
+* Schedule
+* Stage
+* Type
+* Participants
+* Meeting Details
+* Feedback
+* Scorecards
+* Outcome
+* Attachments
+* Audit Trail
+
+---
+
+# Interview Types
+
+Supported interview types:
+
+* Phone Interview
+* Video Interview
+* In-Person Interview
+* HR Interview
+* Technical Interview
+* Manager Interview
+* Executive Interview
+* Panel Interview
+* Group Interview
+* Assessment Review
+* Portfolio Review
+* Culture Fit Interview
+
+Organizations may create custom interview types.
+
+---
+
+# Interview Stages
+
+Examples:
+
+* HR Screening
+* Technical Round
+* Team Interview
+* Manager Interview
+* Executive Review
+* Final Interview
+
+Stages belong to an organization's recruitment workflow.
+
+---
+
+# Scheduling
+
+Recruiters can:
+
+* Schedule interviews
+* Reschedule interviews
+* Cancel interviews
+* Duplicate interview schedules
+* Send invitations
+
+Scheduling includes:
+
+* Date
+* Time
+* Duration
+* Timezone
+* Location
+* Meeting Link
+* Notes
+
+---
+
+# Timezone Support
+
+The platform stores all interview times in UTC.
+
+Users view interview times in their preferred timezone.
+
+Organizations may configure a default timezone.
+
+---
+
+# Participants
+
+Participants include:
+
+* Candidate
+* Recruiter
+* Hiring Manager
+* Interviewer
+* Observer
+* Coordinator
+
+Each participant has a defined role.
+
+---
+
+# Panel Interviews
+
+Panel interviews support:
+
+* Multiple interviewers
+* Individual scorecards
+* Shared notes
+* Consensus decisions
+* Independent evaluations
+
+Each interviewer submits feedback independently.
+
+---
+
+# Calendar Integration
+
+Initial support:
+
+* Google Calendar
+
+Future support:
+
+* Microsoft Outlook Calendar
+* Apple Calendar
+* CalDAV
+
+Capabilities:
+
+* Create events
+* Update events
+* Cancel events
+* Availability synchronization
+
+---
+
+# Meeting Providers
+
+Initial integrations:
+
+* Google Meet
+* Zoom
+* WhatsApp (meeting reminders only)
+
+Future:
+
+* Microsoft Teams
+* Webex
+
+Meeting links may be generated automatically where supported.
+
+---
+
+# Candidate Confirmation
+
+Candidates may:
+
+* Accept interview
+* Request reschedule
+* Decline interview
+
+Organizations define rescheduling rules.
+
+---
+
+# Availability Management
+
+Interviewers may configure:
+
+* Working hours
+* Preferred interview times
+* Timezone
+* Unavailable dates
+* Vacation periods
+
+The scheduler should avoid conflicts automatically.
+
+---
+
+# Scorecards
+
+Organizations create reusable scorecards.
+
+Example categories:
+
+* Communication
+* Technical Knowledge
+* Problem Solving
+* Teamwork
+* Leadership
+* Culture Fit
+* Professionalism
+
+Each category supports:
+
+* Numeric score
+* Comments
+* Recommendation
+
+---
+
+# Feedback
+
+Interview feedback includes:
+
+* Overall rating
+* Strengths
+* Weaknesses
+* Notes
+* Recommendation
+* Hiring decision
+
+Feedback is private and visible only to authorized users.
+
+---
+
+# Interview Outcomes
+
+Supported outcomes:
+
+* Strong Hire
+* Hire
+* Neutral
+* Do Not Hire
+* Strong Do Not Hire
+
+Organizations may customize outcome labels.
+
+---
+
+# Decision Rules
+
+Organizations may configure:
+
+* Majority vote
+* Hiring manager approval
+* Recruiter approval
+* Weighted score
+* Manual decision
+
+The Interview domain stores recommendations but does not automatically hire candidates.
+
+---
+
+# Interview Notes
+
+Interviewers may create:
+
+* Private notes
+* Shared notes
+* Action items
+
+Private notes remain visible only to the author unless shared.
+
+---
+
+# Attachments
+
+Supported attachments:
+
+* Candidate work samples
+* Technical assessments
+* Presentation slides
+* Supporting documents
+
+Files are managed through the Document Service.
+
+---
+
+# AI Integration
+
+The Interview domain integrates with the AI Platform.
+
+Capabilities include:
+
+* Interview question generation
+* Interview guide generation
+* Candidate summary
+* Resume summary
+* Interview transcript summary
+* Feedback drafting
+* Competency analysis
+* Interview preparation assistance
+
+AI suggestions require human review.
+
+---
+
+# Recording Support
+
+Future support:
+
+* Video recording
+* Audio recording
+* Automatic transcription
+* Speaker identification
+
+Organizations control recording policies.
+
+---
+
+# Notifications
+
+Examples:
+
+* Interview scheduled
+* Interview reminder
+* Interview rescheduled
+* Interview cancelled
+* Feedback pending
+* Feedback overdue
+
+Notifications are managed by the Notification System.
+
+---
+
+# Search Integration
+
+Searchable entities include:
+
+* Interviews
+* Interviewers
+* Candidates
+* Scorecards
+* Interview types
+
+Search remains organization-aware.
+
+---
+
+# Analytics
+
+Metrics include:
+
+* Interviews scheduled
+* Interview completion rate
+* Interview no-show rate
+* Average interview duration
+* Feedback completion rate
+* Interviewer workload
+* Time between stages
+* Hiring conversion by interview stage
+
+Analytics consume Interview domain events.
+
+---
+
+# Workflow Integration
+
+Example automations:
+
+* Notify candidate after scheduling.
+* Send reminder 24 hours before interview.
+* Escalate overdue feedback.
+* Move application to next stage after all scorecards are submitted.
+* Generate AI interview summary after completion.
+
+Automation is managed by the Workflow Engine.
+
+---
+
+# Security
+
+The Interview domain enforces:
+
+* Tenant isolation
+* Role-based authorization
+* Participant permissions
+* Secure meeting access
+* Audit logging
+
+Only authorized participants may access interview information.
+
+---
+
+# Domain Events
+
+Examples:
+
+* InterviewCreated
+* InterviewScheduled
+* InterviewRescheduled
+* InterviewCancelled
+* CandidateConfirmedInterview
+* CandidateDeclinedInterview
+* InterviewStarted
+* InterviewCompleted
+* FeedbackSubmitted
+* ScorecardCompleted
+* InterviewDecisionRecorded
+
+These events are consumed by:
+
+* Workflow Engine
+* Notification System
+* AI Platform
+* Analytics
+* Search Platform
+
+---
+
+# Performance
+
+The Interview domain should:
+
+* Support high-volume scheduling.
+* Prevent double booking.
+* Cache interviewer availability.
+* Process reminders asynchronously.
+* Generate meeting links in background jobs where possible.
+
+---
+
+# Future Expansion
+
+The architecture supports:
+
+* AI Interview Copilot
+* Live Interview Assistance
+* Automatic Transcription
+* Sentiment Analysis
+* Voice Analysis
+* Coding Interviews
+* Whiteboard Interviews
+* Pair Programming Sessions
+* Candidate Self-Scheduling
+* Interview Marketplace
+* Blind Interviews
+* Structured Competency Frameworks
+
+---
+
+# Definition of Done
+
+The Interview domain is considered production-ready when:
+
+* Organizations can configure interview stages.
+* Interviews support multiple types and participants.
+* Panel interviews are fully supported.
+* Calendar integrations are available.
+* Scorecards and structured feedback are implemented.
+* AI assists interview preparation and summarization.
+* Notifications, Search, Analytics, and Workflow Engine are integrated.
+* Domain events are published for all significant actions.
+* Tenant isolation is enforced.
+* The architecture supports future real-time interview capabilities.

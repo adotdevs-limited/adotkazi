@@ -1,0 +1,508 @@
+# ANALYTICS_ENTITIES.md
+
+# Analytics Entity Specifications
+
+## Purpose
+
+The Analytics bounded context provides business intelligence, reporting, dashboards, KPIs, and AI-powered insights across the AdotKazi platform.
+
+Rather than querying operational tables directly, Analytics is powered by immutable events and aggregated metrics.
+
+This architecture provides:
+
+* Better performance
+* Historical accuracy
+* Time-series analysis
+* AI insights
+* Scalable reporting
+
+Analytics is read-heavy and optimized for business intelligence.
+
+---
+
+# Analytics Philosophy
+
+Analytics must be:
+
+* Event-driven
+* Immutable
+* Near real-time
+* Tenant-aware
+* Scalable
+* Explainable
+* AI-ready
+
+Operational databases remain optimized for transactions.
+
+Analytics databases remain optimized for reporting.
+
+---
+
+# Entity Relationships
+
+```text
+Analytics
+│
+├── AnalyticsEvent
+│
+├── MetricDefinition
+│
+├── MetricSnapshot
+│
+├── Dashboard
+│   ├── DashboardWidget
+│
+├── Report
+│
+├── ReportSchedule
+│
+├── Insight
+│
+├── KPI
+│
+└── DataExport
+```
+
+---
+
+# AnalyticsEvent
+
+## Purpose
+
+Represents an immutable business event.
+
+Every significant action across AdotKazi generates an analytics event.
+
+Examples:
+
+* User Registered
+* Opportunity Published
+* Application Submitted
+* Interview Scheduled
+* Candidate Hired
+* Placement Started
+* Certificate Issued
+
+---
+
+## Aggregate Root
+
+Yes
+
+---
+
+## Owner
+
+Platform
+
+---
+
+## Fields
+
+| Field           | Type      |
+| --------------- | --------- |
+| id              | UUIDv7    |
+| organization_id | UUID      |
+| event_name      | String    |
+| entity_type     | String    |
+| entity_id       | UUID      |
+| actor_user_id   | UUID      |
+| occurred_at     | Timestamp |
+| payload         | JSONB     |
+
+---
+
+## Business Rules
+
+Analytics events are immutable.
+
+Events are append-only.
+
+Events must never be updated.
+
+---
+
+## Domain Events
+
+Analytics events originate from every bounded context.
+
+---
+
+# MetricDefinition
+
+## Purpose
+
+Defines reusable business metrics.
+
+Examples
+
+* Time to Hire
+* Offer Acceptance Rate
+* Applications per Opportunity
+* Placement Completion Rate
+* AI Usage
+
+---
+
+## Fields
+
+* id
+* key
+* name
+* description
+* aggregation_method
+* refresh_interval
+
+---
+
+## Business Rules
+
+Metric definitions are platform-owned.
+
+Organizations consume metrics.
+
+---
+
+# MetricSnapshot
+
+## Purpose
+
+Stores precomputed metric values.
+
+---
+
+## Fields
+
+| Field                | Type      |
+| -------------------- | --------- |
+| id                   | UUIDv7    |
+| organization_id      | UUID      |
+| metric_definition_id | UUID      |
+| value                | Decimal   |
+| period_start         | Date      |
+| period_end           | Date      |
+| calculated_at        | Timestamp |
+
+---
+
+## Business Rules
+
+Snapshots are immutable.
+
+Historical snapshots remain available.
+
+---
+
+# Dashboard
+
+## Purpose
+
+Represents a configurable analytics dashboard.
+
+---
+
+## Fields
+
+* id
+* organization_id
+* name
+* description
+* visibility
+* created_by
+
+---
+
+## Relationships
+
+Has Many
+
+* Dashboard Widgets
+
+---
+
+## Business Rules
+
+Organizations may create unlimited dashboards.
+
+---
+
+# DashboardWidget
+
+## Purpose
+
+Represents one visualization inside a dashboard.
+
+---
+
+## Fields
+
+* dashboard_id
+* widget_type
+* metric_definition_id
+* title
+* configuration
+* position
+
+---
+
+## Supported Widgets
+
+* KPI Card
+* Line Chart
+* Bar Chart
+* Pie Chart
+* Funnel
+* Table
+* Heatmap
+* Leaderboard
+
+---
+
+# KPI
+
+## Purpose
+
+Represents important performance indicators.
+
+Examples
+
+Recruitment
+
+* Time to Hire
+* Offer Acceptance
+* Interview Conversion
+* Candidate Satisfaction
+
+Internship
+
+* Placement Completion
+* Supervisor Performance
+* Report Submission Rate
+
+Platform
+
+* Active Organizations
+* AI Usage
+* API Usage
+
+---
+
+## Fields
+
+* organization_id
+* name
+* target
+* current_value
+* trend
+* last_updated
+
+---
+
+# Report
+
+## Purpose
+
+Represents generated business reports.
+
+---
+
+## Fields
+
+| Field           | Type      |
+| --------------- | --------- |
+| id              | UUIDv7    |
+| organization_id | UUID      |
+| title           | String    |
+| report_type     | Enum      |
+| generated_by    | UUID      |
+| document_id     | UUID      |
+| generated_at    | Timestamp |
+
+---
+
+## Supported Reports
+
+* Recruitment
+* Internship
+* AI Usage
+* Recruiter Performance
+* Opportunity Performance
+* Compliance
+* Executive Summary
+
+---
+
+# ReportSchedule
+
+## Purpose
+
+Automates recurring reports.
+
+---
+
+## Fields
+
+* organization_id
+* report_id
+* frequency
+* recipients
+* next_run
+* active
+
+---
+
+## Supported Frequencies
+
+* Daily
+* Weekly
+* Monthly
+* Quarterly
+* Yearly
+
+---
+
+# Insight
+
+## Purpose
+
+Represents AI-generated analytical insights.
+
+Examples
+
+* Recruitment bottlenecks
+* Hiring trends
+* Candidate quality
+* Interview effectiveness
+* Placement risks
+
+---
+
+## Fields
+
+* organization_id
+* title
+* description
+* confidence
+* recommendation
+* created_at
+
+---
+
+## Business Rules
+
+Insights are recommendations only.
+
+Users remain responsible for decisions.
+
+---
+
+# DataExport
+
+## Purpose
+
+Represents exported analytics data.
+
+---
+
+## Fields
+
+* organization_id
+* export_type
+* format
+* generated_by
+* document_id
+* expires_at
+
+---
+
+## Supported Formats
+
+* CSV
+* XLSX
+* PDF
+* JSON
+
+---
+
+# Shared Analytics Standards
+
+All analytics entities must:
+
+* Enforce tenant isolation.
+* Generate immutable records where appropriate.
+* Use UTC timestamps.
+* Support asynchronous processing.
+* Respect feature flags.
+* Support AI-generated insights.
+
+---
+
+# Analytics Pipeline
+
+```text
+Business Action
+        │
+        ▼
+Analytics Event
+        │
+        ▼
+Queue
+        │
+        ▼
+Aggregation Worker
+        │
+        ▼
+Metric Snapshots
+        │
+        ▼
+Dashboards
+        │
+        ▼
+Reports
+        │
+        ▼
+AI Insights
+```
+
+---
+
+# Performance Considerations
+
+* Never query operational tables for dashboard rendering.
+* Precompute expensive metrics.
+* Cache frequently accessed dashboards.
+* Partition analytics events by date where appropriate.
+* Archive historical events according to retention policies.
+* Process analytics asynchronously.
+
+---
+
+# Security
+
+* Analytics data must respect tenant boundaries.
+* Dashboard permissions follow role-based access control.
+* Sensitive reports require explicit authorization.
+* Exported reports may have expiration dates.
+* Personally identifiable information should be minimized in aggregated analytics.
+
+---
+
+# Future Expansion
+
+The Analytics bounded context is designed to support:
+
+* Real-time dashboards
+* Predictive analytics
+* AI forecasting
+* Workforce planning
+* Recruitment benchmarking
+* University performance analytics
+* Custom report builder
+* Embedded analytics
+* Executive scorecards
+* Public APIs
+* BI integrations (Power BI, Tableau, Looker)
+* Data warehouse synchronization
+* Cross-tenant benchmarking (anonymized)
+* Machine learning models
+* Executive AI assistant

@@ -1,0 +1,537 @@
+# BRAND_SYSTEM.md
+
+# ADOTDEVS Product Design System
+
+## Purpose
+
+The ADOTDEVS Product Design System is the single source of truth for the design, user experience, interaction patterns, and visual language across every product built by ADOTDEVS.
+
+Every product—including AdotKazi—must extend this design system rather than creating its own independent design language.
+
+Consistency across products is considered a core product feature.
+
+---
+
+# Design Philosophy
+
+Design should make powerful software feel simple.
+
+Every screen should communicate clarity, confidence, and professionalism while reducing cognitive load.
+
+Users should immediately understand:
+
+* Where they are.
+* What they can do.
+* What happens next.
+* What requires attention.
+
+Good design removes friction instead of adding decoration.
+
+---
+
+# Product Family
+
+Every product belongs to the ADOTDEVS ecosystem.
+
+Example:
+
+ADOTDEVS
+
+├── AdotKazi
+
+├── AdotCRM
+
+├── AdotERP
+
+├── AdotLearn
+
+├── AdotSupport
+
+Each product has its own:
+
+* Logo
+* Product icon
+* Favicon
+* Product name
+
+Every product shares:
+
+* Typography
+* Colors
+* Motion
+* Components
+* Accessibility
+* Layout system
+* Design tokens
+* Writing style
+* Interaction patterns
+
+Products should feel like members of one family.
+
+---
+
+# Visual Identity
+
+The ADOTDEVS visual language prioritizes:
+
+* Simplicity
+* Precision
+* Consistency
+* Accessibility
+* Professionalism
+
+Interfaces should appear modern without relying on visual trends that age quickly.
+
+Avoid excessive decoration.
+
+Whitespace is part of the design.
+
+---
+
+# Color System
+
+The official ADOTDEVS design tokens are the foundation for every interface.
+
+Primary accent:
+
+Purple (#7C3AED)
+
+Do not introduce additional primary brand colors.
+
+Semantic colors should remain consistent:
+
+* Success
+* Warning
+* Error
+* Information
+
+Color should communicate meaning, not decoration.
+
+---
+
+# Typography
+
+Use the official ADOTDEVS typography system.
+
+Typography should create hierarchy through:
+
+* Size
+* Weight
+* Spacing
+
+Never rely on color alone to create emphasis.
+
+Text should remain highly readable on all devices.
+
+---
+
+# Layout Principles
+
+Every page should follow predictable structure.
+
+General layout:
+
+Navigation
+
+↓
+
+Page Header
+
+↓
+
+Primary Actions
+
+↓
+
+Main Content
+
+↓
+
+Secondary Content
+
+↓
+
+Footer (where applicable)
+
+Users should never need to search for common actions.
+
+---
+
+# Spacing System
+
+Use the official spacing scale consistently.
+
+Spacing should communicate relationships between interface elements.
+
+Avoid arbitrary margins or padding.
+
+Consistency is more important than density.
+
+---
+
+# Radius
+
+Reuse the official radius scale.
+
+Large surfaces should feel approachable.
+
+Small controls should remain precise.
+
+Radius values must come from shared design tokens.
+
+---
+
+# Shadows & Elevation
+
+Elevation communicates hierarchy.
+
+Use shadows sparingly.
+
+Do not stack multiple shadow styles unnecessarily.
+
+Cards, dialogs, dropdowns, and overlays should follow the same elevation system.
+
+---
+
+# Icons
+
+Use a single icon library throughout the platform.
+
+Icons should:
+
+* Be simple
+* Match stroke weight
+* Remain visually consistent
+* Support accessibility
+
+Icons supplement text—they never replace it.
+
+---
+
+# Motion System
+
+Motion exists to improve understanding.
+
+Animations should:
+
+* Feel fast
+* Feel intentional
+* Never delay productivity
+
+Preferred motion:
+
+* Fade
+* Slide
+* Scale
+* Smooth layout transitions
+* Progressive disclosure
+
+Avoid:
+
+* Excessive bouncing
+* Flashing
+* Distracting animations
+
+Respect reduced motion preferences.
+
+---
+
+# Themes
+
+Support:
+
+* Light Theme
+* Dark Theme
+* System Theme
+
+Both themes receive equal design attention.
+
+Dark mode is not an afterthought.
+
+---
+
+# Responsive Design
+
+Every interface must work across:
+
+* Mobile
+* Tablet
+* Desktop
+* Large desktop displays
+
+Layouts should adapt without hiding important functionality.
+
+Mobile users should access the same core capabilities as desktop users.
+
+---
+
+# Dashboard Design
+
+Dashboards prioritize decision making.
+
+Every dashboard should answer:
+
+* What requires attention?
+* What changed?
+* What should happen next?
+
+Dashboards should avoid unnecessary decoration.
+
+Use whitespace to organize information.
+
+---
+
+# Tables
+
+Tables should support:
+
+* Sorting
+* Filtering
+* Pagination
+* Bulk actions
+* Search
+* Responsive behavior
+
+Large datasets should remain performant.
+
+---
+
+# Forms
+
+Forms should:
+
+* Minimize user effort.
+* Validate in real time where appropriate.
+* Clearly explain errors.
+* Preserve entered information.
+* Support keyboard navigation.
+
+Long forms should be divided into logical sections.
+
+---
+
+# Empty States
+
+Every empty state should:
+
+Explain why the page is empty.
+
+Explain what users can do next.
+
+Provide one primary action.
+
+Never leave users without direction.
+
+---
+
+# Loading States
+
+Use skeleton loading where appropriate.
+
+Avoid unnecessary loading spinners.
+
+Loading should maintain layout stability.
+
+---
+
+# Error States
+
+Errors should:
+
+Explain what happened.
+
+Explain how to recover.
+
+Avoid technical jargon.
+
+Never blame the user.
+
+---
+
+# Notifications
+
+Notifications should be:
+
+Clear
+
+Actionable
+
+Concise
+
+Non-intrusive
+
+Priority determines presentation.
+
+---
+
+# Accessibility
+
+Accessibility is mandatory.
+
+Support:
+
+* Keyboard navigation
+* Screen readers
+* Sufficient contrast
+* Focus indicators
+* Semantic HTML
+* Reduced motion
+* Accessible forms
+
+Aim for WCAG AA compliance.
+
+---
+
+# Writing Style
+
+All interface copy follows the ADOTDEVS writing guidelines.
+
+Principles:
+
+* Clear
+* Direct
+* Helpful
+* Professional
+* Human
+
+Avoid:
+
+* Buzzwords
+* Marketing language
+* Unnecessary technical terms
+
+Buttons should describe actions.
+
+Examples:
+
+Create Job
+
+Publish Opportunity
+
+Review Candidate
+
+Schedule Interview
+
+Never use vague labels such as:
+
+Submit
+
+Continue
+
+Click Here
+
+---
+
+# AI Experience
+
+AI should always feel like an assistant.
+
+AI should:
+
+Suggest
+
+Recommend
+
+Summarize
+
+Improve
+
+Never make final recruitment decisions.
+
+Users remain in control.
+
+AI-generated content should always be editable before saving.
+
+---
+
+# Opportunity Experience
+
+Opportunities are first-class objects.
+
+The interface should clearly distinguish:
+
+* Full-Time Jobs
+* Internships (IPT)
+* Graduate Programs
+* Apprenticeships
+* Volunteer Opportunities
+
+Users should immediately understand what they are applying for.
+
+---
+
+# Candidate Experience
+
+Candidates should experience:
+
+Simple registration
+
+Fast applications
+
+Clear progress tracking
+
+Transparent communication
+
+Minimal repeated data entry
+
+The application experience should feel effortless.
+
+---
+
+# Recruiter Experience
+
+Recruiters should complete common tasks with minimal clicks.
+
+Frequently used actions should always remain visible.
+
+Interfaces should reduce administrative work rather than increase it.
+
+---
+
+# Multi-Tenant Branding
+
+Every organization can customize:
+
+* Logo
+* Company information
+* Careers page content
+* Primary branding assets
+* Email branding
+
+Organizations cannot modify the core ADOTDEVS product design system.
+
+This maintains consistency while allowing employer branding.
+
+---
+
+# Future Products
+
+Every future ADOTDEVS product must extend this design system.
+
+New products should reuse existing:
+
+* Components
+* Layouts
+* Tokens
+* Motion
+* Typography
+* Accessibility rules
+
+Creating a new design language for each product is prohibited.
+
+---
+
+# Design Quality Standard
+
+Before any feature is considered complete, it must satisfy these questions:
+
+* Is it visually consistent?
+* Is it accessible?
+* Is it responsive?
+* Is it easy to understand?
+* Does it reduce cognitive load?
+* Does it follow the design system?
+* Does it support both light and dark themes?
+* Does it feel like an ADOTDEVS product?
+
+If the answer to any question is "No," the feature is not complete.

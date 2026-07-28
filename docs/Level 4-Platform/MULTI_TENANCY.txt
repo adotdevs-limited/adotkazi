@@ -1,0 +1,583 @@
+# MULTI_TENANCY.md
+
+# AdotKazi Multi-Tenancy Architecture
+
+## Purpose
+
+This document defines the multi-tenancy architecture for the AdotKazi platform.
+
+The platform is designed as a multi-tenant SaaS application where multiple organizations securely share the same infrastructure while remaining completely isolated from one another.
+
+Tenant isolation is a fundamental security requirement.
+
+---
+
+# Goals
+
+The multi-tenancy architecture must provide:
+
+* Strong tenant isolation
+* Horizontal scalability
+* Low operational cost
+* High performance
+* Cloud portability
+* Enterprise readiness
+* Simple onboarding
+
+---
+
+# Architecture Strategy
+
+AdotKazi uses:
+
+**Shared Database + Shared Schema + Row-Level Tenant Isolation**
+
+```text
+                 PostgreSQL
+
+┌─────────────────────────────────────────┐
+│                                         │
+│ Organizations                           │
+│ Users                                   │
+│ Memberships                             │
+│ Opportunities                           │
+│ Applications                            │
+│ Placements                              │
+│ Reports                                 │
+│ Notifications                           │
+│ Analytics                               │
+│                                         │
+└─────────────────────────────────────────┘
+
+Every tenant-owned record contains:
+
+organization_id
+```
+
+The application determines the active organization for every request.
+
+---
+
+# Tenant Definition
+
+A tenant represents one organization.
+
+Examples:
+
+* AdotDevs Limited
+* ABC Manufacturing Ltd
+* XYZ Bank
+* University of Dar es Salaam
+
+Each tenant owns:
+
+* Branches
+* Departments
+* Recruiters
+* Hiring Managers
+* Opportunities
+* Candidates
+* Placements
+* Analytics
+* Branding
+* Settings
+* Documents
+
+---
+
+# Global Identity
+
+Authentication is global.
+
+A user has:
+
+* One account
+* One identity
+* One email
+
+A user may belong to multiple organizations.
+
+Example
+
+```text
+John Smith
+
+├── AdotDevs
+│      Recruiter
+│
+├── ABC Bank
+│      Hiring Manager
+│
+└── University
+       Supervisor
+```
+
+The user authenticates once.
+
+Authorization changes when switching organizations.
+
+---
+
+# Organization Membership
+
+Membership connects a user to an organization.
+
+Membership contains:
+
+* Role
+* Permissions
+* Status
+* Default organization
+* Invitation information
+
+Users never belong directly to organizations.
+
+Membership is the relationship.
+
+---
+
+# Active Organization
+
+Every authenticated session has one active organization.
+
+```text
+Login
+
+↓
+
+Organizations
+
+↓
+
+Select Organization
+
+↓
+
+Authorization Loaded
+
+↓
+
+Tenant Context Established
+```
+
+All subsequent requests execute within that organization context.
+
+---
+
+# Tenant Context
+
+Every request includes tenant context.
+
+Sources may include:
+
+* Session
+* Organization slug
+* Custom domain
+* Subdomain
+
+Example
+
+```text
+careers.adotdevs.com
+
+↓
+
+Organization
+
+↓
+
+AdotDevs Limited
+
+↓
+
+organization_id
+
+↓
+
+Query Filtering
+```
+
+---
+
+# Organization Resolution
+
+Organizations may be resolved using:
+
+Primary
+
+* Custom Domain
+
+Secondary
+
+* Subdomain
+
+Fallback
+
+* Organization slug
+
+Example
+
+```text
+careers.adotdevs.com
+
+↓
+
+Organization
+```
+
+or
+
+```text
+company-a.adotkazi.com
+
+↓
+
+Organization
+```
+
+---
+
+# Tenant-Owned Entities
+
+Every tenant-owned entity includes:
+
+```text
+organization_id
+```
+
+Examples
+
+* Opportunity
+* Candidate
+* Placement
+* Dashboard
+* Notification
+* Report
+* Department
+* Branch
+* AIRequest
+
+Platform-owned entities do not contain organization ownership where appropriate.
+
+---
+
+# Query Isolation
+
+Every tenant query must automatically filter by:
+
+```text
+organization_id
+```
+
+Example
+
+Correct
+
+```sql
+SELECT *
+FROM opportunities
+WHERE organization_id = :organization_id;
+```
+
+Incorrect
+
+```sql
+SELECT *
+FROM opportunities;
+```
+
+Unscoped queries are prohibited.
+
+---
+
+# Authorization
+
+Before accessing tenant data the platform verifies:
+
+1. User authenticated.
+2. Membership exists.
+3. Membership active.
+4. Organization active.
+5. Permission granted.
+6. Resource belongs to organization.
+
+Only then is access allowed.
+
+---
+
+# Row-Level Security
+
+Where supported (e.g. PostgreSQL/Supabase), Row-Level Security (RLS) may be enabled as an additional protection layer.
+
+RLS complements application authorization but does not replace it.
+
+The application remains the primary enforcement point.
+
+---
+
+# Cross-Tenant Access
+
+Cross-tenant access is prohibited.
+
+Exceptions:
+
+* Platform Super Administrators
+* Authorized Support Sessions
+* Internal platform analytics (aggregated only)
+
+All exceptions are audited.
+
+---
+
+# Tenant Switching
+
+Users may switch organizations without re-authenticating.
+
+Process
+
+```text
+Current Organization
+
+↓
+
+Select Organization
+
+↓
+
+Membership Loaded
+
+↓
+
+Permissions Loaded
+
+↓
+
+Tenant Context Updated
+
+↓
+
+Continue Working
+```
+
+Sessions remain valid.
+
+Authorization is recalculated.
+
+---
+
+# Organization Lifecycle
+
+States
+
+* Pending
+* Active
+* Suspended
+* Archived
+
+Suspended organizations cannot:
+
+* Login
+* Create opportunities
+* Submit applications
+* Access APIs
+
+Historical data remains intact.
+
+---
+
+# Custom Domains
+
+Supported examples:
+
+```text
+careers.adotdevs.com
+
+jobs.company.com
+
+careers.university.edu
+```
+
+Each custom domain maps to exactly one organization.
+
+TLS certificates should be managed automatically.
+
+---
+
+# Data Isolation
+
+Organizations cannot access:
+
+* Other organizations' users
+* Opportunities
+* Applications
+* Documents
+* Reports
+* AI requests
+* Notifications
+* Analytics
+
+Isolation is enforced at:
+
+* API
+* Service layer
+* Database
+* Search index
+* Analytics
+* Storage
+
+---
+
+# Search Isolation
+
+Every search index includes:
+
+```text
+organization_id
+```
+
+Search queries are automatically scoped to the active organization.
+
+Search must never expose another tenant's data.
+
+---
+
+# Analytics Isolation
+
+Analytics queries are tenant-aware.
+
+Dashboards, KPIs, and reports only include the active organization's data unless the requester is a platform administrator viewing platform-wide metrics.
+
+---
+
+# AI Isolation
+
+AI requests include:
+
+* organization_id
+
+Prompts must never include data from another organization.
+
+Embeddings, cached context, and AI-generated outputs must remain tenant-scoped.
+
+---
+
+# Document Isolation
+
+Every document belongs to one organization.
+
+Documents inherit permissions from their owning entity.
+
+Storage paths should be organization-aware.
+
+Example:
+
+```text
+organizations/{organization_id}/documents/{document_id}
+```
+
+---
+
+# Background Jobs
+
+Every background job executes within a tenant context.
+
+Examples:
+
+* Email delivery
+* AI processing
+* Analytics aggregation
+* Search indexing
+* Report generation
+
+Workers must never process data without organization context.
+
+---
+
+# Events
+
+All domain events include:
+
+* organization_id
+* event_id
+* occurred_at
+
+Consumers validate tenant context before processing.
+
+---
+
+# Performance
+
+Recommended indexes:
+
+* organization_id
+* organization_id + status
+* organization_id + created_at
+* organization_id + updated_at
+
+Large tables should be partitioned by time when necessary.
+
+---
+
+# Security
+
+The platform must enforce:
+
+* Tenant isolation
+* Organization-scoped authorization
+* Secure session handling
+* Domain verification
+* Audit logging
+* Resource ownership validation
+* Support session controls
+
+Security checks occur on every request.
+
+---
+
+# Cloud Portability
+
+The architecture must support deployment on:
+
+* Supabase PostgreSQL
+* Self-hosted PostgreSQL
+* Managed PostgreSQL
+* VPS
+* Docker
+* Kubernetes
+
+Changing infrastructure must not require redesigning tenant architecture.
+
+---
+
+# Future Expansion
+
+The multi-tenancy architecture is designed to support:
+
+* Enterprise organizations
+* White-label deployments
+* Regional data residency
+* Read replicas
+* Database sharding
+* Multi-region deployments
+* Dedicated databases for enterprise customers
+* Hybrid deployment models
+* Cross-organization collaboration (opt-in)
+* Organization mergers
+* Organization data export/import
+
+---
+
+# Definition of Done
+
+The multi-tenancy implementation is complete when:
+
+* Every tenant-owned entity includes `organization_id`.
+* Every request establishes an active tenant context.
+* Every query is organization-scoped.
+* Authorization validates organization membership.
+* Search indexes are tenant-aware.
+* Analytics are tenant-aware.
+* AI is tenant-isolated.
+* Documents are organization-scoped.
+* Background jobs execute within tenant context.
+* Cross-tenant access is impossible except for explicitly authorized administrative operations.

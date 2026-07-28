@@ -1,0 +1,667 @@
+# PLATFORM_ENTITIES.md
+
+# Platform Entity Specifications
+
+## Purpose
+
+The Platform bounded context contains the foundational entities required for every tenant, user, authentication, authorization, configuration, and feature within AdotKazi.
+
+These entities form the backbone of the multi-tenant SaaS architecture.
+
+Recruitment, Internship (IPT), AI, Communication, and Analytics modules all depend on this bounded context.
+
+---
+
+# Entity Relationships
+
+```
+Platform
+│
+├── Organization
+│   ├── Branch
+│   ├── Department
+│   ├── Membership
+│   ├── OrganizationSettings
+│   └── FeatureFlag
+│
+├── User
+│   ├── Membership
+│   ├── Session
+│   ├── Identity
+│   └── UserPreference
+│
+├── Role
+│   └── Permission
+│
+└── Invitation
+```
+
+---
+
+# Organization
+
+## Purpose
+
+Represents a company (tenant) using AdotKazi.
+
+Organization is the root aggregate for all tenant-owned resources.
+
+Every recruitment activity belongs to exactly one organization.
+
+---
+
+## Aggregate Root
+
+Yes
+
+---
+
+## Ownership
+
+Platform
+
+---
+
+## Fields
+
+| Field            | Type      | Required |
+| ---------------- | --------- | -------- |
+| id               | UUIDv7    | Yes      |
+| name             | String    | Yes      |
+| legal_name       | String    | Optional |
+| slug             | String    | Yes      |
+| status           | Enum      | Yes      |
+| industry         | String    | Optional |
+| company_size     | Enum      | Optional |
+| website          | URL       | Optional |
+| email            | Email     | Optional |
+| phone            | String    | Optional |
+| timezone         | String    | Yes      |
+| country          | String    | Yes      |
+| logo_document_id | UUID      | Optional |
+| created_at       | Timestamp | Yes      |
+| updated_at       | Timestamp | Yes      |
+| deleted_at       | Timestamp | Optional |
+
+---
+
+## Relationships
+
+Has Many:
+
+* Branches
+* Departments
+* Memberships
+* Opportunities
+* Pipelines
+* Settings
+* Integrations
+* Feature Flags
+
+Belongs To:
+
+* Subscription (future)
+
+---
+
+## Constraints
+
+* Slug must be unique.
+* Organization name required.
+* Soft deletion only.
+* Tenant data must never migrate automatically.
+
+---
+
+## Business Rules
+
+* Organization owns all tenant resources.
+* Organization cannot access another tenant.
+* Organization can be suspended.
+* Suspended organizations become read-only.
+* Archived organizations retain historical data.
+
+---
+
+## Domain Events
+
+* OrganizationCreated
+* OrganizationUpdated
+* OrganizationSuspended
+* OrganizationReactivated
+* OrganizationArchived
+
+---
+
+## Security
+
+Tenant boundary enforcement begins here.
+
+Every child entity inherits organization ownership.
+
+---
+
+# Branch
+
+## Purpose
+
+Represents a physical or operational office belonging to an organization.
+
+---
+
+## Aggregate Root
+
+No
+
+---
+
+## Owner
+
+Organization
+
+---
+
+## Fields
+
+* id
+* organization_id
+* name
+* code
+* address
+* city
+* country
+* timezone
+* phone
+* email
+* is_headquarters
+* status
+* created_at
+* updated_at
+
+---
+
+## Relationships
+
+Belongs To:
+
+* Organization
+
+Has Many:
+
+* Opportunities
+* Supervisors
+* Placements
+
+---
+
+## Business Rules
+
+One organization may have multiple branches.
+
+Exactly one branch may be designated as headquarters.
+
+---
+
+# Department
+
+## Purpose
+
+Represents an organization-wide department.
+
+Departments are reusable across branches.
+
+---
+
+## Fields
+
+* id
+* organization_id
+* name
+* description
+* color
+* is_active
+
+---
+
+## Relationships
+
+Belongs To:
+
+* Organization
+
+Has Many:
+
+* Opportunities
+
+---
+
+## Business Rules
+
+Department names must be unique within an organization.
+
+---
+
+# User
+
+## Purpose
+
+Represents a global identity.
+
+A user exists once across the entire platform.
+
+Users may belong to multiple organizations.
+
+---
+
+## Aggregate Root
+
+Yes
+
+---
+
+## Fields
+
+| Field              | Type      |
+| ------------------ | --------- |
+| id                 | UUIDv7    |
+| first_name         | String    |
+| last_name          | String    |
+| email              | Email     |
+| avatar_document_id | UUID      |
+| phone              | String    |
+| locale             | String    |
+| timezone           | String    |
+| preferred_theme    | Enum      |
+| status             | Enum      |
+| email_verified_at  | Timestamp |
+| last_login_at      | Timestamp |
+
+---
+
+## Relationships
+
+Has Many:
+
+* Memberships
+* Sessions
+* Invitations
+* Audit Events
+
+---
+
+## Business Rules
+
+One email equals one global account.
+
+Users never belong directly to organizations.
+
+Membership defines organization access.
+
+---
+
+## Domain Events
+
+* UserRegistered
+* UserVerified
+* UserSuspended
+* UserLoggedIn
+* UserDeleted
+
+---
+
+# Membership
+
+## Purpose
+
+Represents a user's relationship with an organization.
+
+---
+
+## Aggregate Root
+
+No
+
+---
+
+## Fields
+
+* id
+* organization_id
+* user_id
+* role_id
+* status
+* invited_by
+* joined_at
+* last_active_at
+
+---
+
+## Relationships
+
+Belongs To:
+
+* User
+* Organization
+* Role
+
+---
+
+## Constraints
+
+One user cannot have duplicate active memberships for the same organization.
+
+---
+
+## Business Rules
+
+Membership determines:
+
+* Permissions
+* Navigation
+* Accessible resources
+
+Removing a membership never deletes the user.
+
+---
+
+# Role
+
+## Purpose
+
+Represents a collection of permissions.
+
+---
+
+## Fields
+
+* id
+* organization_id (nullable for system roles)
+* name
+* description
+* is_system
+* is_default
+
+---
+
+## Relationships
+
+Has Many:
+
+* Permissions
+* Memberships
+
+---
+
+## Business Rules
+
+System roles cannot be deleted.
+
+Organizations may create custom roles.
+
+---
+
+# Permission
+
+## Purpose
+
+Represents one authorized action.
+
+Examples:
+
+* jobs.create
+* jobs.publish
+* candidates.view
+* interviews.schedule
+
+---
+
+## Fields
+
+* id
+* key
+* name
+* description
+* module
+
+---
+
+## Relationships
+
+Many-to-Many:
+
+* Roles
+
+---
+
+## Constraints
+
+Permission keys are globally unique.
+
+---
+
+# Invitation
+
+## Purpose
+
+Invites users into organizations.
+
+---
+
+## Fields
+
+* id
+* organization_id
+* email
+* role_id
+* invited_by
+* token
+* expires_at
+* accepted_at
+* status
+
+---
+
+## Business Rules
+
+Invitation tokens expire.
+
+Accepted invitations cannot be reused.
+
+---
+
+# OrganizationSettings
+
+## Purpose
+
+Stores organization-wide configuration.
+
+---
+
+## Fields
+
+* organization_id
+* branding
+* localization
+* hiring_defaults
+* email_settings
+* ai_settings
+* notification_settings
+
+Flexible configuration may be stored as JSONB where appropriate.
+
+---
+
+# UserPreference
+
+## Purpose
+
+Stores personal preferences independent of organization membership.
+
+---
+
+## Fields
+
+* user_id
+* language
+* theme
+* timezone
+* notification_preferences
+* dashboard_preferences
+
+---
+
+# Session
+
+## Purpose
+
+Represents authenticated user sessions.
+
+---
+
+## Fields
+
+* id
+* user_id
+* device_name
+* ip_address
+* user_agent
+* last_activity_at
+* expires_at
+* revoked_at
+
+---
+
+## Business Rules
+
+Users may manage and revoke active sessions.
+
+Expired sessions are invalid.
+
+---
+
+# FeatureFlag
+
+## Purpose
+
+Controls feature availability per organization.
+
+---
+
+## Fields
+
+* id
+* organization_id
+* feature_key
+* enabled
+* rollout_percentage
+* expires_at
+
+---
+
+## Example Features
+
+* ai_assistant
+* ipt_module
+* custom_domain
+* api_access
+* advanced_analytics
+* beta_features
+
+---
+
+# Identity
+
+## Purpose
+
+Stores linked authentication providers.
+
+Supports:
+
+* Email/Password
+* Magic Link
+* Google
+* GitHub
+* Microsoft
+* Future providers
+
+---
+
+## Fields
+
+* id
+* user_id
+* provider
+* provider_user_id
+* linked_at
+
+---
+
+# Shared Lifecycle
+
+Every platform entity follows:
+
+Draft (where applicable)
+
+↓
+
+Created
+
+↓
+
+Active
+
+↓
+
+Updated
+
+↓
+
+Suspended (optional)
+
+↓
+
+Archived (optional)
+
+↓
+
+Soft Deleted
+
+---
+
+# Shared Standards
+
+All entities must:
+
+* Use UUIDv7 identifiers
+* Include audit fields
+* Support soft deletes where appropriate
+* Enforce tenant isolation
+* Generate audit events for critical actions
+* Respect optimistic locking where concurrent edits are possible
+
+---
+
+# Performance Considerations
+
+* Index organization_id on all tenant-owned entities.
+* Index user_id on user-related entities.
+* Use composite indexes for common query patterns.
+* Cache organization settings and feature flags.
+* Avoid N+1 queries through eager loading where appropriate.
+
+---
+
+# Future Expansion
+
+The Platform context is designed to support future capabilities without breaking existing models, including:
+
+* Subscription and billing
+* Single Sign-On (SSO)
+* SCIM provisioning
+* Organization groups
+* Marketplace integrations
+* White-label deployments
+* API keys and OAuth applications
+* Advanced compliance and governance
+* Cross-organization administration
+* Multi-region deployments

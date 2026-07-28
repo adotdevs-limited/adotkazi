@@ -1,0 +1,627 @@
+# ORGANIZATIONS.md
+
+# AdotKazi Organization Domain
+
+## Purpose
+
+The Organization Domain is the foundational domain of the AdotKazi platform.
+
+Every tenant represents an organization, and every business operation occurs within the context of an organization.
+
+The Organization Domain manages organization identity, structure, branding, settings, memberships, branches, departments, policies, quotas, and configuration.
+
+It acts as the root boundary for multi-tenancy.
+
+---
+
+# Vision
+
+Enable any organization—from a small startup to a multinational enterprise—to configure AdotKazi as its own recruitment and talent platform without affecting any other organization.
+
+Organizations should feel like they have their own dedicated recruitment system while sharing the same platform.
+
+---
+
+# Goals
+
+The Organization Domain must:
+
+* Support unlimited organizations
+* Provide complete tenant isolation
+* Support multiple branches
+* Support multiple departments
+* Support organization branding
+* Support organization settings
+* Support memberships and permissions
+* Support future subscriptions
+* Scale independently
+
+---
+
+# Core Philosophy
+
+Everything belongs to an organization.
+
+Examples:
+
+* Opportunities
+* Applications
+* Candidates
+* Recruiters
+* Documents
+* Interviews
+* Notifications
+* Analytics
+* AI Usage
+* Settings
+* Workflows
+
+Every entity references:
+
+```text
+organization_id
+```
+
+The organization is the root ownership boundary.
+
+---
+
+# Domain Responsibilities
+
+The Organization Domain owns:
+
+* Organization Profile
+* Organization Settings
+* Branding
+* Membership
+* Branches
+* Departments
+* Locations
+* Working Hours
+* Hiring Preferences
+* Email Configuration
+* Feature Configuration
+* Subscription Metadata
+* Custom Domains
+
+The Organization Domain does **not** own:
+
+* Opportunities
+* Applications
+* Candidates
+* Interviews
+* Reports
+
+Those belong to their respective domains.
+
+---
+
+# Organization Aggregate
+
+The Organization aggregate contains:
+
+* Identity
+* Profile
+* Status
+* Branding
+* Configuration
+* Subscription
+* Features
+* Membership
+
+It is the root aggregate of every tenant.
+
+---
+
+# Organization Lifecycle
+
+```text
+Created
+
+↓
+
+Trial
+
+↓
+
+Active
+
+↓
+
+Suspended
+
+↓
+
+Archived
+```
+
+Future:
+
+```text
+Deleted
+```
+
+Deletion should follow a retention policy.
+
+---
+
+# Organization Status
+
+Supported states:
+
+* Pending
+* Trial
+* Active
+* Suspended
+* Archived
+
+Only Active organizations may use the platform normally.
+
+---
+
+# Organization Profile
+
+Basic profile information:
+
+* Name
+* Legal Name
+* Registration Number
+* Tax Number
+* Industry
+* Company Size
+* Founded Year
+* Website
+* Description
+* Headquarters
+
+Additional fields may be added without affecting existing organizations.
+
+---
+
+# Branding
+
+Each organization controls its own brand.
+
+Brand assets include:
+
+* Logo
+* Favicon
+* Primary Color
+* Secondary Color
+* Typography
+* Email Branding
+* Social Links
+* Careers Banner
+
+Brand settings automatically apply throughout the tenant.
+
+---
+
+# Branch Management
+
+Organizations may have multiple branches.
+
+Examples:
+
+Dar es Salaam
+
+↓
+
+Arusha
+
+↓
+
+Dodoma
+
+↓
+
+Mwanza
+
+Each branch contains:
+
+* Name
+* Address
+* Timezone
+* Contact Information
+* Manager
+
+Branches may own opportunities.
+
+---
+
+# Department Management
+
+Organizations manage departments.
+
+Examples:
+
+* Engineering
+* Marketing
+* Finance
+* Human Resources
+* Design
+* Sales
+* Operations
+
+Departments are reusable across opportunities.
+
+---
+
+# Locations
+
+Locations represent physical or virtual workplaces.
+
+Supported types:
+
+* Office
+* Remote
+* Hybrid
+* Client Site
+* Regional Office
+
+Opportunities reference locations.
+
+---
+
+# Membership
+
+Users become members of organizations.
+
+Membership contains:
+
+* User
+* Organization
+* Role
+* Status
+* Joined Date
+
+A user may belong to multiple organizations.
+
+---
+
+# Global Accounts
+
+Recruiters have one global account.
+
+They may switch between organizations they belong to without creating additional accounts.
+
+Permissions are evaluated independently within each organization.
+
+---
+
+# Organization Roles
+
+Examples:
+
+* Owner
+* Administrator
+* Recruiter
+* Hiring Manager
+* Interviewer
+* Supervisor
+* Content Manager
+* Viewer
+
+Roles are defined in the Authorization Domain.
+
+---
+
+# Working Hours
+
+Organizations configure:
+
+* Business Days
+* Working Hours
+* Timezone
+* Public Holidays
+
+These settings are used for scheduling interviews, reminders, and workflows.
+
+---
+
+# Hiring Preferences
+
+Organizations configure defaults such as:
+
+* Default Pipeline
+* Default Interview Workflow
+* Offer Approval Rules
+* Resume Requirements
+* Anonymous Applications
+* Candidate Visibility
+* Auto-Archive Policies
+
+Business domains consume these settings.
+
+---
+
+# Opportunity Types
+
+Organizations decide which opportunity types are enabled.
+
+Examples:
+
+* Full-Time
+* Part-Time
+* Contract
+* Internship
+* Graduate Program
+* Industrial Practical Training
+* Field Training
+* Apprenticeship
+* Volunteer
+
+Disabled opportunity types are hidden from users.
+
+---
+
+# AI Configuration
+
+Organizations configure:
+
+* AI Enabled
+* AI Providers
+* AI Features
+* AI Approval Requirements
+* AI Usage Limits
+
+AI settings are organization-specific.
+
+---
+
+# Communication Settings
+
+Organizations configure:
+
+* Sender Name
+* Sender Email
+* Reply-To Address
+* Email Templates
+* Notification Preferences
+
+Future:
+
+* SMS
+* WhatsApp
+* Push Notifications
+
+---
+
+# Custom Domain
+
+Organizations may configure:
+
+Examples:
+
+```text
+careers.company.com
+
+jobs.company.com
+
+careers.example.org
+```
+
+The platform manages routing and SSL configuration.
+
+---
+
+# Feature Flags
+
+Organizations may enable or disable platform features.
+
+Examples:
+
+* AI Features
+* IPT Module
+* Recommendation Engine
+* CMS
+* Workflow Automation
+* Public API
+
+This supports gradual feature rollout.
+
+---
+
+# Subscription Metadata
+
+Future subscription information includes:
+
+* Plan
+* Trial Status
+* Expiration
+* User Limits
+* Storage Limits
+* AI Credits
+* API Limits
+
+Business logic reads these values without coupling to billing.
+
+---
+
+# Quotas
+
+Organizations may have configurable limits:
+
+* Users
+* Opportunities
+* Applications
+* Storage
+* API Requests
+* AI Requests
+
+Quota enforcement occurs before resource creation.
+
+---
+
+# Organization Settings
+
+Examples:
+
+* Language
+* Currency
+* Timezone
+* Date Format
+* Number Format
+* Privacy Settings
+* Data Retention
+* Branding Preferences
+
+Settings are centralized.
+
+---
+
+# Integrations
+
+Organizations may connect:
+
+* Google Workspace
+* Microsoft 365
+* Google Meet
+* Zoom
+* WhatsApp
+* Resend
+* Webhooks
+
+Future integrations require no structural changes.
+
+---
+
+# Security
+
+The Organization Domain enforces:
+
+* Tenant isolation
+* Membership validation
+* Organization ownership
+* Domain verification
+* Audit logging
+
+Cross-organization access is prohibited.
+
+---
+
+# AI Integration
+
+The AI Platform may assist with:
+
+* Organization profile generation
+* Careers page content
+* Employer branding
+* Hiring recommendations
+* Analytics summaries
+
+AI outputs require human review.
+
+---
+
+# Analytics Integration
+
+Metrics include:
+
+* Active Users
+* Opportunities
+* Applications
+* Interviews
+* Placements
+* AI Usage
+* Storage Usage
+* API Usage
+
+Analytics are organization-specific.
+
+---
+
+# Search Integration
+
+Search indexes:
+
+* Organizations (platform scope)
+* Departments
+* Branches
+* Locations
+
+Organization data is filtered according to tenant permissions.
+
+---
+
+# Workflow Integration
+
+Examples:
+
+* Welcome new members
+* Notify admins of pending invitations
+* Suspend inactive organizations
+* Archive expired trials
+
+Workflow automation consumes organization events.
+
+---
+
+# Domain Events
+
+Examples:
+
+* OrganizationCreated
+* OrganizationActivated
+* OrganizationSuspended
+* OrganizationArchived
+* MemberInvited
+* MemberJoined
+* MemberRemoved
+* DepartmentCreated
+* BranchCreated
+* BrandingUpdated
+* CustomDomainVerified
+
+Events are consumed by:
+
+* Analytics
+* Notification System
+* AI Platform
+* Search Platform
+* Workflow Engine
+
+---
+
+# Performance
+
+The Organization Domain should:
+
+* Cache organization configuration.
+* Cache branding assets.
+* Cache feature flags.
+* Minimize repeated settings lookups.
+* Scale independently from transactional domains.
+
+---
+
+# Future Expansion
+
+The architecture supports:
+
+* Organization Groups
+* Parent/Child Organizations
+* Franchises
+* Multi-Brand Enterprises
+* Regional Administrators
+* Enterprise SSO
+* SCIM Provisioning
+* Organization Marketplace
+* Shared Talent Pools
+* Cross-Organization Collaboration (optional)
+
+---
+
+# Definition of Done
+
+The Organization Domain is considered production-ready when:
+
+* Every resource belongs to an organization.
+* Organizations can manage branding, departments, branches, and settings.
+* Global user accounts support membership in multiple organizations.
+* Feature flags and opportunity types are configurable.
+* Custom domains are supported.
+* AI, Analytics, Search, Notifications, and Workflow Engine are integrated.
+* Tenant isolation is enforced across all operations.
+* Organization events are published for significant lifecycle changes.
+* The domain remains independent of billing and infrastructure providers, enabling future SaaS growth.

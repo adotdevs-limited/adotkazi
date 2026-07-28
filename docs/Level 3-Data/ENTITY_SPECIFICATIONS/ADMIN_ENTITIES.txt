@@ -1,0 +1,455 @@
+# ADMIN_ENTITIES.md
+
+# Administration Entity Specifications
+
+## Purpose
+
+The Administration bounded context manages platform governance, operational oversight, compliance, auditing, configuration, and system administration.
+
+Unlike tenant-owned business entities, many administration entities are platform-owned and are used by Super Administrators to operate and monitor the AdotKazi platform.
+
+This bounded context supports:
+
+* Platform administration
+* Audit and compliance
+* System configuration
+* Operational monitoring
+* Feature management
+* API management
+* Support tools
+
+---
+
+# Administration Philosophy
+
+Administration must prioritize:
+
+* Security
+* Traceability
+* Compliance
+* Transparency
+* Recoverability
+* Operational excellence
+
+Administrative actions must always be attributable, auditable, and reversible where appropriate.
+
+---
+
+# Entity Relationships
+
+```text
+Administration
+│
+├── AuditEvent
+│
+├── ActivityLog
+│
+├── SystemSetting
+│
+├── FeatureFlagDefinition
+│
+├── APIKey
+│
+├── SupportSession
+│
+├── MaintenanceWindow
+│
+├── BackgroundJob
+│
+├── HealthCheck
+│
+└── Incident
+```
+
+---
+
+# AuditEvent
+
+## Purpose
+
+Represents an immutable record of a significant action performed within the platform.
+
+Audit events are required for compliance, investigations, and historical traceability.
+
+---
+
+## Aggregate Root
+
+Yes
+
+---
+
+## Owner
+
+Platform
+
+---
+
+## Fields
+
+| Field           | Type            |
+| --------------- | --------------- |
+| id              | UUIDv7          |
+| organization_id | UUID (nullable) |
+| actor_user_id   | UUID            |
+| entity_type     | String          |
+| entity_id       | UUID            |
+| action          | String          |
+| before_data     | JSONB           |
+| after_data      | JSONB           |
+| ip_address      | String          |
+| user_agent      | String          |
+| occurred_at     | Timestamp       |
+
+---
+
+## Business Rules
+
+* Audit events are immutable.
+* Audit events are never soft deleted.
+* Sensitive fields must be masked.
+
+---
+
+## Domain Events
+
+* AuditRecorded
+
+---
+
+# ActivityLog
+
+## Purpose
+
+Stores operational events that are useful for troubleshooting but are not compliance records.
+
+Examples:
+
+* Login
+* Logout
+* Queue started
+* Email sent
+* AI request processed
+
+---
+
+## Fields
+
+* id
+* organization_id
+* user_id
+* category
+* message
+* metadata
+* created_at
+
+---
+
+## Business Rules
+
+Activity logs may be archived after the configured retention period.
+
+---
+
+# SystemSetting
+
+## Purpose
+
+Stores global platform configuration.
+
+---
+
+## Fields
+
+| Field       | Type      |
+| ----------- | --------- |
+| id          | UUIDv7    |
+| key         | String    |
+| value       | JSONB     |
+| description | String    |
+| updated_by  | UUID      |
+| updated_at  | Timestamp |
+
+---
+
+## Business Rules
+
+Only Super Administrators may modify system settings.
+
+Changes generate audit events.
+
+---
+
+# FeatureFlagDefinition
+
+## Purpose
+
+Defines platform features that can be enabled or disabled.
+
+Organization-specific enablement is managed by the Platform context.
+
+---
+
+## Fields
+
+* id
+* key
+* name
+* description
+* default_enabled
+* category
+* created_at
+
+---
+
+## Business Rules
+
+Feature definitions are platform-owned.
+
+Organizations consume these definitions through FeatureFlag entities.
+
+---
+
+# APIKey
+
+## Purpose
+
+Provides secure programmatic access to AdotKazi APIs.
+
+---
+
+## Fields
+
+| Field           | Type      |
+| --------------- | --------- |
+| id              | UUIDv7    |
+| organization_id | UUID      |
+| name            | String    |
+| key_prefix      | String    |
+| hashed_secret   | String    |
+| permissions     | JSONB     |
+| expires_at      | Timestamp |
+| last_used_at    | Timestamp |
+| revoked_at      | Timestamp |
+
+---
+
+## Business Rules
+
+* Secrets are never stored in plain text.
+* Keys may be revoked without deletion.
+* Key permissions follow the principle of least privilege.
+
+---
+
+# SupportSession
+
+## Purpose
+
+Represents temporary administrative access for customer support.
+
+---
+
+## Fields
+
+* id
+* organization_id
+* support_user_id
+* reason
+* started_at
+* expires_at
+* ended_at
+
+---
+
+## Business Rules
+
+Support access requires explicit authorization.
+
+All support activity generates audit events.
+
+Support sessions expire automatically.
+
+---
+
+# MaintenanceWindow
+
+## Purpose
+
+Represents scheduled maintenance affecting platform availability.
+
+---
+
+## Fields
+
+* id
+* title
+* description
+* scheduled_start
+* scheduled_end
+* status
+* created_by
+
+---
+
+## Business Rules
+
+Maintenance windows may trigger user notifications.
+
+Historical maintenance records remain available.
+
+---
+
+# BackgroundJob
+
+## Purpose
+
+Tracks asynchronous platform jobs.
+
+Examples:
+
+* Search indexing
+* AI processing
+* Email queues
+* Report generation
+* Cleanup tasks
+
+---
+
+## Fields
+
+* id
+* queue
+* job_type
+* status
+* attempts
+* started_at
+* completed_at
+* processing_time_ms
+* error_message
+
+---
+
+## Business Rules
+
+Jobs may be retried according to queue policy.
+
+Completed jobs remain available for diagnostics.
+
+---
+
+# HealthCheck
+
+## Purpose
+
+Stores health metrics for platform services.
+
+---
+
+## Fields
+
+* id
+* service
+* status
+* response_time_ms
+* checked_at
+* metadata
+
+---
+
+## Monitored Services
+
+* Database
+* Search Engine
+* AI Service
+* Email Provider
+* Storage
+* Queue Workers
+* Cache
+
+---
+
+# Incident
+
+## Purpose
+
+Represents a platform incident affecting reliability or availability.
+
+---
+
+## Fields
+
+| Field         | Type      |
+| ------------- | --------- |
+| id            | UUIDv7    |
+| title         | String    |
+| severity      | Enum      |
+| status        | Enum      |
+| description   | Text      |
+| detected_at   | Timestamp |
+| resolved_at   | Timestamp |
+| owner_user_id | UUID      |
+
+---
+
+## Business Rules
+
+Incidents support post-incident reviews.
+
+All incident lifecycle changes generate audit events.
+
+---
+
+# Shared Administration Standards
+
+All administration entities must:
+
+* Generate audit events where applicable.
+* Respect platform security policies.
+* Enforce role-based access control.
+* Prevent unauthorized modification.
+* Support immutable historical records where required.
+* Use UTC timestamps.
+* Support soft deletes only where appropriate.
+
+---
+
+# Performance Considerations
+
+* Index all timestamp fields used for reporting.
+* Archive old activity logs automatically.
+* Partition large audit tables if required.
+* Optimize health check queries for dashboards.
+* Execute background jobs through dedicated workers.
+
+---
+
+# Security
+
+* Encrypt sensitive configuration values.
+* Hash API secrets using strong cryptographic algorithms.
+* Never expose audit history to unauthorized users.
+* Log every privileged administrative action.
+* Require multi-factor authentication for Super Administrators.
+* Apply rate limits to administrative APIs.
+
+---
+
+# Future Expansion
+
+The Administration bounded context is designed to support:
+
+* System status dashboard
+* Billing administration
+* License management
+* Compliance reporting
+* Data retention policies
+* Data export requests
+* GDPR/privacy workflows
+* Advanced monitoring and alerting
+* Distributed job scheduling
+* Secret management
+* Platform diagnostics
+* Disaster recovery tooling
+* Operational runbooks
+* Multi-region administration

@@ -1,0 +1,540 @@
+# CMS.md
+
+# AdotKazi Content Management System (CMS)
+
+## Purpose
+
+The Content Management System (CMS) enables organizations and platform administrators to create, manage, publish, and localize content across the AdotKazi platform without requiring code changes.
+
+Unlike a traditional website CMS, the AdotKazi CMS is a **Headless, Multi-Tenant, API-First Content Platform** that powers careers websites, landing pages, email content, help documentation, legal pages, and other dynamic content.
+
+The CMS serves both the AdotKazi platform and each organization's public careers experience.
+
+---
+
+# Vision
+
+Provide every organization with the ability to build and manage a professional careers presence while giving the platform a flexible foundation for future websites, portals, and marketing pages.
+
+The CMS should be extensible enough to support future products without redesign.
+
+---
+
+# Goals
+
+The CMS must:
+
+* Be multi-tenant
+* Be headless
+* Be API-first
+* Support localization
+* Support versioning
+* Support workflows
+* Support media management
+* Support SEO
+* Support reusable content
+* Support future page builders
+
+---
+
+# Core Principles
+
+The CMS owns content.
+
+Business domains own business data.
+
+Example:
+
+Recruitment owns:
+
+* Opportunities
+* Applications
+* Interviews
+
+CMS owns:
+
+* Homepage
+* About Company
+* Benefits
+* FAQs
+* Team Descriptions
+* Culture Content
+
+Business logic must never live inside the CMS.
+
+---
+
+# Architecture
+
+```text id="cms1"
+                CMS Platform
+
+                     │
+
+        ┌────────────┼────────────┐
+
+        │            │            │
+
+ Content API   Media Library   SEO Engine
+
+        │            │            │
+
+        └────────────┼────────────┘
+
+                     │
+
+      Public Websites & Applications
+```
+
+The CMS exposes content through APIs.
+
+Applications render the content.
+
+---
+
+# Content Types
+
+The CMS supports multiple content models.
+
+Examples:
+
+* Pages
+* Articles
+* FAQs
+* Testimonials
+* Team Members
+* Departments
+* Benefits
+* Culture Blocks
+* Hero Sections
+* Announcements
+* Legal Documents
+* Help Articles
+
+Organizations may define additional content types in the future.
+
+---
+
+# Careers Website Content
+
+Organizations manage:
+
+* Homepage
+* About Us
+* Mission
+* Vision
+* Company Values
+* Benefits
+* Hiring Process
+* Teams
+* Departments
+* Office Locations
+* Contact Information
+* Frequently Asked Questions
+
+All content is editable without developer involvement.
+
+---
+
+# Landing Pages
+
+Organizations may create:
+
+* Recruitment campaigns
+* Internship campaigns
+* Graduate programs
+* IPT campaigns
+* Hiring events
+
+Landing pages support:
+
+* SEO
+* Forms
+* Call-to-actions
+* Rich media
+
+---
+
+# Content Structure
+
+Each content item contains:
+
+* Title
+* Slug
+* Content
+* Summary
+* Status
+* Author
+* Version
+* Published Date
+* SEO Metadata
+
+Additional fields depend on content type.
+
+---
+
+# Rich Content
+
+Supported content blocks:
+
+* Heading
+* Paragraph
+* Image
+* Video
+* Quote
+* List
+* Table
+* Divider
+* Call-to-Action
+* Accordion
+* Button
+* Gallery
+* Code Block (future)
+
+Blocks are reusable.
+
+---
+
+# Page Builder (Future)
+
+Future versions may include a drag-and-drop page builder.
+
+Supported components may include:
+
+* Hero
+* Features
+* Testimonials
+* Team
+* Statistics
+* Timeline
+* FAQ
+* Contact Form
+* Job Listings
+* Opportunity Search
+
+The architecture should support this without redesign.
+
+---
+
+# Versioning
+
+Every content item supports version history.
+
+Workflow:
+
+```text id="cms2"
+Draft
+
+↓
+
+Review
+
+↓
+
+Published
+
+↓
+
+Archived
+```
+
+Previous versions remain accessible for rollback.
+
+---
+
+# Publishing Workflow
+
+Organizations may configure:
+
+* Draft
+* Review
+* Approved
+* Published
+* Scheduled
+* Archived
+
+Publishing can be immediate or scheduled.
+
+---
+
+# Localization
+
+The CMS supports multiple languages.
+
+Example:
+
+English
+
+↓
+
+Swahili
+
+↓
+
+French (future)
+
+↓
+
+Arabic (future)
+
+Each translation is linked to the same content entity.
+
+---
+
+# Media Library
+
+The CMS integrates with the Document Service.
+
+Supported assets:
+
+* Images
+* PDFs
+* Videos
+* Logos
+* Icons
+* Documents
+
+Media is organization-aware.
+
+---
+
+# Branding
+
+Organizations manage:
+
+* Logo
+* Favicon
+* Brand Colors
+* Typography
+* Social Media Links
+* Contact Details
+* Footer Content
+
+Brand settings automatically apply across careers pages.
+
+---
+
+# Navigation Management
+
+Organizations may manage:
+
+* Main Navigation
+* Footer Navigation
+* Quick Links
+* Social Links
+
+Navigation is fully configurable.
+
+---
+
+# SEO Engine
+
+Every page supports:
+
+* SEO Title
+* Meta Description
+* Canonical URL
+* Open Graph Image
+* Robots Directives
+* Structured Data (future)
+
+Automatic sitemap generation should be supported.
+
+---
+
+# URL Management
+
+Examples:
+
+```
+careers.adotkazi.com/about
+
+careers.adotkazi.com/benefits
+
+careers.adotkazi.com/culture
+
+careers.adotkazi.com/faq
+```
+
+Organizations may customize slugs.
+
+---
+
+# Search Integration
+
+CMS content is indexed by the Search Platform.
+
+Searchable content:
+
+* Pages
+* Articles
+* FAQs
+* Benefits
+* Culture
+* Team
+
+Search remains tenant-aware.
+
+---
+
+# AI Integration
+
+The AI Platform may assist with:
+
+* Content drafting
+* Grammar improvement
+* SEO optimization
+* Headline suggestions
+* Translation assistance
+* Content summarization
+* Readability analysis
+
+AI-generated content requires human review.
+
+---
+
+# Analytics Integration
+
+Track:
+
+* Page views
+* Visitor engagement
+* CTA clicks
+* Search queries
+* Bounce rate
+* Most viewed pages
+
+Analytics are organization-specific.
+
+---
+
+# Notification Integration
+
+Examples:
+
+* Content approved
+* Content published
+* Scheduled publication
+* Review requested
+
+Notifications are handled by the Notification System.
+
+---
+
+# Workflow Integration
+
+Automation examples:
+
+* Publish on schedule
+* Notify reviewers
+* Expire seasonal campaigns
+* Archive outdated content
+* Request content review every 12 months
+
+Managed through the Workflow Engine.
+
+---
+
+# Permissions
+
+Example roles:
+
+Platform Admin
+
+Organization Owner
+
+Content Manager
+
+Editor
+
+Reviewer
+
+Author
+
+Viewer
+
+Permissions determine who may create, edit, review, publish, or archive content.
+
+---
+
+# Security
+
+The CMS enforces:
+
+* Tenant isolation
+* Role-based authorization
+* Content versioning
+* Audit logging
+* Secure media access
+
+Published content is public only when explicitly configured.
+
+---
+
+# Domain Events
+
+Examples:
+
+* ContentCreated
+* ContentUpdated
+* ContentSubmittedForReview
+* ContentApproved
+* ContentPublished
+* ContentArchived
+* ContentDeleted
+* MediaUploaded
+
+Events are consumed by:
+
+* Search Platform
+* Analytics
+* Notification System
+* Workflow Engine
+
+---
+
+# Performance
+
+The CMS should:
+
+* Cache published content.
+* Use CDN caching for public assets.
+* Support static rendering where appropriate.
+* Invalidate cache automatically after publication.
+* Scale independently from transactional services.
+
+---
+
+# Future Expansion
+
+The architecture supports:
+
+* Drag-and-drop page builder
+* Template marketplace
+* Theme marketplace
+* Multi-brand organizations
+* Knowledge Base
+* Blog Engine
+* Documentation Portal
+* Event Pages
+* Marketing Automation
+* Content Personalization
+* A/B Testing
+* Headless Commerce integrations
+
+---
+
+# Definition of Done
+
+The CMS is considered production-ready when:
+
+* Organizations can manage careers website content.
+* Content is delivered through APIs.
+* Versioning and publishing workflows are implemented.
+* Localization is supported.
+* SEO metadata is configurable.
+* Media is managed through the Document Service.
+* AI, Search, Analytics, Notifications, and Workflow Engine are integrated.
+* Tenant isolation is enforced.
+* Audit logging is enabled.
+* The architecture supports future page builders and additional content types without structural redesign.

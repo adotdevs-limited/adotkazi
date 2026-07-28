@@ -1,0 +1,718 @@
+# OBSERVABILITY.md
+
+# AdotKazi Observability Architecture
+
+**Version:** 1.0
+**Status:** Platform Standard
+
+---
+
+# Purpose
+
+This document defines the observability strategy for the AdotKazi platform.
+
+Observability enables engineers to understand the internal state of the platform by collecting and correlating logs, metrics, traces, events, and health information.
+
+The goal is to rapidly detect, investigate, diagnose, and resolve issues before they impact customers.
+
+Observability is a core platform capability—not an optional operational feature.
+
+---
+
+# Vision
+
+Every request, job, workflow, AI operation, and business event should be traceable from start to finish.
+
+Engineers should be able to answer questions such as:
+
+* What happened?
+* When did it happen?
+* Why did it happen?
+* Who was affected?
+* Which organization was affected?
+* Which service failed?
+* How can it be prevented?
+
+---
+
+# Goals
+
+The Observability Platform must:
+
+* Centralize logs
+* Collect metrics
+* Provide distributed tracing
+* Monitor system health
+* Detect anomalies
+* Generate alerts
+* Track business events
+* Monitor infrastructure
+* Support incident investigations
+* Scale with the platform
+
+---
+
+# Core Principles
+
+The platform follows these principles:
+
+* Observe everything
+* Correlate all telemetry
+* Structure all logs
+* Monitor business outcomes
+* Automate alerting
+* Minimize operational blind spots
+* Avoid vendor lock-in
+
+---
+
+# Architecture
+
+```text id="obs1"
+Users
+
+↓
+
+Application
+
+↓
+
+Logs
+
+Metrics
+
+Traces
+
+Events
+
+↓
+
+Telemetry Collector
+
+↓
+
+Observability Platform
+
+↓
+
+Dashboards
+
+Alerts
+
+Incident Response
+```
+
+---
+
+# The Five Pillars
+
+AdotKazi collects five primary telemetry types:
+
+1. Logs
+2. Metrics
+3. Distributed Traces
+4. Business Events
+5. Health Signals
+
+Together they provide complete operational visibility.
+
+---
+
+# Structured Logging
+
+Every service must produce structured logs.
+
+Every log should contain:
+
+* Timestamp
+* Severity
+* Service
+* Module
+* Environment
+* Request ID
+* Correlation ID
+* Organization ID
+* User ID (when applicable)
+* Event Name
+* Message
+
+Logs should be machine-readable.
+
+---
+
+# Log Levels
+
+Supported levels:
+
+* TRACE
+* DEBUG
+* INFO
+* WARN
+* ERROR
+* FATAL
+
+Production defaults:
+
+* INFO
+* WARN
+* ERROR
+
+DEBUG logging should be disabled in production unless explicitly enabled.
+
+---
+
+# Logging Rules
+
+Never log:
+
+* Passwords
+* Authentication tokens
+* API secrets
+* Encryption keys
+* Personal identifiers beyond operational necessity
+* Sensitive AI prompts unless explicitly permitted
+
+Sensitive fields should be masked or redacted.
+
+---
+
+# Correlation IDs
+
+Every request receives a unique correlation ID.
+
+Example flow:
+
+```text id="obs2"
+HTTP Request
+
+↓
+
+API
+
+↓
+
+Recruitment
+
+↓
+
+Notification
+
+↓
+
+Analytics
+
+↓
+
+AI Platform
+```
+
+The same correlation ID follows the entire request chain.
+
+---
+
+# Request IDs
+
+Every incoming request receives:
+
+```text id="obs3"
+request_id
+```
+
+This ID uniquely identifies the request lifecycle.
+
+---
+
+# Distributed Tracing
+
+Tracing captures request execution across services.
+
+Trace examples:
+
+```text id="obs4"
+Candidate Applies
+
+↓
+
+API
+
+↓
+
+Recruitment
+
+↓
+
+Storage
+
+↓
+
+Notification
+
+↓
+
+Analytics
+```
+
+Every span includes:
+
+* Start Time
+* End Time
+* Duration
+* Parent Span
+* Service
+* Operation
+
+---
+
+# Metrics
+
+Collect application metrics including:
+
+* Requests per second
+* Response time
+* Error rate
+* Active users
+* Queue length
+* Cache hit ratio
+* Worker throughput
+
+Metrics should be lightweight and continuously collected.
+
+---
+
+# Business Metrics
+
+Track business outcomes such as:
+
+* Opportunities published
+* Applications submitted
+* Interviews completed
+* IPT reports submitted
+* AI requests
+* Notifications delivered
+
+Business metrics complement technical metrics.
+
+---
+
+# Infrastructure Metrics
+
+Monitor:
+
+* CPU usage
+* Memory usage
+* Disk usage
+* Network traffic
+* Database connections
+* Redis usage
+* Storage capacity
+
+Infrastructure metrics support capacity planning.
+
+---
+
+# Database Monitoring
+
+Track:
+
+* Query latency
+* Slow queries
+* Connection pool usage
+* Lock contention
+* Replication health
+* Migration status
+
+Database health should be continuously monitored.
+
+---
+
+# Background Worker Monitoring
+
+Track:
+
+* Queue depth
+* Job execution time
+* Failed jobs
+* Retry count
+* Dead-letter queue size
+* Worker utilization
+
+Long-running jobs should generate warnings.
+
+---
+
+# AI Monitoring
+
+Track:
+
+* Provider
+* Model
+* Request latency
+* Token usage
+* Estimated cost
+* Failure rate
+* Timeout rate
+
+Monitor AI quality and operational cost.
+
+---
+
+# Notification Monitoring
+
+Track:
+
+* Emails sent
+* Delivery rate
+* Bounce rate
+* Retry count
+* Queue delays
+* Provider health
+
+Future:
+
+* SMS
+* WhatsApp
+* Push notifications
+
+---
+
+# Search Monitoring
+
+Track:
+
+* Search latency
+* Query volume
+* Index size
+* Indexing failures
+* Zero-result searches
+
+Search health is monitored independently.
+
+---
+
+# File Storage Monitoring
+
+Monitor:
+
+* Upload failures
+* Download latency
+* Storage growth
+* File processing failures
+* Virus scan failures
+
+Storage health affects multiple domains.
+
+---
+
+# Authentication Monitoring
+
+Track:
+
+* Login success rate
+* Login failures
+* MFA usage
+* Password resets
+* Session creation
+* OAuth errors
+
+Unusual authentication activity should trigger alerts.
+
+---
+
+# Organization Monitoring
+
+Monitor:
+
+* Active organizations
+* Organization growth
+* Usage trends
+* Feature adoption
+* Organization health
+
+Useful for customer success and capacity planning.
+
+---
+
+# Health Checks
+
+Every service exposes:
+
+```text id="obs5"
+/health
+
+/live
+
+/ready
+```
+
+Health endpoints verify:
+
+* Database
+* Cache
+* Storage
+* External Providers
+* Queue
+* Configuration
+
+---
+
+# Synthetic Monitoring
+
+Automated probes verify critical user journeys.
+
+Examples:
+
+* Login
+* Opportunity search
+* Application submission
+* Interview scheduling
+* IPT report submission
+
+Synthetic tests run continuously.
+
+---
+
+# Alerting
+
+Alerts should be actionable.
+
+Examples:
+
+Critical:
+
+* Database unavailable
+* Authentication failure
+* AI provider unavailable
+* Queue backlog
+* High error rate
+
+Warning:
+
+* Slow responses
+* High memory usage
+* Increased retries
+* Elevated AI costs
+
+Avoid alert fatigue by tuning thresholds.
+
+---
+
+# Incident Management
+
+Every incident should include:
+
+* Detection
+* Classification
+* Ownership
+* Investigation
+* Resolution
+* Postmortem
+
+Incidents should be linked to relevant telemetry.
+
+---
+
+# Dashboards
+
+Standard dashboards include:
+
+## Platform
+
+* Overall Health
+* Active Users
+* Error Rate
+* Performance
+* Infrastructure
+
+---
+
+## Recruitment
+
+* Applications
+* Interviews
+* Hiring Funnel
+* Recruiter Activity
+
+---
+
+## IPT
+
+* Active Placements
+* Daily Logs
+* Weekly Reports
+* Supervisor Activity
+
+---
+
+## AI
+
+* Requests
+* Cost
+* Latency
+* Provider Usage
+
+---
+
+## Communication
+
+* Email Delivery
+* Queue Health
+* Notification Status
+
+---
+
+## Infrastructure
+
+* Servers
+* Database
+* Cache
+* Storage
+* Workers
+
+---
+
+# Service Level Objectives (SLOs)
+
+Example targets:
+
+* API availability ≥ 99.9%
+* Authentication success ≥ 99.9%
+* Opportunity search < 500ms (p95)
+* Application submission < 2 seconds (p95)
+* Email delivery queue < 1 minute
+* AI request completion < 10 seconds (excluding provider delays)
+
+SLOs should evolve as the platform grows.
+
+---
+
+# Error Tracking
+
+Every exception should capture:
+
+* Stack trace
+* Environment
+* Request ID
+* Correlation ID
+* Organization ID
+* User ID
+* Application version
+
+Duplicate errors should be grouped automatically.
+
+---
+
+# Audit Correlation
+
+Operational telemetry should correlate with audit logs where appropriate.
+
+This enables complete reconstruction of sensitive administrative actions.
+
+---
+
+# Retention
+
+Recommended retention:
+
+| Data Type       |    Suggested Retention |
+| --------------- | ---------------------: |
+| Logs            |             30–90 Days |
+| Metrics         |           12–24 Months |
+| Traces          |              7–30 Days |
+| Audit Logs      |  Per compliance policy |
+| Business Events | Long-term (aggregated) |
+
+Retention policies should be configurable.
+
+---
+
+# Recommended Technology
+
+The architecture is vendor-independent.
+
+Recommended stack:
+
+* OpenTelemetry (telemetry collection)
+* Prometheus (metrics)
+* Grafana (dashboards)
+* Loki (logs)
+* Tempo or Jaeger (distributed tracing)
+* Sentry (error tracking)
+
+Equivalent alternatives may be substituted without changing application code.
+
+---
+
+# Security
+
+Observability systems must:
+
+* Respect tenant isolation
+* Restrict dashboard access
+* Mask sensitive data
+* Encrypt telemetry in transit
+* Authenticate dashboard users
+
+Operational data should not expose confidential business information.
+
+---
+
+# Performance
+
+Observability must:
+
+* Minimize application overhead
+* Use asynchronous telemetry export
+* Batch log transmission
+* Sample traces where appropriate
+* Compress telemetry payloads
+
+Instrumentation should not significantly impact user experience.
+
+---
+
+# AI Coding Agent Rules
+
+When generating code, AI assistants must:
+
+* Add structured logging for significant operations.
+* Include correlation IDs in request flows.
+* Instrument new APIs with metrics and traces.
+* Avoid logging secrets or sensitive data.
+* Expose health endpoints for new services.
+* Emit domain events for business operations where applicable.
+
+Instrumentation should be built into new features from the beginning.
+
+---
+
+# Future Expansion
+
+The architecture supports:
+
+* Real-time anomaly detection
+* Predictive incident detection
+* AI-powered root cause analysis
+* Service dependency maps
+* Multi-region observability
+* Cost observability
+* Capacity forecasting
+* Business KPI monitoring
+* Synthetic browser monitoring
+* Chaos engineering dashboards
+
+---
+
+# Definition of Done
+
+A service is considered observable when:
+
+* Structured logging is implemented.
+* Metrics are collected.
+* Distributed tracing is enabled.
+* Health endpoints are exposed.
+* Business events are emitted.
+* Dashboards display meaningful telemetry.
+* Alerts are configured for critical failures.
+* Sensitive data is protected.
+* Performance impact is acceptable.
+* Operational teams can diagnose production issues using telemetry without requiring code changes.

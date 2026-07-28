@@ -1,0 +1,722 @@
+# RECRUITMENT_ENTITIES.md
+
+# Recruitment Entity Specifications
+
+## Purpose
+
+The Recruitment bounded context manages the complete talent acquisition lifecycle.
+
+It provides the entities required to create opportunities, manage candidates, process applications, coordinate recruiters, conduct interviews, evaluate applicants, extend offers, and complete hiring.
+
+This bounded context depends on the Platform bounded context for authentication, organizations, memberships, permissions, and tenant isolation.
+
+---
+
+# Entity Relationships
+
+```text
+Recruitment
+│
+├── Opportunity
+│   ├── HiringTeam
+│   ├── Pipeline
+│   ├── Application
+│   ├── SkillRequirement
+│   └── Offer
+│
+├── Candidate
+│   ├── Education
+│   ├── Experience
+│   ├── Certification
+│   ├── Portfolio
+│   ├── Skill
+│   └── Application
+│
+├── Interview
+│   ├── InterviewFeedback
+│   └── InterviewScore
+│
+├── Evaluation
+│
+└── TalentPool
+```
+
+---
+
+# Opportunity
+
+## Purpose
+
+Represents any opportunity an organization offers.
+
+Supported opportunity types include:
+
+* Full-Time
+* Part-Time
+* Contract
+* Internship (IPT)
+* Graduate Programme
+* Apprenticeship
+* Volunteer
+
+Opportunity is the primary aggregate root of the Recruitment bounded context.
+
+---
+
+## Aggregate Root
+
+Yes
+
+---
+
+## Owner
+
+Organization
+
+---
+
+## Fields
+
+| Field                | Type      | Required |
+| -------------------- | --------- | -------- |
+| id                   | UUIDv7    | Yes      |
+| organization_id      | UUID      | Yes      |
+| branch_id            | UUID      | Optional |
+| department_id        | UUID      | Yes      |
+| hiring_team_id       | UUID      | Optional |
+| pipeline_id          | UUID      | Yes      |
+| title                | String    | Yes      |
+| slug                 | String    | Yes      |
+| opportunity_type     | Enum      | Yes      |
+| employment_type      | Enum      | Optional |
+| workplace_type       | Enum      | Yes      |
+| experience_level     | Enum      | Optional |
+| openings             | Integer   | Yes      |
+| salary_min           | Decimal   | Optional |
+| salary_max           | Decimal   | Optional |
+| currency             | String    | Optional |
+| application_deadline | Timestamp | Optional |
+| publish_at           | Timestamp | Optional |
+| close_at             | Timestamp | Optional |
+| status               | Enum      | Yes      |
+
+---
+
+## Relationships
+
+Belongs To:
+
+* Organization
+* Branch
+* Department
+* Hiring Team
+* Pipeline
+
+Has Many:
+
+* Applications
+* Skill Requirements
+* Interviews
+* Offers
+
+---
+
+## Business Rules
+
+* Opportunities belong to one organization.
+* Opportunities use exactly one pipeline.
+* Organizations may duplicate opportunities.
+* Closed opportunities cannot receive new applications.
+* Archived opportunities remain searchable internally.
+* Scheduled opportunities become visible automatically at the publish date.
+
+---
+
+## Domain Events
+
+* OpportunityCreated
+* OpportunityPublished
+* OpportunityUpdated
+* OpportunityPaused
+* OpportunityClosed
+* OpportunityArchived
+
+---
+
+# HiringTeam
+
+## Purpose
+
+Represents the people responsible for recruiting for one or more opportunities.
+
+---
+
+## Fields
+
+* id
+* organization_id
+* name
+* description
+* created_at
+* updated_at
+
+---
+
+## Relationships
+
+Has Many:
+
+* Memberships (Recruiters)
+* Opportunities
+
+---
+
+## Business Rules
+
+Hiring teams are reusable across opportunities.
+
+---
+
+# Candidate
+
+## Purpose
+
+Represents a global talent profile.
+
+Candidates own their personal information while organizations own recruitment records.
+
+---
+
+## Aggregate Root
+
+Yes
+
+---
+
+## Fields
+
+| Field               | Type    |
+| ------------------- | ------- |
+| id                  | UUIDv7  |
+| user_id             | UUID    |
+| headline            | String  |
+| summary             | Text    |
+| location            | String  |
+| willing_to_relocate | Boolean |
+| work_authorization  | String  |
+| years_experience    | Integer |
+| expected_salary     | Decimal |
+| currency            | String  |
+| availability        | Enum    |
+| profile_visibility  | Enum    |
+
+---
+
+## Relationships
+
+Has Many:
+
+* Applications
+* Education
+* Experience
+* Certifications
+* Skills
+* Portfolio Items
+* Documents
+
+---
+
+## Business Rules
+
+* One candidate owns one reusable profile.
+* Candidates may apply to unlimited organizations.
+* Candidates may reapply after rejection if allowed.
+* Candidates control their personal profile.
+
+---
+
+## Domain Events
+
+* CandidateCreated
+* CandidateUpdated
+* CandidateApplied
+
+---
+
+# Application
+
+## Purpose
+
+Represents a candidate applying for an opportunity.
+
+---
+
+## Aggregate Root
+
+No
+
+---
+
+## Fields
+
+| Field            | Type      |
+| ---------------- | --------- |
+| id               | UUIDv7    |
+| opportunity_id   | UUID      |
+| candidate_id     | UUID      |
+| current_stage_id | UUID      |
+| status           | Enum      |
+| source           | Enum      |
+| referred_by      | UUID      |
+| applied_at       | Timestamp |
+| withdrawn_at     | Timestamp |
+| rejected_at      | Timestamp |
+| hired_at         | Timestamp |
+
+---
+
+## Relationships
+
+Belongs To:
+
+* Opportunity
+* Candidate
+* Pipeline Stage
+
+Has Many:
+
+* Interviews
+* Evaluations
+* Documents
+* Notes
+* Timeline Events
+
+---
+
+## Business Rules
+
+* One application belongs to one opportunity.
+* Candidates may submit multiple applications across opportunities.
+* Status and pipeline stage are independent.
+* Applications maintain complete history.
+
+---
+
+## Domain Events
+
+* ApplicationSubmitted
+* ApplicationWithdrawn
+* CandidateShortlisted
+* CandidateRejected
+* CandidateHired
+
+---
+
+# Pipeline
+
+## Purpose
+
+Defines the recruitment workflow.
+
+Organizations own reusable pipeline templates.
+
+---
+
+## Fields
+
+* id
+* organization_id
+* name
+* description
+* is_default
+* is_system
+
+---
+
+## Relationships
+
+Has Many:
+
+* Pipeline Stages
+* Opportunities
+
+---
+
+## Business Rules
+
+Organizations may create unlimited pipeline templates.
+
+---
+
+# PipelineStage
+
+## Purpose
+
+Represents one step within a hiring pipeline.
+
+---
+
+## Fields
+
+* id
+* pipeline_id
+* name
+* order
+* color
+* stage_type
+* allows_feedback
+* is_terminal
+
+---
+
+## Business Rules
+
+Stage order must be unique.
+
+Terminal stages cannot transition further.
+
+---
+
+# Interview
+
+## Purpose
+
+Represents a scheduled interview.
+
+---
+
+## Fields
+
+* id
+* application_id
+* interview_type
+* scheduled_start
+* scheduled_end
+* meeting_provider
+* meeting_link
+* status
+
+---
+
+## Relationships
+
+Belongs To:
+
+* Application
+
+Has Many:
+
+* Interviewers
+* Feedback
+* Scores
+
+---
+
+## Business Rules
+
+Applications may contain multiple interviews.
+
+Interviewers submit independent feedback.
+
+---
+
+## Domain Events
+
+* InterviewScheduled
+* InterviewCompleted
+* InterviewCancelled
+
+---
+
+# InterviewFeedback
+
+## Purpose
+
+Stores recruiter feedback.
+
+---
+
+## Fields
+
+* interview_id
+* membership_id
+* recommendation
+* comments
+* submitted_at
+
+---
+
+## Business Rules
+
+Feedback becomes immutable after submission.
+
+---
+
+# InterviewScore
+
+## Purpose
+
+Stores structured interview scoring.
+
+---
+
+## Fields
+
+* interview_id
+* competency
+* score
+* weight
+
+---
+
+# Evaluation
+
+## Purpose
+
+Represents structured candidate assessments outside interviews.
+
+Examples:
+
+* Technical assessment
+* Take-home assignment
+* Portfolio review
+
+---
+
+## Fields
+
+* application_id
+* evaluator_id
+* evaluation_type
+* score
+* recommendation
+* comments
+
+---
+
+# Offer
+
+## Purpose
+
+Represents an employment or internship offer.
+
+---
+
+## Fields
+
+* application_id
+* offer_status
+* salary
+* currency
+* start_date
+* expires_at
+* accepted_at
+* rejected_at
+
+---
+
+## Business Rules
+
+Applications may receive multiple offer revisions.
+
+Only one active offer may exist at a time.
+
+---
+
+# Skill
+
+## Purpose
+
+Represents a standardized skill.
+
+Examples:
+
+* JavaScript
+* React
+* PostgreSQL
+* Figma
+
+---
+
+## Fields
+
+* id
+* name
+* category
+* description
+
+---
+
+## Relationships
+
+Many-to-Many:
+
+* Candidates
+* Opportunities
+
+---
+
+# SkillRequirement
+
+## Purpose
+
+Represents required or preferred skills for an opportunity.
+
+---
+
+## Fields
+
+* opportunity_id
+* skill_id
+* requirement_level
+* minimum_years
+
+---
+
+# Education
+
+## Purpose
+
+Academic history.
+
+---
+
+## Fields
+
+* candidate_id
+* institution
+* qualification
+* field_of_study
+* start_date
+* end_date
+* grade
+
+---
+
+# Experience
+
+## Purpose
+
+Professional work history.
+
+---
+
+## Fields
+
+* candidate_id
+* employer
+* position
+* start_date
+* end_date
+* description
+
+---
+
+# Certification
+
+## Purpose
+
+Professional certifications.
+
+---
+
+## Fields
+
+* candidate_id
+* issuing_organization
+* certificate_name
+* issued_at
+* expires_at
+
+---
+
+# PortfolioItem
+
+## Purpose
+
+Represents candidate work samples.
+
+---
+
+## Fields
+
+* candidate_id
+* title
+* description
+* url
+* document_id
+
+---
+
+# TalentPool
+
+## Purpose
+
+Stores candidates for future opportunities.
+
+---
+
+## Fields
+
+* organization_id
+* name
+* description
+
+---
+
+## Relationships
+
+Many-to-Many:
+
+* Candidates
+
+---
+
+## Business Rules
+
+Candidates may belong to multiple talent pools.
+
+Talent pools support proactive recruitment.
+
+---
+
+# Shared Recruitment Standards
+
+All recruitment entities must:
+
+* Enforce tenant isolation.
+* Support audit logging.
+* Generate domain events.
+* Support optimistic locking where applicable.
+* Respect soft delete policies.
+* Validate ownership through organization boundaries.
+* Record timeline history for significant actions.
+
+---
+
+# Performance Considerations
+
+* Index organization_id, opportunity_id, candidate_id, and application_id.
+* Index status and current_stage_id for workflow queries.
+* Use composite indexes for tenant + status and opportunity + status.
+* Optimize recruiter dashboards with precomputed summaries where appropriate.
+* Synchronize searchable entities with Meilisearch asynchronously.
+
+---
+
+# Future Expansion
+
+This bounded context is designed to support future capabilities, including:
+
+* AI-powered candidate ranking
+* Recruitment agencies
+* Campus recruitment
+* Employee referrals
+* Internal mobility
+* Assessment providers
+* Background checks
+* Digital offer signing
+* Talent communities
+* Public recruitment APIs
+* Workflow automation
+* Advanced recruiting analytics

@@ -1,0 +1,525 @@
+# AUTHENTICATION.md
+
+# AdotKazi Authentication Architecture
+
+## Purpose
+
+This document defines the authentication architecture for the AdotKazi platform.
+
+Authentication is responsible for verifying user identity before access is granted to any protected resources.
+
+Authorization (roles and permissions) is handled separately in **AUTHORIZATION.md**.
+
+---
+
+# Goals
+
+The authentication system must be:
+
+* Secure
+* Passwordless-ready
+* Scalable
+* Multi-tenant aware
+* Cloud-agnostic
+* Provider-independent
+* Developer-friendly
+
+Authentication should remain independent from business logic.
+
+---
+
+# Authentication Stack
+
+## Recommended Framework
+
+**Better Auth**
+
+Reasons:
+
+* Native Next.js support
+* PostgreSQL compatible
+* Self-hostable
+* OAuth support
+* Magic Links
+* Email verification
+* Multi-Factor Authentication (MFA)
+* Passkey (WebAuthn) support
+* Session management
+* Device management
+* Easy migration from Supabase Auth if required
+
+The authentication provider should be replaceable without affecting business domains.
+
+---
+
+# Authentication Flow
+
+```text
+User
+   │
+   ▼
+Login Request
+   │
+   ▼
+Credential Verification
+   │
+   ▼
+Identity Confirmed
+   │
+   ▼
+MFA Verification (if enabled)
+   │
+   ▼
+Session Created
+   │
+   ▼
+JWT / Session Cookie Issued
+   │
+   ▼
+Protected Resources
+```
+
+---
+
+# Supported Authentication Methods
+
+## Email & Password
+
+Primary authentication method.
+
+Requirements:
+
+* Strong password policy
+* Secure hashing
+* Email verification before activation
+* Password reset support
+
+---
+
+## Magic Links
+
+Users may sign in using a one-time email link.
+
+Characteristics:
+
+* Passwordless
+* Single-use
+* Time-limited
+* Cryptographically signed
+
+---
+
+## OAuth
+
+Supported providers (initial):
+
+* Google
+
+Future providers:
+
+* Microsoft
+* GitHub
+* LinkedIn
+* Apple
+
+OAuth identities are linked to a single global user account.
+
+---
+
+## Passkeys (WebAuthn)
+
+Future-ready authentication using platform authenticators.
+
+Supported authenticators include:
+
+* Windows Hello
+* Face ID
+* Touch ID
+* Security Keys
+
+Passkeys may coexist with passwords and OAuth.
+
+---
+
+# Global Identity Model
+
+Authentication is **global**.
+
+A user has:
+
+* One identity
+* One account
+* One email
+
+A user may belong to multiple organizations through memberships.
+
+Example:
+
+```text
+User
+│
+├── Organization A
+│     └── Recruiter
+│
+├── Organization B
+│     └── Hiring Manager
+│
+└── Organization C
+      └── Interviewer
+```
+
+The user authenticates once and switches organizations without creating additional accounts.
+
+---
+
+# User Registration
+
+Users may register through:
+
+* Invitation
+* Self-registration (future, configurable)
+
+Registration process:
+
+1. Create identity
+2. Verify email
+3. Complete profile
+4. Accept invitation (if applicable)
+5. Join organization
+6. Create session
+
+---
+
+# Email Verification
+
+Email verification is mandatory.
+
+Requirements:
+
+* Signed verification token
+* Single-use
+* Expiration time
+* Automatic invalidation after use
+
+Unverified accounts cannot access protected areas.
+
+---
+
+# Password Policy
+
+Minimum requirements:
+
+* Minimum 12 characters
+* Mixed case
+* Numeric characters
+* Special characters
+* Password history (future)
+* Breach password checking (future)
+
+Passwords are never stored in plain text.
+
+Recommended hashing algorithm:
+
+* Argon2id
+
+---
+
+# Password Recovery
+
+Recovery flow:
+
+```text
+Forgot Password
+        │
+        ▼
+Email Verification
+        │
+        ▼
+Signed Reset Token
+        │
+        ▼
+Reset Password
+        │
+        ▼
+Invalidate Existing Sessions
+```
+
+Requirements:
+
+* Time-limited tokens
+* Single-use
+* Audit logging
+
+---
+
+# Multi-Factor Authentication (MFA)
+
+Supported methods:
+
+* TOTP Authenticator Apps
+* Email OTP (fallback)
+
+Future:
+
+* WebAuthn Passkeys
+* Security Keys
+
+Organizations may require MFA for specific roles.
+
+---
+
+# Session Management
+
+Sessions are server-managed.
+
+Session information includes:
+
+* User ID
+* Device
+* Browser
+* IP Address
+* Last Activity
+* Expiration
+* Refresh Information
+
+Users may:
+
+* View active sessions
+* Revoke sessions
+* Sign out from all devices
+
+---
+
+# Session Expiration
+
+Recommended defaults:
+
+* Access Session: 8 hours
+* Remember Me: 30 days
+* Idle Timeout: 30 minutes
+* Refresh Rotation Enabled
+
+All session durations should be configurable.
+
+---
+
+# Remember Me
+
+Optional persistent sessions.
+
+Requirements:
+
+* Secure cookies
+* Refresh token rotation
+* Device binding where practical
+
+---
+
+# Device Management
+
+Track trusted devices.
+
+Each device stores:
+
+* Device name
+* Browser
+* Operating system
+* Last login
+* IP address
+* Trust status
+
+Users may revoke trusted devices at any time.
+
+---
+
+# Login Security
+
+Implement:
+
+* Rate limiting
+* Brute-force protection
+* Login attempt throttling
+* Account lockout after repeated failures
+* CAPTCHA support (future)
+
+---
+
+# JWT Strategy
+
+Use short-lived JWTs only when appropriate.
+
+Recommended approach:
+
+* Secure HTTP-only cookies
+* Server-side session validation
+* Rotating refresh tokens
+
+Avoid long-lived bearer tokens where possible.
+
+---
+
+# Cookies
+
+Authentication cookies must be:
+
+* HTTP Only
+* Secure
+* SameSite=Lax (or Strict where appropriate)
+* Encrypted
+* Signed
+
+JavaScript must not access authentication cookies.
+
+---
+
+# Logout
+
+Logout process:
+
+1. Invalidate session
+2. Remove refresh tokens
+3. Clear cookies
+4. Record audit event
+
+Users may:
+
+* Logout current device
+* Logout all devices
+
+---
+
+# Account Status
+
+Supported statuses:
+
+* Pending Verification
+* Active
+* Suspended
+* Locked
+* Disabled
+
+Suspended accounts cannot authenticate.
+
+---
+
+# Authentication Events
+
+The authentication system publishes domain events including:
+
+* UserRegistered
+* EmailVerified
+* LoginSucceeded
+* LoginFailed
+* MFAEnabled
+* MFADisabled
+* PasswordChanged
+* PasswordResetRequested
+* PasswordResetCompleted
+* SessionCreated
+* SessionRevoked
+* UserLoggedOut
+
+These events are consumed by:
+
+* Analytics
+* Communication
+* Administration
+* Security monitoring
+
+---
+
+# Security Requirements
+
+Authentication must implement:
+
+* Argon2id password hashing
+* CSRF protection
+* XSS protection
+* Secure cookies
+* Refresh token rotation
+* Replay attack prevention
+* Timing attack resistance
+* Email enumeration protection
+* Session fixation prevention
+
+Secrets must never be exposed to clients.
+
+---
+
+# Audit Requirements
+
+Authentication actions must generate immutable audit events.
+
+Examples:
+
+* Login
+* Logout
+* Password change
+* Email verification
+* MFA changes
+* Device trust changes
+* Session revocation
+
+---
+
+# Performance
+
+Authentication should:
+
+* Minimize database queries
+* Cache non-sensitive metadata where appropriate
+* Validate sessions efficiently
+* Support horizontal scaling
+* Avoid shared in-memory session storage
+
+---
+
+# Cloud Portability
+
+Authentication must not rely on vendor-specific services.
+
+The architecture should support deployment on:
+
+* Supabase PostgreSQL
+* Self-hosted PostgreSQL
+* VPS
+* Docker
+* Kubernetes
+
+Replacing infrastructure must not require changes to authentication logic.
+
+---
+
+# Future Expansion
+
+The authentication architecture is designed to support:
+
+* Enterprise SSO (SAML/OIDC)
+* SCIM user provisioning
+* Passwordless-only organizations
+* Hardware security keys
+* Biometric authentication
+* Risk-based authentication
+* Adaptive MFA
+* Session anomaly detection
+* Trusted organization policies
+* Mobile authentication
+* API client authentication
+* Service accounts
+
+---
+
+# Definition of Done
+
+Authentication is considered production-ready when:
+
+* Identity verification is secure.
+* Email verification is enforced.
+* Passwords use Argon2id hashing.
+* MFA is supported.
+* OAuth is functional.
+* Sessions are revocable.
+* Audit events are generated.
+* Security protections are enabled.
+* Authentication remains independent from authorization.
+* Cloud portability is maintained.

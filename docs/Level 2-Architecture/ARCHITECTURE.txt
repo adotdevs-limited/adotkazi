@@ -1,0 +1,501 @@
+# ARCHITECTURE.md
+
+# AdotKazi System Architecture
+
+## Overview
+
+AdotKazi is a production-grade, multi-tenant Recruitment and Applicant Tracking System (ATS) built as a Software-as-a-Service (SaaS) platform.
+
+The architecture is designed to support thousands of organizations, millions of candidates, and continuous feature expansion while remaining maintainable, secure, and cost-efficient.
+
+The platform follows a **modular monolith architecture**, allowing rapid development today while preserving the ability to extract independent services as the platform grows.
+
+---
+
+# Architectural Goals
+
+Every architectural decision must support:
+
+* Scalability
+* Security
+* Simplicity
+* Performance
+* Extensibility
+* Cost Efficiency
+* Maintainability
+* Developer Experience
+
+The system should optimize for long-term sustainability rather than short-term implementation speed.
+
+---
+
+# Core Principles
+
+## Multi-Tenant by Design
+
+Multi-tenancy is a foundational architectural principle.
+
+Every tenant operates independently with isolated:
+
+* Data
+* Branding
+* Users
+* Workflows
+* Email settings
+* AI configuration
+* Analytics
+* Documents
+* Pipelines
+* Integrations
+
+Tenant isolation must never depend on frontend logic.
+
+Every request must be validated on the server.
+
+---
+
+## Modular Monolith
+
+The platform is implemented as one deployable application composed of independent feature modules.
+
+Initial modules include:
+
+* Authentication
+* Organizations
+* Memberships
+* Opportunities
+* Applications
+* Candidates
+* Interviews
+* Documents
+* Notifications
+* AI
+* Analytics
+* Settings
+* Administration
+
+Modules communicate through application services rather than direct database coupling.
+
+Future migration to microservices should be possible without rewriting business logic.
+
+---
+
+# Technology Stack
+
+Frontend
+
+* Next.js 15 (App Router)
+* React 19
+* TypeScript (Strict Mode)
+* Tailwind CSS
+* shadcn/ui
+* Motion
+
+Backend
+
+* Next.js Server Actions
+* Route Handlers
+* Service Layer
+* Repository Pattern
+
+Database
+
+* PostgreSQL
+* Prisma ORM
+
+Authentication
+
+* Better Auth (preferred)
+* Auth.js only if Better Auth cannot satisfy requirements
+
+Validation
+
+* Zod
+
+Forms
+
+* React Hook Form
+
+Email
+
+* Resend
+
+Storage
+
+* Supabase Storage (S3-compatible architecture)
+
+Search
+
+* Meilisearch
+
+Caching & Queue
+
+* Redis-compatible provider
+* Queue system selected for reliability, cost, and portability (e.g., Inngest or equivalent)
+
+Deployment
+
+* Initially optimized for Vercel
+* Infrastructure must remain provider-agnostic and portable to VPS or self-hosted environments
+
+---
+
+# API Strategy
+
+The platform is API-first.
+
+Business logic must never exist inside UI components.
+
+Architecture:
+
+UI
+
+↓
+
+Server Actions
+
+↓
+
+Application Services
+
+↓
+
+Repositories
+
+↓
+
+Database
+
+External integrations consume REST APIs built on the same application services.
+
+No duplicated business logic is permitted.
+
+GraphQL is intentionally not adopted at this stage due to unnecessary complexity for the current product requirements.
+
+---
+
+# Multi-Tenant Strategy
+
+Database Strategy
+
+* Shared PostgreSQL database
+* Shared schema
+* Tenant isolation through tenant_id
+
+Every tenant-owned entity includes:
+
+tenant_id
+
+No database query may access tenant-owned data without tenant filtering.
+
+Tenant context is resolved from:
+
+* Custom domains
+* Subdomains
+* Platform paths
+
+Supported examples:
+
+* careers.adotdevs.com
+* company.com/careers
+* adotkazi.com/company
+
+---
+
+# Identity Architecture
+
+Users have one global identity.
+
+Organizations grant memberships.
+
+A single user can belong to multiple organizations.
+
+Each membership has independent:
+
+* Role
+* Permissions
+* Preferences
+
+This enables consultants, agencies, and administrators to work across multiple organizations using one account.
+
+---
+
+# Candidate Architecture
+
+Candidates maintain one reusable global profile.
+
+Organizations maintain independent recruitment records including:
+
+* Internal notes
+* Ratings
+* Hiring status
+* Tags
+* Applications
+* Communication history
+
+A candidate owns their personal profile.
+
+Organizations own their recruitment data.
+
+---
+
+# Opportunity Engine
+
+Recruitment is centered around a unified Opportunity model.
+
+Supported opportunity types include:
+
+* Full-Time
+* Part-Time
+* Contract
+* Internship / IPT
+* Graduate Program
+* Apprenticeship
+* Volunteer
+
+Every opportunity inherits common functionality while allowing type-specific extensions.
+
+This architecture prevents duplicated logic and simplifies future expansion.
+
+---
+
+# AI Architecture
+
+Artificial Intelligence is implemented as a dedicated platform service.
+
+The AI service supports:
+
+* Resume parsing
+* Candidate summaries
+* Candidate matching
+* Job description generation
+* Interview question generation
+* Recruitment email drafting
+* Internship report generation
+* Duplicate detection
+* AI insights
+
+AI provides recommendations only.
+
+All recruitment decisions remain under human control.
+
+Resume workflow:
+
+Candidate uploads CV
+
+↓
+
+AI extracts structured information
+
+↓
+
+Candidate reviews extracted data
+
+↓
+
+Candidate edits if necessary
+
+↓
+
+Candidate submits application
+
+---
+
+# Search Architecture
+
+Meilisearch provides fast, scalable search.
+
+Search supports:
+
+* Jobs
+* Candidates
+* Organizations
+* Documents
+* Skills
+* Departments
+* Locations
+
+Search indexes update asynchronously to preserve application performance.
+
+---
+
+# File Architecture
+
+Documents are stored in object storage using an S3-compatible abstraction.
+
+Supported documents include:
+
+* CVs
+* Cover Letters
+* Certificates
+* Academic Transcripts
+* Student Introduction Letters
+* Identification Documents
+* Offer Letters
+* Generated Certificates
+
+Storage providers should be interchangeable without changing business logic.
+
+---
+
+# Notification Architecture
+
+Version 1:
+
+* Email
+
+Future support:
+
+* WhatsApp
+* SMS
+* Push Notifications
+* In-app Notifications
+
+Notification providers remain replaceable through an abstraction layer.
+
+---
+
+# Queue Architecture
+
+Long-running operations execute asynchronously.
+
+Examples include:
+
+* Email delivery
+* Resume parsing
+* AI generation
+* Search indexing
+* Certificate generation
+* PDF generation
+* Future webhooks
+
+User requests should never wait for background processing unless absolutely necessary.
+
+---
+
+# Security
+
+Security is mandatory.
+
+Requirements include:
+
+* RBAC
+* Permission middleware
+* Tenant isolation middleware
+* CSRF protection
+* XSS protection
+* SQL injection prevention
+* Rate limiting
+* Secure sessions
+* Encrypted secrets
+* Secure file uploads
+* Security headers
+* Audit logging
+
+Security must be enforced at the server layer.
+
+---
+
+# Audit Logging
+
+Every critical action generates an immutable audit event.
+
+Examples:
+
+* Organization created
+* Job published
+* Candidate applied
+* Interview scheduled
+* Status changed
+* Offer accepted
+* User invited
+* Role changed
+
+Audit history must be searchable.
+
+---
+
+# Soft Deletes
+
+Business entities use soft deletes.
+
+Records remain recoverable.
+
+Deletion never removes historical audit data.
+
+---
+
+# Internationalization
+
+Internationalization is built into the architecture from day one.
+
+Initial languages:
+
+* English
+* Swahili
+
+Future languages should require translation files only.
+
+Business logic must remain language-independent.
+
+---
+
+# Portability
+
+No business logic may depend on a specific cloud provider.
+
+The platform must support migration between:
+
+* Vercel
+* VPS
+* Self-hosted environments
+* Alternative cloud providers
+
+Storage, caching, email, queues, and deployment infrastructure must be abstracted behind interchangeable interfaces.
+
+---
+
+# Performance Goals
+
+The architecture should comfortably scale to:
+
+* 10,000+ organizations
+* 1,000,000+ candidates
+* 100,000+ opportunities
+* Millions of applications
+
+Performance optimization should prioritize efficient database queries, asynchronous processing, caching, pagination, lazy loading, and horizontal scalability where appropriate.
+
+---
+
+# Engineering Standards
+
+All development must follow:
+
+* SOLID principles
+* Clean Architecture
+* Feature-based modules
+* Strict TypeScript
+* No use of `any`
+* Reusable components
+* Comprehensive validation
+* Automated testing
+* Consistent documentation
+
+Developer experience is considered a first-class product feature.
+
+---
+
+# Future Evolution
+
+The architecture should allow future extraction of independent services, including:
+
+* AI Service
+* Notification Service
+* Search Service
+* Analytics Service
+* Public API Service
+
+without requiring significant changes to the domain model or business logic.
+
+The modular monolith is the foundation—not the limitation—of AdotKazi's long-term evolution.

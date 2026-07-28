@@ -1,0 +1,592 @@
+# CANDIDATE_PORTAL.md
+
+# AdotKazi Candidate Portal
+
+## Purpose
+
+The Candidate Portal is the primary interface for individuals using the AdotKazi platform to discover opportunities, manage their professional profile, submit applications, track progress, communicate with organizations, and build a long-term career portfolio.
+
+Unlike traditional ATS portals that are application-centric, the AdotKazi Candidate Portal is **candidate-centric**. A candidate creates one global profile that can be used across multiple organizations and opportunities.
+
+The portal is shared across the platform and is not owned by any single organization.
+
+---
+
+# Vision
+
+Provide every candidate with a single, intelligent career hub where they can:
+
+* Discover opportunities
+* Apply once using reusable profiles
+* Track applications
+* Build their professional portfolio
+* Complete IPT placements
+* Receive AI career assistance
+* Manage documents
+* Grow throughout their career
+
+---
+
+# Goals
+
+The Candidate Portal must:
+
+* Support one global candidate account
+* Provide reusable candidate profiles
+* Support multiple applications
+* Support IPT and Recruitment
+* Be mobile-friendly
+* Integrate with AI
+* Support notifications
+* Scale to millions of users
+
+---
+
+# Core Principles
+
+## One Global Account
+
+Each candidate owns one global account.
+
+Example:
+
+```text id="cp1"
+John Doe
+
+↓
+
+Global Candidate Account
+
+↓
+
+Applications
+
+├── Adotdevs
+
+├── Company A
+
+├── Company B
+
+├── Government Agency
+
+└── NGO
+```
+
+Candidates never create separate accounts for each organization.
+
+---
+
+## Profile Once, Apply Everywhere
+
+Candidates maintain one professional profile.
+
+Organizations read the profile but cannot permanently modify it.
+
+Profile changes automatically apply to future applications.
+
+---
+
+# Candidate Journey
+
+```text id="cp2"
+Register
+
+↓
+
+Complete Profile
+
+↓
+
+Discover Opportunities
+
+↓
+
+Apply
+
+↓
+
+Track Progress
+
+↓
+
+Interview
+
+↓
+
+Offer / Placement
+
+↓
+
+Employment or IPT
+
+↓
+
+Career Growth
+```
+
+---
+
+# Dashboard
+
+The dashboard displays:
+
+* Active Applications
+* Upcoming Interviews
+* IPT Placements
+* Recommended Opportunities
+* Notifications
+* Profile Completion
+* Saved Opportunities
+* Recently Viewed Opportunities
+
+---
+
+# Candidate Profile
+
+The profile contains:
+
+## Personal Information
+
+* Full Name
+* Photo
+* Email
+* Phone
+* Address
+* Nationality
+* Date of Birth (optional)
+* Languages
+
+---
+
+## Professional Information
+
+* Headline
+* Summary
+* Skills
+* Experience
+* Education
+* Certifications
+* Awards
+* Licenses
+
+---
+
+## Online Presence
+
+* LinkedIn
+* GitHub
+* Portfolio
+* Website
+* Behance
+* Dribbble
+
+Future platforms may be added.
+
+---
+
+## Documents
+
+Candidates manage:
+
+* Resume
+* CV
+* Cover Letters
+* Academic Transcript
+* Certificates
+* Recommendation Letters
+* Portfolio Files
+
+Documents are managed through the Document Service.
+
+---
+
+# Profile Completion
+
+Completion score considers:
+
+* Personal Information
+* Education
+* Experience
+* Skills
+* Documents
+* Contact Details
+
+The score encourages stronger profiles but never blocks applications unless required by an organization.
+
+---
+
+# Opportunity Discovery
+
+Candidates browse:
+
+* Jobs
+* Internships
+* IPT
+* Field Training
+* Graduate Programs
+* Apprenticeships
+* Volunteer Opportunities
+
+Future opportunity types automatically appear.
+
+---
+
+# Search & Filtering
+
+Filters include:
+
+* Opportunity Type
+* Location
+* Remote
+* Department
+* Organization
+* Salary
+* Experience Level
+* Skills
+* Employment Type
+* Posted Date
+
+Search is powered by the Search Platform.
+
+---
+
+# Saved Opportunities
+
+Candidates may:
+
+* Save opportunities
+* Remove saved opportunities
+* Organize favorites (future)
+
+Saved opportunities remain private.
+
+---
+
+# Application Center
+
+Candidates can:
+
+* Submit applications
+* Continue drafts
+* Withdraw applications
+* View application history
+* Reapply where permitted
+
+Each application shows:
+
+* Status
+* Timeline
+* Submitted Documents
+* Communication
+* Interview Schedule
+
+---
+
+# Application Timeline
+
+Example:
+
+```text id="cp3"
+Submitted
+
+↓
+
+Under Review
+
+↓
+
+Shortlisted
+
+↓
+
+Interview
+
+↓
+
+Assessment
+
+↓
+
+Offer
+
+↓
+
+Hired
+```
+
+Organizations define their workflows, but candidates see simplified progress.
+
+---
+
+# Interview Center
+
+Candidates can:
+
+* View interview invitations
+* Confirm attendance
+* Request rescheduling
+* Join online meetings
+* View interview history
+
+Meeting links are available only for authorized interviews.
+
+---
+
+# IPT Center
+
+For IPT and Field Training opportunities, candidates can:
+
+* View placement details
+* Submit daily logs
+* Submit weekly reports
+* Submit final reports
+* Upload required documents
+* View supervisor feedback
+* View evaluations
+* Download certificates
+
+This integrates with the IPT Module.
+
+---
+
+# Notifications
+
+Candidates receive:
+
+* Application confirmations
+* Status updates
+* Interview invitations
+* Interview reminders
+* Report reminders
+* Offer notifications
+* Placement updates
+* Certificate availability
+
+Notification preferences are configurable.
+
+---
+
+# AI Career Assistant
+
+The portal integrates with the AI Platform.
+
+Capabilities include:
+
+* Resume improvement
+* Cover letter generation
+* Profile optimization
+* Interview preparation
+* Career advice
+* Skill recommendations
+* Opportunity recommendations
+* Weekly report assistance (IPT)
+* Final report assistance (IPT)
+
+AI suggestions never submit content automatically.
+
+---
+
+# Recommendation Engine
+
+The Recommendation Engine suggests:
+
+* Relevant opportunities
+* Matching organizations
+* Missing skills
+* Courses (future)
+* Certifications (future)
+
+Recommendations improve based on candidate activity and profile data.
+
+---
+
+# Portfolio
+
+Candidates automatically build a professional portfolio.
+
+Portfolio includes:
+
+* Employment History
+* IPT Placements
+* Projects
+* Skills
+* Certificates
+* Awards
+* Evaluations (where permitted)
+
+Candidates control what is publicly shareable.
+
+---
+
+# Privacy Controls
+
+Candidates can control:
+
+* Public Profile Visibility
+* Resume Visibility
+* Contact Information
+* Portfolio Sharing
+* Notification Preferences
+
+Privacy settings apply platform-wide.
+
+---
+
+# Communication Center
+
+Candidates can:
+
+* Receive organization messages
+* Reply where permitted
+* View communication history
+* Download offer letters
+* Access onboarding instructions (future)
+
+Communication integrates with the Notification System.
+
+---
+
+# Account Settings
+
+Candidates manage:
+
+* Password
+* Multi-Factor Authentication
+* Language
+* Timezone
+* Theme
+* Connected Accounts
+* Session Management
+* Privacy Settings
+
+---
+
+# Integrations
+
+Current integrations:
+
+* Google Sign-In
+* GitHub Sign-In
+
+Future:
+
+* LinkedIn
+* Microsoft
+* Apple
+
+The architecture remains provider-independent.
+
+---
+
+# Analytics
+
+Candidate-facing analytics include:
+
+* Applications Submitted
+* Interviews Attended
+* Placement History
+* Profile Completion
+* Skill Growth
+* Opportunity Matches
+
+Internal recruiter analytics are not visible to candidates.
+
+---
+
+# Security
+
+The Candidate Portal enforces:
+
+* Secure authentication
+* Multi-factor authentication
+* Role-based authorization
+* Secure document access
+* Session management
+* Audit logging
+
+Candidates can only access their own information.
+
+---
+
+# Accessibility
+
+The portal should:
+
+* Meet WCAG 2.1 AA standards
+* Support keyboard navigation
+* Support screen readers
+* Support responsive layouts
+* Support low-bandwidth environments
+
+Accessibility is a core requirement.
+
+---
+
+# Domain Events
+
+Examples:
+
+* CandidateRegistered
+* ProfileUpdated
+* ResumeUploaded
+* OpportunitySaved
+* ApplicationSubmitted
+* ApplicationWithdrawn
+* InterviewConfirmed
+* DailyLogSubmitted
+* WeeklyReportSubmitted
+* CandidateAcceptedOffer
+
+Events are consumed by:
+
+* AI Platform
+* Analytics
+* Notification System
+* Search Platform
+* Workflow Engine
+
+---
+
+# Performance
+
+The Candidate Portal should:
+
+* Load dashboards quickly through cached summaries.
+* Lazy-load application history.
+* Stream notifications in real time.
+* Optimize document uploads with background processing.
+* Support millions of concurrent candidates.
+
+---
+
+# Future Expansion
+
+The architecture supports:
+
+* Candidate Mobile App
+* Digital Career Wallet
+* Professional Networking
+* Public Candidate Profiles
+* Learning Marketplace
+* Certification Verification
+* Career Coaching
+* Mentorship
+* Internal Mobility
+* Alumni Networks
+* Candidate Communities
+
+---
+
+# Definition of Done
+
+The Candidate Portal is considered production-ready when:
+
+* Candidates have one global account and reusable profile.
+* Applications can be managed across multiple organizations.
+* Recruitment and IPT workflows are fully supported.
+* Documents are managed through the Document Service.
+* AI provides career assistance and opportunity recommendations.
+* Search, Notifications, Analytics, Workflow Engine, and Recommendation Engine are integrated.
+* Privacy controls are configurable.
+* Tenant isolation and security are enforced.
+* The portal is responsive, accessible, and designed to scale to millions of candidates.

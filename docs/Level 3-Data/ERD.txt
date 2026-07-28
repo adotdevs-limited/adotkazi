@@ -1,0 +1,492 @@
+# ERD.md
+
+# AdotKazi Entity Relationship Diagram (ERD)
+
+## Purpose
+
+This document describes the logical entity relationships of the AdotKazi platform.
+
+Rather than presenting one extremely large database diagram, the system is divided into bounded contexts.
+
+Each bounded context owns its own entities while exposing only necessary relationships to other contexts.
+
+This approach improves maintainability, scalability, and developer understanding.
+
+---
+
+# System Architecture
+
+```text
+                                    AdotKazi
+                                        │
+ ┌──────────────────────────────────────┼──────────────────────────────────────┐
+ │                                      │                                      │
+ │                                      │                                      │
+Platform                         Recruitment                               IPT
+ │                                      │                                      │
+ │                                      │                                      │
+Communication                     AI Platform                           Analytics
+ │                                      │                                      │
+ └─────────────────────────────── Administration ───────────────────────────────┘
+```
+
+Every module depends on the Platform bounded context.
+
+Platform owns:
+
+* Organizations
+* Users
+* Memberships
+* Authentication
+* Authorization
+* Tenant isolation
+
+---
+
+# Platform ERD
+
+```text
+Organization
+│
+├── Branch
+├── Department
+├── Membership
+│      │
+│      ├── User
+│      ├── Role
+│      └── Permission
+│
+├── OrganizationSettings
+├── FeatureFlag
+├── Invitation
+└── OrganizationDomain
+```
+
+Relationships
+
+Organization
+
+* has many Branches
+* has many Departments
+* has many Memberships
+* has many Feature Flags
+
+Membership
+
+* belongs to User
+* belongs to Organization
+* belongs to Role
+
+Role
+
+* has many Permissions
+
+---
+
+# Recruitment ERD
+
+```text
+Opportunity
+│
+├── Pipeline
+│      │
+│      └── PipelineStage
+│
+├── HiringTeam
+│
+├── Application
+│      │
+│      ├── Candidate
+│      │
+│      ├── Interview
+│      │      ├── InterviewFeedback
+│      │      └── InterviewScore
+│      │
+│      ├── Evaluation
+│      └── Offer
+│
+└── SkillRequirement
+        │
+        └── Skill
+```
+
+Relationships
+
+Opportunity
+
+* has many Applications
+* belongs to Department
+* belongs to Branch
+* belongs to Hiring Team
+* belongs to Pipeline
+
+Candidate
+
+* has many Applications
+* has many Skills
+* has many Education records
+* has many Experience records
+* has many Certifications
+
+Application
+
+* belongs to Opportunity
+* belongs to Candidate
+
+---
+
+# IPT ERD
+
+```text
+Placement
+│
+├── SupervisorAssignment
+│      │
+│      └── Supervisor
+│
+├── DailyLog
+├── WeeklyReport
+├── MonthlyReport
+├── FinalReport
+├── Evaluation
+├── Certificate
+├── LearningObjective
+└── PlacementTimeline
+```
+
+Relationships
+
+Placement
+
+* belongs to Application
+* belongs to Opportunity
+* belongs to Candidate
+
+Placement
+
+* has many Daily Logs
+* has many Weekly Reports
+* has many Evaluations
+
+Supervisor
+
+* supervises many Placements
+
+---
+
+# AI ERD
+
+```text
+AIRequest
+│
+├── AIJob
+├── AIResponse
+├── AIRecommendation
+├── AIFeedback
+│
+├── PromptTemplate
+└── AIModel
+        │
+        └── AIUsage
+```
+
+Relationships
+
+AIRequest
+
+* has one AI Job
+* has one AI Response
+* has many Recommendations
+* has many Feedback entries
+
+PromptTemplate
+
+* used by many AI Requests
+
+AIModel
+
+* serves many AI Requests
+
+---
+
+# Communication ERD
+
+```text
+Notification
+│
+├── Recipient
+├── Delivery
+├── Attachment
+└── NotificationEvent
+
+EmailTemplate
+
+ChannelConfiguration
+
+CommunicationPreference
+
+WebhookEndpoint
+
+CommunicationLog
+```
+
+Relationships
+
+Notification
+
+* has many Recipients
+* has many Deliveries
+* has many Attachments
+
+Recipients
+
+* receive Deliveries
+
+---
+
+# Administration ERD
+
+```text
+AuditEvent
+
+ActivityLog
+
+SystemSetting
+
+FeatureFlagDefinition
+
+APIKey
+
+SupportSession
+
+MaintenanceWindow
+
+BackgroundJob
+
+HealthCheck
+
+Incident
+```
+
+Administration entities are largely independent.
+
+Most reference:
+
+* Organization
+* User
+
+---
+
+# Analytics ERD
+
+```text
+AnalyticsEvent
+│
+├── MetricSnapshot
+│      │
+│      └── MetricDefinition
+│
+├── Dashboard
+│      │
+│      └── DashboardWidget
+│
+├── KPI
+
+├── Report
+│      └── ReportSchedule
+│
+├── Insight
+
+└── DataExport
+```
+
+Relationships
+
+Dashboard
+
+* has many Widgets
+
+MetricDefinition
+
+* has many Snapshots
+
+Reports
+
+* may have many Schedules
+
+---
+
+# Cross-Bounded Context Relationships
+
+```text
+Platform
+     │
+     ├────────────► Recruitment
+     │
+     ├────────────► IPT
+     │
+     ├────────────► Communication
+     │
+     ├────────────► AI
+     │
+     ├────────────► Analytics
+     │
+     └────────────► Administration
+```
+
+Platform entities are referenced by every bounded context.
+
+No bounded context may directly modify another bounded context's internal aggregates.
+
+Interactions occur through:
+
+* Domain Events
+* Service APIs
+* Read Models
+* Shared Identifiers
+
+---
+
+# Aggregate Roots
+
+Platform
+
+* Organization
+* User
+
+Recruitment
+
+* Opportunity
+* Candidate
+
+IPT
+
+* Placement
+
+AI
+
+* AIRequest
+
+Communication
+
+* Notification
+
+Administration
+
+* AuditEvent
+
+Analytics
+
+* AnalyticsEvent
+
+Only aggregate roots should be referenced across bounded contexts where possible.
+
+---
+
+# Ownership Rules
+
+Organization owns:
+
+* Branches
+* Departments
+* Opportunities
+* Placements
+* Notifications
+* Dashboards
+* Reports
+
+User owns:
+
+* Memberships
+* Sessions
+* Preferences
+* AI Feedback
+
+Candidate owns:
+
+* Personal Profile
+* Education
+* Experience
+* Certifications
+* Portfolio
+
+Placement owns:
+
+* Daily Logs
+* Weekly Reports
+* Evaluations
+* Certificates
+
+Opportunity owns:
+
+* Applications
+* Hiring Team Assignment
+* Pipeline Assignment
+
+---
+
+# Tenant Isolation
+
+Every tenant-owned entity contains:
+
+* organization_id
+
+Tenant isolation is enforced in:
+
+* Database queries
+* Application services
+* API authorization
+* Search indexes
+* Analytics
+
+No tenant may access another tenant's data.
+
+---
+
+# Database Standards
+
+All entities follow the standards defined in:
+
+* DATABASE_STANDARDS.md
+
+Including:
+
+* UUIDv7 primary keys
+* Soft deletes where applicable
+* UTC timestamps
+* Audit fields
+* Optimistic locking
+* Foreign key constraints
+* Indexing strategy
+
+---
+
+# Future Bounded Contexts
+
+The logical architecture supports additional bounded contexts without breaking existing relationships.
+
+Planned future contexts include:
+
+* Integration
+* Documents
+* Workflow Automation
+* Recommendation Engine
+* Search
+* CMS
+* Billing
+* Compliance
+* Monitoring
+
+These contexts will integrate through shared identifiers and domain events while maintaining bounded context isolation.
+
+---
+
+# Physical ERD
+
+This document defines the logical architecture.
+
+The physical database ERD should be generated automatically from the Prisma schema after implementation.
+
+The generated ERD becomes the authoritative representation of database tables, columns, indexes, constraints, and relationships.
+
+Manual maintenance of the physical ERD is discouraged to avoid documentation drift.

@@ -1,0 +1,396 @@
+# ROADMAP.md
+
+# AdotKazi Product Roadmap
+
+## Purpose
+
+This roadmap defines the strategic evolution of AdotKazi from an internal recruitment platform for Adotdevs Limited into a production-grade, AI-powered, multi-tenant SaaS platform serving organizations across East Africa and beyond.
+
+The roadmap provides direction for product planning, engineering priorities, design decisions, and future expansion.
+
+It is a living document and may evolve as customer needs, market conditions, and business priorities change.
+
+---
+
+# Product Vision Timeline
+
+## Stage 1 — Foundation
+
+**Objective**
+
+Build a secure, scalable foundation that supports multi-tenancy and production deployment.
+
+**Success Criteria**
+
+* Organizations can be created.
+* Multi-tenant architecture is operational.
+* Authentication and authorization are complete.
+* Design system is implemented.
+* Core infrastructure is production-ready.
+* CI/CD pipeline established.
+* Documentation complete.
+
+**Deliverables**
+
+* Multi-tenant platform
+* Global authentication
+* Membership system
+* Organization management
+* Branch management
+* Department management
+* Roles and permissions
+* Audit logging
+* Feature flags
+* Notification infrastructure
+* AI infrastructure
+* Storage infrastructure
+* Search infrastructure
+
+---
+
+# Stage 2 — Recruitment Platform (MVP)
+
+**Objective**
+
+Deliver a complete Applicant Tracking System (ATS) that organizations can use to recruit employees.
+
+**Success Criteria**
+
+Organizations can complete an entire recruitment process using AdotKazi.
+
+**Deliverables**
+
+### Careers Website
+
+* Public careers page
+* Employer branding
+* Open opportunities
+* Opportunity details
+* Search and filtering
+
+### Opportunity Engine
+
+* Create opportunities
+* Publish opportunities
+* Drafts
+* Scheduling
+* Closing
+* Archiving
+* Opportunity templates
+
+### Candidate Experience
+
+* Global candidate account
+* Resume upload
+* AI-assisted profile extraction
+* Application tracking
+* Notifications
+* Saved opportunities
+
+### Recruitment
+
+* Applications
+* Pipelines
+* Interviews
+* Recruiter collaboration
+* Candidate evaluations
+* Offers
+* Hiring workflow
+
+---
+
+# Stage 3 — Internship (IPT) Platform
+
+**Objective**
+
+Become the leading platform for Industrial Practical Training (IPT) and internship recruitment.
+
+**Success Criteria**
+
+Organizations can manage the entire internship lifecycle digitally.
+
+**Deliverables**
+
+### Internship Opportunities
+
+* IPT opportunities
+* Internship opportunities
+* Graduate programmes
+* Volunteer opportunities
+* Apprenticeships
+
+### Placement Management
+
+* Student placements
+* Supervisor assignment
+* Placement timeline
+* Placement status
+* Capacity management
+
+### Student Experience
+
+* University information
+* Required documents
+* Daily logbook
+* Weekly reports
+* Final reports
+* AI-assisted report writing
+* Supervisor feedback
+* Completion certificates
+
+### Supervisor Experience
+
+* Student management
+* Report reviews
+* Evaluations
+* Approvals
+* Progress monitoring
+
+---
+
+# Stage 4 — AI Assistant
+
+**Objective**
+
+Transform AdotKazi into an AI-native recruitment platform.
+
+**Success Criteria**
+
+AI meaningfully reduces administrative work while keeping humans in control of hiring decisions.
+
+**Deliverables**
+
+### Candidate AI
+
+* Resume parsing
+* Candidate summaries
+* Skill extraction
+* Duplicate detection
+* Opportunity matching
+
+### Recruiter AI
+
+* Job description generation
+* Interview question generation
+* Email drafting
+* Candidate comparison
+* Recruitment insights
+
+### Internship AI
+
+* Daily logbook improvement
+* Weekly report assistance
+* Final report generation
+* Grammar correction
+* Formatting assistance
+
+---
+
+# Stage 5 — Collaboration & Automation
+
+**Objective**
+
+Reduce manual recruitment work through workflow automation.
+
+**Deliverables**
+
+* Workflow automation
+* Email automation
+* Approval workflows
+* Reminders
+* Calendar integration
+* Google Meet integration
+* Zoom integration
+* WhatsApp integration
+* Webhooks
+* API integrations
+
+---
+
+# Stage 6 — Analytics & Intelligence
+
+**Objective**
+
+Help organizations make better recruitment decisions using data.
+
+**Deliverables**
+
+* Hiring dashboards
+* Recruiter performance
+* Opportunity analytics
+* Candidate source analytics
+* Funnel analytics
+* Time-to-hire metrics
+* AI insights
+* Exportable reports
+
+---
+
+# Stage 7 — SaaS Expansion
+
+**Objective**
+
+Commercialize AdotKazi as a subscription platform.
+
+**Deliverables**
+
+* Free trial
+* Subscription plans
+* Usage limits
+* Feature flags
+* Tenant billing
+* Organization onboarding
+* Customer support tools
+* Platform administration
+* Public API
+* Webhooks
+
+---
+
+# Stage 8 — Enterprise Features
+
+**Objective**
+
+Support large organizations with advanced operational requirements.
+
+**Deliverables**
+
+* SSO
+* SCIM
+* Advanced permissions
+* Multiple recruiters
+* Multiple business units
+* Advanced audit logs
+* Compliance features
+* Enterprise reporting
+* Custom domains
+* SLA monitoring
+
+---
+
+# Stage 9 — Ecosystem
+
+**Objective**
+
+Position AdotKazi as the central talent acquisition platform for East Africa.
+
+**Future Opportunities**
+
+* University partnerships
+* Recruitment agency support
+* Talent marketplace
+* Job board syndication
+* Public developer platform
+* Third-party integrations
+* Partner ecosystem
+
+---
+
+# Product Milestones
+
+## Milestone Alpha
+
+Internal development environment.
+
+Users:
+
+Engineering team only.
+
+Purpose:
+
+Architecture validation.
+
+---
+
+## Milestone Beta
+
+Internal use at Adotdevs Limited.
+
+Users:
+
+Internal recruiters.
+
+Purpose:
+
+Validate recruitment workflows.
+
+---
+
+## Milestone Release Candidate
+
+Limited external organizations.
+
+Purpose:
+
+Validate multi-tenancy, onboarding, and production infrastructure.
+
+---
+
+## Version 1.0
+
+Public launch.
+
+Supports:
+
+* Employee recruitment
+* Internship recruitment
+* AI assistance
+* Multi-tenancy
+* Careers websites
+
+---
+
+## Version 2.0
+
+Commercial SaaS expansion.
+
+Supports:
+
+* Paid subscriptions
+* Automation
+* Advanced analytics
+* Enterprise capabilities
+* Public APIs
+
+---
+
+# Engineering Priorities
+
+The engineering team should prioritize work in the following order:
+
+1. Platform stability
+2. Security
+3. Correctness
+4. Accessibility
+5. Performance
+6. Developer experience
+7. User experience
+8. New features
+
+New functionality must never compromise platform quality.
+
+---
+
+# Product Principles
+
+Every roadmap decision should align with these principles:
+
+* Multi-tenant by design.
+* AI assists but never replaces human decision-making.
+* Candidate experience matters as much as recruiter experience.
+* Configuration is preferred over customization.
+* Accessibility is mandatory.
+* Cloud provider independence is maintained.
+* APIs remain reusable.
+* Security is built in from the start.
+* Performance is considered during design, not after implementation.
+
+---
+
+# Long-Term Vision
+
+AdotKazi aims to become the leading AI-powered recruitment platform in East Africa before expanding into global markets.
+
+The platform will remain focused on talent acquisition rather than evolving into a full Human Resource Management System (HRMS).
+
+By maintaining a focused product vision, scalable architecture, and exceptional user experience, AdotKazi will enable organizations of every size to recruit, evaluate, and onboard talent through one intelligent, collaborative, and secure platform.
