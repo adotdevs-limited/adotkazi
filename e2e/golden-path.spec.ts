@@ -81,6 +81,6 @@ test("sign up, verify, create an organization, and invite a teammate", async ({
   const guestPage = await guestContext.newPage();
   await guestPage.goto(inviteLink);
   await expect(guestPage.getByText(`Join Test Org ${unique}`)).toBeVisible();
-  await expect(guestPage.getByRole("link", { name: "Sign in" })).toBeVisible();
+  await expect(guestPage.getByRole("button", { name: "Sign in" })).toBeVisible();
   await guestContext.close();
 });
