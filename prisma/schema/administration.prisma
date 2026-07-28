@@ -1,0 +1,27 @@
+// Administration bounded context (subset) — see
+// docs/Level 3-Data/ENTITY_SPECIFICATIONS/ADMIN_ENTITIES.txt
+//
+// Only AuditEvent is modeled in Milestone 1; the remaining Administration
+// entities (SystemSetting, APIKey, Incident, etc.) belong to the Super Admin
+// module and are introduced when that module is built.
+
+/// Immutable record of a significant action. Never updated or soft deleted.
+model AuditEvent {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  organizationId String?  @map("organization_id") @db.Uuid
+  actorUserId    String?  @map("actor_user_id") @db.Uuid
+  actor          User?    @relation(fields: [actorUserId], references: [id])
+  entityType     String   @map("entity_type")
+  entityId       String   @map("entity_id") @db.Uuid
+  action         String
+  beforeData     Json?    @map("before_data")
+  afterData      Json?    @map("after_data")
+  ipAddress      String?  @map("ip_address")
+  userAgent      String?  @map("user_agent")
+  occurredAt     DateTime @default(now()) @map("occurred_at")
+
+  @@index([organizationId, occurredAt])
+  @@index([entityType, entityId])
+  @@index([actorUserId])
+  @@map("audit_events")
+}

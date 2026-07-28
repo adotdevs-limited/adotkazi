@@ -1,0 +1,84 @@
+// Better Auth-managed models.
+//
+// Generated once via `pnpm dlx @better-auth/cli generate`, then hand-extended
+// with AdotKazi's domain relations (Membership, Invitation, AuditEvent,
+// UserPreference) and snake_case column mapping per SCHEMA_GUIDELINES.txt.
+// Do not blindly re-run the generator over this file — merge new fields by
+// hand so the additions below are preserved.
+
+model User {
+  id            String   @id @db.Uuid
+  name          String
+  email         String
+  emailVerified Boolean  @default(false) @map("email_verified")
+  image         String?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // AdotKazi domain extensions (see PLATFORM_ENTITIES.txt#User)
+  phone            String?
+  locale           String    @default("en")
+  timezone         String    @default("UTC")
+  preferredTheme   String    @default("system") @map("preferred_theme")
+  status           String    @default("pending_verification")
+  avatarDocumentId String?   @map("avatar_document_id") @db.Uuid
+  lastLoginAt      DateTime? @map("last_login_at")
+
+  sessions        Session[]
+  accounts        Account[]
+  memberships     Membership[]
+  sentInvitations Invitation[]    @relation("InvitationSender")
+  preference      UserPreference?
+  auditEvents     AuditEvent[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id @db.Uuid
+  expiresAt DateTime @map("expires_at")
+  token     String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  userId    String   @map("user_id") @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id @db.Uuid
+  accountId             String    @map("account_id")
+  providerId            String    @map("provider_id")
+  userId                String    @map("user_id") @db.Uuid
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?   @map("access_token")
+  refreshToken          String?   @map("refresh_token")
+  idToken               String?   @map("id_token")
+  accessTokenExpiresAt  DateTime? @map("access_token_expires_at")
+  refreshTokenExpiresAt DateTime? @map("refresh_token_expires_at")
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id @db.Uuid
+  identifier String
+  value      String
+  expiresAt  DateTime @map("expires_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@index([identifier])
+  @@map("verification")
+}

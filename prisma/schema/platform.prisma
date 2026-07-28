@@ -1,0 +1,273 @@
+// Platform bounded context — see docs/Level 3-Data/ENTITY_SPECIFICATIONS/PLATFORM_ENTITIES.txt
+//
+// Owns organization identity, structure, membership, and RBAC. Every other
+// bounded context depends on these models for tenant isolation.
+
+enum OrganizationStatus {
+  PENDING
+  TRIAL
+  ACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+enum CompanySize {
+  MICRO
+  SMALL
+  MEDIUM
+  LARGE
+  ENTERPRISE
+}
+
+enum BranchStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum MembershipStatus {
+  INVITED
+  ACTIVE
+  SUSPENDED
+  REMOVED
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REVOKED
+}
+
+/// Aggregate root for all tenant-owned data. See PLATFORM_ENTITIES.txt#Organization.
+model Organization {
+  id             String             @id @default(uuid(7)) @db.Uuid
+  name           String
+  legalName      String?            @map("legal_name")
+  slug           String             @unique
+  status         OrganizationStatus @default(PENDING)
+  industry       String?
+  companySize    CompanySize?       @map("company_size")
+  website        String?
+  email          String?
+  phone          String?
+  timezone       String
+  country        String
+  logoDocumentId String?            @map("logo_document_id") @db.Uuid
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  createdBy String?   @map("created_by") @db.Uuid
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  updatedBy String?   @map("updated_by") @db.Uuid
+  deletedAt DateTime? @map("deleted_at")
+  deletedBy String?   @map("deleted_by") @db.Uuid
+
+  branches     Branch[]
+  departments  Department[]
+  memberships  Membership[]
+  roles        Role[]
+  invitations  Invitation[]
+  featureFlags FeatureFlag[]
+  settings     OrganizationSettings?
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("organizations")
+}
+
+/// A physical or operational office belonging to an organization.
+model Branch {
+  id             String       @id @default(uuid(7)) @db.Uuid
+  organizationId String       @map("organization_id") @db.Uuid
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  name           String
+  code           String?
+  address        String?
+  city           String?
+  country        String?
+  timezone       String?
+  phone          String?
+  email          String?
+  isHeadquarters Boolean      @default(false) @map("is_headquarters")
+  status         BranchStatus @default(ACTIVE)
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  createdBy String?   @map("created_by") @db.Uuid
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  updatedBy String?   @map("updated_by") @db.Uuid
+  deletedAt DateTime? @map("deleted_at")
+  deletedBy String?   @map("deleted_by") @db.Uuid
+
+  @@index([organizationId])
+  @@index([organizationId, status])
+  @@map("branches")
+}
+
+/// An organization-wide department, reusable across branches and opportunities.
+model Department {
+  id             String       @id @default(uuid(7)) @db.Uuid
+  organizationId String       @map("organization_id") @db.Uuid
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  name           String
+  description    String?
+  color          String?
+  isActive       Boolean      @default(true) @map("is_active")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  createdBy String?   @map("created_by") @db.Uuid
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  updatedBy String?   @map("updated_by") @db.Uuid
+  deletedAt DateTime? @map("deleted_at")
+  deletedBy String?   @map("deleted_by") @db.Uuid
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
+  @@map("departments")
+}
+
+/// A collection of permissions. System roles are global (organizationId is
+/// null); organizations may also define custom roles.
+model Role {
+  id             String        @id @default(uuid(7)) @db.Uuid
+  organizationId String?       @map("organization_id") @db.Uuid
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  name           String
+  description    String?
+  isSystem       Boolean       @default(false) @map("is_system")
+  isDefault      Boolean       @default(false) @map("is_default")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  permissions RolePermission[]
+  memberships Membership[]
+  invitations Invitation[]
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
+  @@map("roles")
+}
+
+/// One authorized action, named `resource.action` (e.g. `organization.update`).
+model Permission {
+  id          String  @id @default(uuid(7)) @db.Uuid
+  key         String  @unique
+  name        String
+  description String?
+  module      String
+
+  roles RolePermission[]
+
+  @@index([module])
+  @@map("permissions")
+}
+
+/// Explicit join between Role and Permission (see SCHEMA_GUIDELINES.txt:
+/// "Always use explicit junction models").
+model RolePermission {
+  roleId       String     @map("role_id") @db.Uuid
+  permissionId String     @map("permission_id") @db.Uuid
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now()) @map("created_at")
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+/// A user's relationship with an organization: role, permissions, and status.
+model Membership {
+  id             String           @id @default(uuid(7)) @db.Uuid
+  organizationId String           @map("organization_id") @db.Uuid
+  organization   Organization     @relation(fields: [organizationId], references: [id])
+  userId         String           @map("user_id") @db.Uuid
+  user           User             @relation(fields: [userId], references: [id])
+  roleId         String           @map("role_id") @db.Uuid
+  role           Role             @relation(fields: [roleId], references: [id])
+  status         MembershipStatus @default(INVITED)
+  invitedBy      String?          @map("invited_by") @db.Uuid
+  joinedAt       DateTime?        @map("joined_at")
+  lastActiveAt   DateTime?        @map("last_active_at")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@unique([organizationId, userId])
+  @@index([organizationId, status])
+  @@index([userId])
+  @@map("memberships")
+}
+
+/// Invites a user (by email) to join an organization with a given role.
+model Invitation {
+  id             String           @id @default(uuid(7)) @db.Uuid
+  organizationId String           @map("organization_id") @db.Uuid
+  organization   Organization     @relation(fields: [organizationId], references: [id])
+  email          String
+  roleId         String           @map("role_id") @db.Uuid
+  role           Role             @relation(fields: [roleId], references: [id])
+  // Nullable: platform bootstrap invitations (see prisma/seed.ts) have no
+  // human inviter. All invitations created through the app set this.
+  invitedById    String?          @map("invited_by") @db.Uuid
+  invitedBy      User?            @relation("InvitationSender", fields: [invitedById], references: [id])
+  token          String           @unique
+  status         InvitationStatus @default(PENDING)
+  expiresAt      DateTime         @map("expires_at")
+  acceptedAt     DateTime?        @map("accepted_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([organizationId, status])
+  @@index([email])
+  @@map("invitations")
+}
+
+/// Organization-wide configuration (branding, localization, defaults).
+model OrganizationSettings {
+  organizationId       String       @id @map("organization_id") @db.Uuid
+  organization         Organization @relation(fields: [organizationId], references: [id])
+  branding             Json?
+  localization         Json?
+  hiringDefaults       Json?        @map("hiring_defaults")
+  emailSettings        Json?        @map("email_settings")
+  aiSettings           Json?        @map("ai_settings")
+  notificationSettings Json?        @map("notification_settings")
+
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("organization_settings")
+}
+
+/// Personal preferences independent of organization membership.
+model UserPreference {
+  userId                  String @id @map("user_id") @db.Uuid
+  user                    User   @relation(fields: [userId], references: [id])
+  language                String @default("en")
+  theme                   String @default("system")
+  timezone                String @default("UTC")
+  notificationPreferences Json?  @map("notification_preferences")
+  dashboardPreferences    Json?  @map("dashboard_preferences")
+
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("user_preferences")
+}
+
+/// Controls feature availability per organization.
+model FeatureFlag {
+  id                String       @id @default(uuid(7)) @db.Uuid
+  organizationId    String       @map("organization_id") @db.Uuid
+  organization      Organization @relation(fields: [organizationId], references: [id])
+  featureKey        String       @map("feature_key")
+  enabled           Boolean      @default(false)
+  rolloutPercentage Int?         @map("rollout_percentage")
+  expiresAt         DateTime?    @map("expires_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([organizationId, featureKey])
+  @@map("feature_flags")
+}
