@@ -7,6 +7,8 @@ const envSchema = z.object({
   APP_URL: z.string().min(1),
   GOOGLE_CLIENT_ID: z.string().optional().default(""),
   GOOGLE_CLIENT_SECRET: z.string().optional().default(""),
+  RESEND_API_KEY: z.string().optional().default(""),
+  EMAIL_FROM: z.string().optional().default(""),
 });
 
 const parsed = envSchema.safeParse(process.env);
@@ -20,3 +22,4 @@ if (!parsed.success) {
 export const env = parsed.data;
 
 export const isGoogleOAuthConfigured = Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET);
+export const isResendConfigured = Boolean(env.RESEND_API_KEY && env.EMAIL_FROM);
