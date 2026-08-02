@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { ExternalLinkIcon } from "lucide-react";
+
 import {
   requireCurrentUser,
   requireActiveMembership,
@@ -6,6 +9,7 @@ import { prisma } from "@/lib/db";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export const metadata = { title: "Settings" };
 
@@ -37,8 +41,18 @@ export default async function SettingsPage() {
             <Input id="org-name" value={organization.name} disabled />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="org-slug">Workspace URL</Label>
-            <Input id="org-slug" value={`adotkazi.com/${organization.slug}`} disabled />
+            <Label htmlFor="org-slug">Careers page</Label>
+            <div className="flex gap-2">
+              <Input id="org-slug" value={`adotkazi.com/careers/${organization.slug}`} disabled />
+              <Button
+                nativeButton={false}
+                variant="outline"
+                size="icon"
+                render={<Link href={`/careers/${organization.slug}`} target="_blank" />}
+              >
+                <ExternalLinkIcon />
+              </Button>
+            </div>
           </div>
           <div className="grid gap-2">
             <Label htmlFor="org-country">Country</Label>

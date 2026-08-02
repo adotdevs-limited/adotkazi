@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { PencilIcon } from "lucide-react";
+import { PencilIcon, UsersIcon } from "lucide-react";
 
 import {
   requireCurrentUser,
@@ -8,6 +8,7 @@ import {
 } from "@/domains/platform/tenancy/active-organization";
 import { can } from "@/domains/platform/authorization/policy";
 import { findOpportunityById } from "@/domains/recruitment/opportunities/opportunity.repository";
+import { countApplicationsForOpportunity } from "@/domains/recruitment/applications/application.repository";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { OpportunityStatusBadge } from "@/components/opportunities/opportunity-status-badge";
@@ -34,6 +35,10 @@ export default async function OpportunityDetailPage({
   }
 
   const canUpdate = can(membership, "opportunity.update");
+  const canViewApplications = can(membership, "application.view");
+  const applicationCount = canViewApplications
+    ? await countApplicationsForOpportunity(opportunity.id)
+    : 0;
 
   return (
     <div className="grid gap-6">
@@ -50,15 +55,26 @@ export default async function OpportunityDetailPage({
             {opportunity.workplaceType.replaceAll("_", " ")}
           </p>
         </div>
-        {canUpdate && opportunity.status !== "CLOSED" && opportunity.status !== "ARCHIVED" && (
-          <Button
-            nativeButton={false}
-            variant="outline"
-            render={<Link href={`/dashboard/opportunities/${opportunity.id}/edit`} />}
-          >
-            <PencilIcon /> Edit
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {canViewApplications && (
+            <Button
+              nativeButton={false}
+              variant="outline"
+              render={<Link href={`/dashboard/opportunities/${opportunity.id}/applications`} />}
+            >
+              <UsersIcon /> View applicants ({applicationCount})
+            </Button>
+          )}
+          {canUpdate && opportunity.status !== "CLOSED" && opportunity.status !== "ARCHIVED" && (
+            <Button
+              nativeButton={false}
+              variant="outline"
+              render={<Link href={`/dashboard/opportunities/${opportunity.id}/edit`} />}
+            >
+              <PencilIcon /> Edit
+            </Button>
+          )}
+        </div>
       </div>
 
       <OpportunityLifecycleActions

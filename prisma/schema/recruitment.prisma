@@ -87,6 +87,7 @@ model Opportunity {
   visibility OpportunityVisibility @default(PUBLIC)
 
   skillRequirements SkillRequirement[]
+  applications      Application[]
 
   createdAt DateTime  @default(now()) @map("created_at")
   createdBy String?   @map("created_by") @db.Uuid
@@ -143,6 +144,8 @@ model PipelineStage {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  applications Application[]
+
   @@unique([pipelineId, order])
   @@index([pipelineId])
   @@map("pipeline_stages")
@@ -195,4 +198,60 @@ model SkillRequirement {
   @@id([opportunityId, skillId])
   @@index([skillId])
   @@map("opportunity_skill_requirements")
+}
+
+/// Thin now — id + userId only. RECRUITMENT_ENTITIES.txt's full profile
+/// (headline, experience, education, portfolio) is a later phase; this seam
+/// exists now so Application references Candidate, not User directly,
+/// avoiding a migration when the full profile is built out.
+model Candidate {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  userId    String   @unique @map("user_id") @db.Uuid
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  applications Application[]
+
+  @@map("candidates")
+}
+
+/// One candidate's submission to one opportunity. The resume is stored
+/// per-application (not on Candidate) so it stays within the existing
+/// org-scoped StorageProvider contract (FILE_STORAGE.txt) — a reusable,
+/// cross-organization candidate resume is a later phase.
+/// Only ACTIVE/REJECTED for now — HIRED/WITHDRAWN need consumers (offers,
+/// candidate self-service) that don't exist yet. Independent of
+/// currentStageId; see RECRUITMENT_ENTITIES.txt.
+enum ApplicationStatus {
+  ACTIVE
+  REJECTED
+}
+
+model Application {
+  id             String         @id @default(uuid(7)) @db.Uuid
+  organizationId String         @map("organization_id") @db.Uuid
+  organization   Organization   @relation(fields: [organizationId], references: [id])
+  opportunityId  String         @map("opportunity_id") @db.Uuid
+  opportunity    Opportunity    @relation(fields: [opportunityId], references: [id])
+  candidateId    String         @map("candidate_id") @db.Uuid
+  candidate      Candidate      @relation(fields: [candidateId], references: [id])
+  currentStageId String?        @map("current_stage_id") @db.Uuid
+  currentStage   PipelineStage? @relation(fields: [currentStageId], references: [id])
+
+  coverNote         String? @map("cover_note") @db.Text
+  resumeFilename    String  @map("resume_filename")
+  resumeStoragePath String  @map("resume_storage_path")
+
+  status ApplicationStatus @default(ACTIVE)
+
+  appliedAt DateTime @default(now()) @map("applied_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([candidateId, opportunityId])
+  @@index([organizationId])
+  @@index([opportunityId])
+  @@index([currentStageId])
+  @@map("applications")
 }

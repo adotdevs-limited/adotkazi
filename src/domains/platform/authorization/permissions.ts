@@ -107,6 +107,18 @@ export const PERMISSIONS = [
     description: "Create and edit recruitment pipelines.",
     module: "recruitment",
   },
+  {
+    key: "application.view",
+    name: "View applications",
+    description: "View applicants and their details.",
+    module: "recruitment",
+  },
+  {
+    key: "application.update",
+    name: "Update applications",
+    description: "Move applications through pipeline stages, reject, and reactivate.",
+    module: "recruitment",
+  },
 ] as const;
 
 export type PermissionKey = (typeof PERMISSIONS)[number]["key"];

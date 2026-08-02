@@ -34,6 +34,8 @@ export const SYSTEM_ROLES: Array<{
       "opportunity.publish",
       "opportunity.archive",
       "pipeline.manage",
+      "application.view",
+      "application.update",
     ],
   },
   {
@@ -56,6 +58,8 @@ export const SYSTEM_ROLES: Array<{
       "opportunity.publish",
       "opportunity.archive",
       "pipeline.manage",
+      "application.view",
+      "application.update",
     ],
   },
   {
@@ -70,6 +74,8 @@ export const SYSTEM_ROLES: Array<{
       "opportunity.update",
       "opportunity.publish",
       "opportunity.archive",
+      "application.view",
+      "application.update",
     ],
   },
   {
@@ -79,13 +85,20 @@ export const SYSTEM_ROLES: Array<{
     // Full org-wide grant for now — there's no HiringTeam-assignment UI yet
     // to scope this down to only the manager's own opportunities. Narrow
     // once HiringTeam management ships.
-    permissions: ["organization.view", "membership.view", "opportunity.view", "opportunity.update"],
+    permissions: [
+      "organization.view",
+      "membership.view",
+      "opportunity.view",
+      "opportunity.update",
+      "application.view",
+      "application.update",
+    ],
   },
   {
     name: "Interviewer",
     description: "Conducts interviews and submits feedback.",
     isDefault: false,
-    permissions: ["organization.view", "opportunity.view"],
+    permissions: ["organization.view", "opportunity.view", "application.view"],
   },
   {
     name: "Supervisor",
@@ -97,7 +110,13 @@ export const SYSTEM_ROLES: Array<{
     name: "Viewer",
     description: "Read-only access to the organization.",
     isDefault: false,
-    permissions: ["organization.view", "membership.view", "audit.view", "opportunity.view"],
+    permissions: [
+      "organization.view",
+      "membership.view",
+      "audit.view",
+      "opportunity.view",
+      "application.view",
+    ],
   },
 ];
 

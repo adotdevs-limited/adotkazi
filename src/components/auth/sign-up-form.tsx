@@ -26,7 +26,13 @@ const signUpSchema = z.object({
   password: z.string().min(12, "Use at least 12 characters."),
 });
 
-export function SignUpForm({ googleEnabled }: { googleEnabled: boolean }) {
+export function SignUpForm({
+  googleEnabled,
+  redirectTo = "/dashboard",
+}: {
+  googleEnabled: boolean;
+  redirectTo?: string;
+}) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [submitted, setSubmitted] = React.useState(false);
 
@@ -41,6 +47,7 @@ export function SignUpForm({ googleEnabled }: { googleEnabled: boolean }) {
       name: values.name,
       email: values.email,
       password: values.password,
+      callbackURL: redirectTo,
     });
     setIsSubmitting(false);
 
@@ -78,9 +85,7 @@ export function SignUpForm({ googleEnabled }: { googleEnabled: boolean }) {
               type="button"
               variant="outline"
               className="w-full"
-              onClick={() =>
-                authClient.signIn.social({ provider: "google", callbackURL: "/dashboard" })
-              }
+              onClick={() => authClient.signIn.social({ provider: "google", callbackURL: redirectTo })}
             >
               Continue with Google
             </Button>

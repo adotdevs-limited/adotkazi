@@ -71,6 +71,7 @@ model Organization {
   opportunities Opportunity[]
   pipelines     Pipeline[]
   hiringTeams   HiringTeam[]
+  applications  Application[]
 
   @@index([status])
   @@index([createdAt])

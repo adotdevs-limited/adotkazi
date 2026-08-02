@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BriefcaseIcon, PlusIcon } from "lucide-react";
+import { BriefcaseIcon, ExternalLinkIcon, PlusIcon } from "lucide-react";
 
 import {
   requireCurrentUser,
@@ -29,11 +29,20 @@ export default async function OpportunitiesPage() {
             Job requisitions for {membership.organizationName}.
           </p>
         </div>
-        {canCreate && (
-          <Button nativeButton={false} render={<Link href="/dashboard/opportunities/new" />}>
-            <PlusIcon /> New opportunity
+        <div className="flex items-center gap-2">
+          <Button
+            nativeButton={false}
+            variant="outline"
+            render={<Link href={`/careers/${membership.organizationSlug}`} target="_blank" />}
+          >
+            <ExternalLinkIcon /> View careers page
           </Button>
-        )}
+          {canCreate && (
+            <Button nativeButton={false} render={<Link href="/dashboard/opportunities/new" />}>
+              <PlusIcon /> New opportunity
+            </Button>
+          )}
+        </div>
       </div>
 
       <Card>

@@ -26,7 +26,13 @@ const signInSchema = z.object({
   password: z.string().min(1, "Enter your password."),
 });
 
-export function SignInForm({ googleEnabled }: { googleEnabled: boolean }) {
+export function SignInForm({
+  googleEnabled,
+  redirectTo = "/dashboard",
+}: {
+  googleEnabled: boolean;
+  redirectTo?: string;
+}) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
@@ -48,7 +54,7 @@ export function SignInForm({ googleEnabled }: { googleEnabled: boolean }) {
       return;
     }
 
-    router.push("/dashboard");
+    router.push(redirectTo);
     router.refresh();
   }
 
@@ -65,9 +71,7 @@ export function SignInForm({ googleEnabled }: { googleEnabled: boolean }) {
               type="button"
               variant="outline"
               className="w-full"
-              onClick={() =>
-                authClient.signIn.social({ provider: "google", callbackURL: "/dashboard" })
-              }
+              onClick={() => authClient.signIn.social({ provider: "google", callbackURL: redirectTo })}
             >
               Continue with Google
             </Button>

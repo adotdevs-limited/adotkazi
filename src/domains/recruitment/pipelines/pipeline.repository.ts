@@ -36,6 +36,10 @@ export function findPipelineById(id: string, organizationId: string) {
   return prisma.pipeline.findFirst({ where: { id, organizationId, deletedAt: null } });
 }
 
+export function listStagesForPipeline(pipelineId: string) {
+  return prisma.pipelineStage.findMany({ where: { pipelineId }, orderBy: { order: "asc" } });
+}
+
 /**
  * Creates the organization's default recruitment pipeline and its ordered
  * stages. Called once from createOrganization's transaction — see that

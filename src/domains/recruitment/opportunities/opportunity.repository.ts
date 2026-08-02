@@ -50,6 +50,50 @@ export function listOpportunitiesForOrganization(
   });
 }
 
+/** Candidate-facing listing — PUBLISHED + PUBLIC only. See careers/[orgSlug]. */
+export function listPublicOpportunitiesForOrganization(
+  organizationId: string,
+  filters?: {
+    opportunityType?: OpportunityType;
+    workplaceType?: WorkplaceType;
+    departmentId?: string;
+    q?: string;
+  },
+) {
+  return prisma.opportunity.findMany({
+    where: {
+      organizationId,
+      status: "PUBLISHED",
+      visibility: "PUBLIC",
+      deletedAt: null,
+      ...(filters?.opportunityType ? { opportunityType: filters.opportunityType } : {}),
+      ...(filters?.workplaceType ? { workplaceType: filters.workplaceType } : {}),
+      ...(filters?.departmentId ? { departmentId: filters.departmentId } : {}),
+      ...(filters?.q ? { title: { contains: filters.q, mode: "insensitive" } } : {}),
+    },
+    include: { department: true },
+    orderBy: [{ publishAt: "desc" }, { createdAt: "desc" }],
+    take: 100,
+  });
+}
+
+/** Candidate-facing detail lookup — same PUBLISHED + PUBLIC guard as the list above. */
+export function findPublicOpportunityBySlug(organizationId: string, slug: string) {
+  return prisma.opportunity.findFirst({
+    where: {
+      organizationId,
+      slug,
+      status: "PUBLISHED",
+      visibility: "PUBLIC",
+      deletedAt: null,
+    },
+    include: {
+      department: true,
+      skillRequirements: { include: { skill: true } },
+    },
+  });
+}
+
 export type CreateOpportunityData = {
   organizationId: string;
   departmentId: string;
