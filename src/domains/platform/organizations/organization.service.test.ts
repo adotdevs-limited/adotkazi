@@ -2,9 +2,9 @@ import { randomUUID } from "node:crypto";
 import { afterAll, describe, expect, it } from "vitest";
 
 import { prisma } from "@/lib/db";
-import { loadActiveMembership } from "@/domains/platform/authorization/policy";
+import { loadActiveMembership, ForbiddenError } from "@/domains/platform/authorization/policy";
 import { OWNER_ROLE_NAME } from "@/domains/platform/authorization/roles";
-import { createOrganization, SlugTakenError } from "./organization.service";
+import { createOrganization, SlugTakenError, updateOrganizationProfile } from "./organization.service";
 
 /**
  * Integration test: exercises the real createOrganization transaction
@@ -105,5 +105,79 @@ describe("createOrganization", () => {
         timezone: "Africa/Dar_es_Salaam",
       }),
     ).rejects.toThrow(SlugTakenError);
+  });
+
+  it("updates the organization profile and its branding", async () => {
+    const user = await createTestUser();
+    const slug = `test-org-${randomUUID().slice(0, 8)}`;
+    const result = await createOrganization(user.id, {
+      name: "Old Name",
+      slug,
+      country: "Tanzania",
+      timezone: "Africa/Dar_es_Salaam",
+    });
+    createdOrganizationIds.push(result.organizationId);
+    const membership = await loadActiveMembership(user.id, result.organizationId);
+    if (!membership) throw new Error("Expected an active Owner membership.");
+
+    const updated = await updateOrganizationProfile(membership, {
+      name: "New Name",
+      country: "Kenya",
+      primaryColor: "#112233",
+      logoUrl: "https://example.com/logo.png",
+    });
+
+    expect(updated.name).toBe("New Name");
+    expect(updated.country).toBe("Kenya");
+
+    const settings = await prisma.organizationSettings.findUnique({
+      where: { organizationId: result.organizationId },
+    });
+    expect(settings?.branding).toMatchObject({
+      primaryColor: "#112233",
+      logoUrl: "https://example.com/logo.png",
+    });
+
+    const auditEvent = await prisma.auditEvent.findFirst({
+      where: {
+        entityType: "Organization",
+        entityId: result.organizationId,
+        action: "organization.updated",
+      },
+    });
+    expect(auditEvent).not.toBeNull();
+  });
+
+  it("throws ForbiddenError updating the profile without organization.update", async () => {
+    const user = await createTestUser();
+    const slug = `test-org-${randomUUID().slice(0, 8)}`;
+    const result = await createOrganization(user.id, {
+      name: "Test Organization",
+      slug,
+      country: "Tanzania",
+      timezone: "Africa/Dar_es_Salaam",
+    });
+    createdOrganizationIds.push(result.organizationId);
+
+    const viewerRole = await prisma.role.findFirstOrThrow({
+      where: { name: "Viewer", organizationId: null },
+    });
+    const viewerUser = await createTestUser();
+    await prisma.membership.create({
+      data: {
+        organizationId: result.organizationId,
+        userId: viewerUser.id,
+        roleId: viewerRole.id,
+        status: "ACTIVE",
+        joinedAt: new Date(),
+        lastActiveAt: new Date(),
+      },
+    });
+    const viewerMembership = await loadActiveMembership(viewerUser.id, result.organizationId);
+    if (!viewerMembership) throw new Error("Expected an active Viewer membership.");
+
+    await expect(
+      updateOrganizationProfile(viewerMembership, { name: "Nope", country: "Nope" }),
+    ).rejects.toThrow(ForbiddenError);
   });
 });

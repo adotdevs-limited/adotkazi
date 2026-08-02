@@ -2,10 +2,16 @@ import "server-only";
 
 import { prisma } from "@/lib/db";
 import { recordAuditEvent } from "@/domains/platform/audit/audit.service";
+import { requirePermission, type ActiveMembership } from "@/domains/platform/authorization/policy";
 import { OWNER_ROLE_NAME } from "@/domains/platform/authorization/roles";
 import { createDefaultPipeline } from "@/domains/recruitment/pipelines/pipeline.repository";
-import type { CreateOrganizationInput } from "./organization.schema";
-import { createOrganizationRecord, isSlugTaken } from "./organization.repository";
+import type { CreateOrganizationInput, UpdateOrganizationProfileInput } from "./organization.schema";
+import {
+  createOrganizationRecord,
+  isSlugTaken,
+  updateOrganizationBranding,
+  updateOrganizationRecord,
+} from "./organization.repository";
 
 export class SlugTakenError extends Error {
   constructor() {
@@ -81,4 +87,34 @@ export async function createOrganization(
   });
 
   return { organizationId: organization.id, slug: organization.slug };
+}
+
+export async function updateOrganizationProfile(
+  membership: ActiveMembership,
+  input: UpdateOrganizationProfileInput,
+) {
+  requirePermission(membership, "organization.update");
+
+  const [organization] = await prisma.$transaction([
+    updateOrganizationRecord(membership.organizationId, {
+      name: input.name,
+      country: input.country,
+      updatedBy: membership.userId,
+    }),
+    updateOrganizationBranding(membership.organizationId, {
+      primaryColor: input.primaryColor,
+      logoUrl: input.logoUrl,
+    }),
+  ]);
+
+  await recordAuditEvent({
+    organizationId: membership.organizationId,
+    actorUserId: membership.userId,
+    entityType: "Organization",
+    entityId: membership.organizationId,
+    action: "organization.updated",
+    after: { name: organization.name, country: organization.country },
+  });
+
+  return organization;
 }

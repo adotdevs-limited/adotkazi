@@ -44,3 +44,27 @@ export function listOrganizationsForUser(userId: string) {
     orderBy: { lastActiveAt: "desc" },
   });
 }
+
+export function findOrganizationSettings(organizationId: string) {
+  return prisma.organizationSettings.findUnique({ where: { organizationId } });
+}
+
+export function updateOrganizationRecord(
+  id: string,
+  data: { name: string; country: string; updatedBy: string },
+) {
+  return prisma.organization.update({
+    where: { id },
+    data: { name: data.name, country: data.country, updatedBy: data.updatedBy },
+  });
+}
+
+export function updateOrganizationBranding(
+  organizationId: string,
+  branding: { primaryColor?: string; logoUrl?: string },
+) {
+  return prisma.organizationSettings.update({
+    where: { organizationId },
+    data: { branding },
+  });
+}

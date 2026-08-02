@@ -2,13 +2,15 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 import {
   requireCurrentUser,
+  getActiveMembership,
   ACTIVE_ORG_COOKIE,
 } from "@/domains/platform/tenancy/active-organization";
-import { createOrganizationSchema } from "./organization.schema";
-import { createOrganization, SlugTakenError } from "./organization.service";
+import { createOrganizationSchema, updateOrganizationProfileSchema } from "./organization.schema";
+import { createOrganization, SlugTakenError, updateOrganizationProfile } from "./organization.service";
 
 export type CreateOrganizationActionState = {
   error: string | null;
@@ -60,4 +62,48 @@ export async function createOrganizationAction(
   });
 
   redirect("/dashboard");
+}
+
+export type UpdateOrganizationProfileActionState = {
+  error: string | null;
+  fieldErrors?: Record<string, string>;
+};
+
+export async function updateOrganizationProfileAction(
+  _prevState: UpdateOrganizationProfileActionState,
+  formData: FormData,
+): Promise<UpdateOrganizationProfileActionState> {
+  const user = await requireCurrentUser();
+  const membership = await getActiveMembership(user.id);
+  if (!membership) {
+    return { error: "You must belong to an organization to edit its profile." };
+  }
+
+  const parsed = updateOrganizationProfileSchema.safeParse({
+    name: formData.get("name"),
+    country: formData.get("country"),
+    primaryColor: formData.get("primaryColor"),
+    logoUrl: formData.get("logoUrl"),
+  });
+  if (!parsed.success) {
+    const fieldErrors: Record<string, string> = {};
+    for (const issue of parsed.error.issues) {
+      const key = issue.path[0];
+      if (typeof key === "string" && !fieldErrors[key]) {
+        fieldErrors[key] = issue.message;
+      }
+    }
+    return { error: "Please fix the highlighted fields.", fieldErrors };
+  }
+
+  try {
+    await updateOrganizationProfile(membership, parsed.data);
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : "Something went wrong. Please try again.",
+    };
+  }
+
+  revalidatePath("/dashboard/settings");
+  return { error: null };
 }

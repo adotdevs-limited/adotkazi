@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -42,24 +43,26 @@ export function OrgSwitcher({
         }
       />
       <DropdownMenuContent align="start" className="w-64">
-        <DropdownMenuLabel>Organizations</DropdownMenuLabel>
-        {organizations.map((org) => (
-          <DropdownMenuItem
-            key={org.organizationId}
-            onClick={() => {
-              if (org.organizationId === activeOrganizationId) return;
-              startTransition(() => {
-                void switchActiveOrganization(org.organizationId);
-              });
-            }}
-          >
-            <div className="flex min-w-0 flex-1 flex-col">
-              <span className="truncate">{org.name}</span>
-              <span className="text-muted-foreground text-xs">{org.roleName}</span>
-            </div>
-            {org.organizationId === activeOrganizationId && <CheckIcon className="shrink-0" />}
-          </DropdownMenuItem>
-        ))}
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>Organizations</DropdownMenuLabel>
+          {organizations.map((org) => (
+            <DropdownMenuItem
+              key={org.organizationId}
+              onClick={() => {
+                if (org.organizationId === activeOrganizationId) return;
+                startTransition(() => {
+                  void switchActiveOrganization(org.organizationId);
+                });
+              }}
+            >
+              <div className="flex min-w-0 flex-1 flex-col">
+                <span className="truncate">{org.name}</span>
+                <span className="text-muted-foreground text-xs">{org.roleName}</span>
+              </div>
+              {org.organizationId === activeOrganizationId && <CheckIcon className="shrink-0" />}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem render={<Link href="/onboarding/organization" />}>
           <PlusIcon /> Create organization

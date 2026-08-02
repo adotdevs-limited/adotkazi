@@ -5,7 +5,8 @@ import {
   requireActiveMembership,
 } from "@/domains/platform/tenancy/active-organization";
 import { can } from "@/domains/platform/authorization/policy";
-import { prisma } from "@/lib/db";
+import { listDepartmentsForOrganization } from "@/domains/platform/departments/department.repository";
+import { listBranchesForOrganization } from "@/domains/platform/branches/branch.repository";
 import { listPipelinesForOrganization } from "@/domains/recruitment/pipelines/pipeline.repository";
 import { OpportunityForm } from "@/components/opportunities/opportunity-form";
 
@@ -20,16 +21,8 @@ export default async function NewOpportunityPage() {
   }
 
   const [departments, branches, pipelines] = await Promise.all([
-    prisma.department.findMany({
-      where: { organizationId: membership.organizationId, deletedAt: null },
-      select: { id: true, name: true },
-      orderBy: { name: "asc" },
-    }),
-    prisma.branch.findMany({
-      where: { organizationId: membership.organizationId, deletedAt: null },
-      select: { id: true, name: true },
-      orderBy: { name: "asc" },
-    }),
+    listDepartmentsForOrganization(membership.organizationId),
+    listBranchesForOrganization(membership.organizationId),
     listPipelinesForOrganization(membership.organizationId),
   ]);
 
