@@ -1,0 +1,198 @@
+// Recruitment bounded context — see docs/Level 3-Data/ENTITY_SPECIFICATIONS/OPPORTUNITY_ENGINE.txt
+//
+// Stage 2 Phase 1 (Opportunity Engine core): job requisitions usable from the
+// authenticated dashboard by org members. No public careers site, candidate
+// accounts, applications, interviews, or offers yet — those are later phases
+// that build on Opportunity/Pipeline/PipelineStage/HiringTeam/Skill below.
+
+enum OpportunityType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+  GRADUATE_PROGRAM
+  APPRENTICESHIP
+  VOLUNTEER
+}
+
+enum WorkplaceType {
+  ON_SITE
+  REMOTE
+  HYBRID
+}
+
+enum ExperienceLevel {
+  ENTRY
+  JUNIOR
+  MID
+  SENIOR
+  LEAD
+  EXECUTIVE
+}
+
+/// 7-value lifecycle (OPPORTUNITY_ENGINE.txt), not RECRUITMENT.txt's simpler
+/// 6-value list — supports an optional approval gate before publishing.
+enum OpportunityStatus {
+  DRAFT
+  PENDING_REVIEW
+  SCHEDULED
+  PUBLISHED
+  PAUSED
+  CLOSED
+  ARCHIVED
+}
+
+enum OpportunityVisibility {
+  PUBLIC
+  ORGANIZATION_ONLY
+  INVITATION_ONLY
+  PRIVATE_DRAFT
+}
+
+/// A job requisition. See OPPORTUNITY_ENGINE.txt#Opportunity.
+model Opportunity {
+  id             String       @id @default(uuid(7)) @db.Uuid
+  organizationId String       @map("organization_id") @db.Uuid
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  branchId       String?      @map("branch_id") @db.Uuid
+  branch         Branch?      @relation(fields: [branchId], references: [id])
+  departmentId   String       @map("department_id") @db.Uuid
+  department     Department   @relation(fields: [departmentId], references: [id])
+  hiringTeamId   String?      @map("hiring_team_id") @db.Uuid
+  hiringTeam     HiringTeam?  @relation(fields: [hiringTeamId], references: [id])
+  pipelineId     String       @map("pipeline_id") @db.Uuid
+  pipeline       Pipeline     @relation(fields: [pipelineId], references: [id])
+
+  title            String
+  slug             String
+  description      String? @db.Text
+  responsibilities String? @db.Text
+  requirements     String? @db.Text
+  benefits         String? @db.Text
+
+  opportunityType OpportunityType  @map("opportunity_type")
+  workplaceType   WorkplaceType    @map("workplace_type")
+  experienceLevel ExperienceLevel? @map("experience_level")
+  location        String?
+  openings        Int              @default(1)
+  salaryMin       Decimal?         @map("salary_min") @db.Decimal(12, 2)
+  salaryMax       Decimal?         @map("salary_max") @db.Decimal(12, 2)
+  currency        String?
+
+  applicationDeadline DateTime? @map("application_deadline")
+  publishAt           DateTime? @map("publish_at")
+  closeAt             DateTime? @map("close_at")
+
+  status     OpportunityStatus     @default(DRAFT)
+  visibility OpportunityVisibility @default(PUBLIC)
+
+  skillRequirements SkillRequirement[]
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  createdBy String?   @map("created_by") @db.Uuid
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  updatedBy String?   @map("updated_by") @db.Uuid
+  deletedAt DateTime? @map("deleted_at")
+  deletedBy String?   @map("deleted_by") @db.Uuid
+
+  @@unique([organizationId, slug])
+  @@index([organizationId])
+  @@index([organizationId, status])
+  @@index([departmentId])
+  @@index([pipelineId])
+  @@map("opportunities")
+}
+
+/// An org-configured recruitment pipeline template. Reduced audit set —
+/// matches Role's precedent as org configuration, not a per-candidate
+/// transactional record.
+model Pipeline {
+  id             String       @id @default(uuid(7)) @db.Uuid
+  organizationId String       @map("organization_id") @db.Uuid
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  name           String
+  description    String?
+  isDefault      Boolean      @default(false) @map("is_default")
+  isSystem       Boolean      @default(false) @map("is_system")
+
+  stages        PipelineStage[]
+  opportunities Opportunity[]
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
+  @@map("pipelines")
+}
+
+/// One ordered stage within a Pipeline. No cascade on delete — pipelines are
+/// soft-deleted, so hard-delete cascade would rarely fire; cascade is
+/// reserved for pure junction tables (see RolePermission).
+model PipelineStage {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  pipelineId     String   @map("pipeline_id") @db.Uuid
+  pipeline       Pipeline @relation(fields: [pipelineId], references: [id])
+  name           String
+  order          Int
+  color          String?
+  isTerminal     Boolean  @default(false) @map("is_terminal")
+  allowsFeedback Boolean  @default(true) @map("allows_feedback")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([pipelineId, order])
+  @@index([pipelineId])
+  @@map("pipeline_stages")
+}
+
+/// Groups the people involved in hiring for an Opportunity. Schema only this
+/// phase — no CRUD screens yet, Opportunity.hiringTeamId stays nullable.
+model HiringTeam {
+  id             String       @id @default(uuid(7)) @db.Uuid
+  organizationId String       @map("organization_id") @db.Uuid
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  name           String
+  description    String?
+
+  opportunities Opportunity[]
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
+  @@map("hiring_teams")
+}
+
+/// Global skill lookup, not org-scoped (see SCHEMA_GUIDELINES.txt).
+model Skill {
+  id       String  @id @default(uuid(7)) @db.Uuid
+  name     String  @unique
+  category String?
+
+  requirements SkillRequirement[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([category])
+  @@map("skills")
+}
+
+/// Explicit junction between Opportunity and Skill (see SCHEMA_GUIDELINES.txt:
+/// "Always use explicit junction models").
+model SkillRequirement {
+  opportunityId    String      @map("opportunity_id") @db.Uuid
+  opportunity      Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  skillId          String      @map("skill_id") @db.Uuid
+  skill            Skill       @relation(fields: [skillId], references: [id])
+  requirementLevel String?     @map("requirement_level")
+  minimumYears     Int?        @map("minimum_years")
+
+  @@id([opportunityId, skillId])
+  @@index([skillId])
+  @@map("opportunity_skill_requirements")
+}

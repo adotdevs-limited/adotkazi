@@ -16,7 +16,12 @@ describe("createOrganization", () => {
   const createdOrganizationIds: string[] = [];
 
   afterAll(async () => {
-    // Respect FK order: memberships/audit events -> organizations -> users.
+    // Respect FK order: pipeline stages/pipelines -> memberships/audit events
+    // -> organizations -> users.
+    await prisma.pipelineStage.deleteMany({
+      where: { pipeline: { organizationId: { in: createdOrganizationIds } } },
+    });
+    await prisma.pipeline.deleteMany({ where: { organizationId: { in: createdOrganizationIds } } });
     await prisma.membership.deleteMany({ where: { userId: { in: createdUserIds } } });
     await prisma.auditEvent.deleteMany({ where: { actorUserId: { in: createdUserIds } } });
     await prisma.organizationSettings.deleteMany({
@@ -67,6 +72,16 @@ describe("createOrganization", () => {
       where: { organizationId: result.organizationId },
     });
     expect(settings).not.toBeNull();
+
+    const pipeline = await prisma.pipeline.findFirst({
+      where: { organizationId: result.organizationId, isDefault: true },
+      include: { stages: { orderBy: { order: "asc" } } },
+    });
+    expect(pipeline).not.toBeNull();
+    expect(pipeline?.isSystem).toBe(true);
+    expect(pipeline?.stages).toHaveLength(9);
+    expect(pipeline?.stages.map((s) => s.order)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8]);
+    expect(pipeline?.stages.at(-1)?.isTerminal).toBe(true);
   });
 
   it("rejects a slug that is already taken", async () => {

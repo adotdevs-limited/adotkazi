@@ -61,13 +61,16 @@ model Organization {
   deletedAt DateTime? @map("deleted_at")
   deletedBy String?   @map("deleted_by") @db.Uuid
 
-  branches     Branch[]
-  departments  Department[]
-  memberships  Membership[]
-  roles        Role[]
-  invitations  Invitation[]
-  featureFlags FeatureFlag[]
-  settings     OrganizationSettings?
+  branches      Branch[]
+  departments   Department[]
+  memberships   Membership[]
+  roles         Role[]
+  invitations   Invitation[]
+  featureFlags  FeatureFlag[]
+  settings      OrganizationSettings?
+  opportunities Opportunity[]
+  pipelines     Pipeline[]
+  hiringTeams   HiringTeam[]
 
   @@index([status])
   @@index([createdAt])
@@ -97,6 +100,8 @@ model Branch {
   deletedAt DateTime? @map("deleted_at")
   deletedBy String?   @map("deleted_by") @db.Uuid
 
+  opportunities Opportunity[]
+
   @@index([organizationId])
   @@index([organizationId, status])
   @@map("branches")
@@ -118,6 +123,8 @@ model Department {
   updatedBy String?   @map("updated_by") @db.Uuid
   deletedAt DateTime? @map("deleted_at")
   deletedBy String?   @map("deleted_by") @db.Uuid
+
+  opportunities Opportunity[]
 
   @@unique([organizationId, name])
   @@index([organizationId])

@@ -2,10 +2,9 @@ import type { PermissionKey } from "./permissions";
 
 /**
  * Organization-scoped system roles, per AUTHORIZATION.md's permission
- * matrix. Roles that belong to modules not yet implemented (Recruiter,
- * Hiring Manager, Interviewer, Supervisor) exist so organizations can invite
- * people into the correct role today; their permission grants grow as the
- * Recruitment and IPT bounded contexts are built.
+ * matrix. Recruitment-focused roles (Recruiter, Hiring Manager, Interviewer)
+ * now carry their Opportunity Engine grants; Supervisor stays IPT-focused
+ * and gains permissions once that bounded context is built.
  */
 export const SYSTEM_ROLES: Array<{
   name: string;
@@ -29,6 +28,12 @@ export const SYSTEM_ROLES: Array<{
       "role.manage",
       "settings.manage",
       "audit.view",
+      "opportunity.view",
+      "opportunity.create",
+      "opportunity.update",
+      "opportunity.publish",
+      "opportunity.archive",
+      "pipeline.manage",
     ],
   },
   {
@@ -45,25 +50,42 @@ export const SYSTEM_ROLES: Array<{
       "membership.manage",
       "settings.manage",
       "audit.view",
+      "opportunity.view",
+      "opportunity.create",
+      "opportunity.update",
+      "opportunity.publish",
+      "opportunity.archive",
+      "pipeline.manage",
     ],
   },
   {
     name: "Recruiter",
-    description: "Manages recruitment (permissions expand once the Recruitment module ships).",
+    description: "Manages recruitment: creates, publishes, and closes opportunities.",
     isDefault: true,
-    permissions: ["organization.view", "membership.view"],
+    permissions: [
+      "organization.view",
+      "membership.view",
+      "opportunity.view",
+      "opportunity.create",
+      "opportunity.update",
+      "opportunity.publish",
+      "opportunity.archive",
+    ],
   },
   {
     name: "Hiring Manager",
     description: "Reviews and decides on candidates for their opportunities.",
     isDefault: false,
-    permissions: ["organization.view", "membership.view"],
+    // Full org-wide grant for now — there's no HiringTeam-assignment UI yet
+    // to scope this down to only the manager's own opportunities. Narrow
+    // once HiringTeam management ships.
+    permissions: ["organization.view", "membership.view", "opportunity.view", "opportunity.update"],
   },
   {
     name: "Interviewer",
     description: "Conducts interviews and submits feedback.",
     isDefault: false,
-    permissions: ["organization.view"],
+    permissions: ["organization.view", "opportunity.view"],
   },
   {
     name: "Supervisor",
@@ -75,7 +97,7 @@ export const SYSTEM_ROLES: Array<{
     name: "Viewer",
     description: "Read-only access to the organization.",
     isDefault: false,
-    permissions: ["organization.view", "membership.view", "audit.view"],
+    permissions: ["organization.view", "membership.view", "audit.view", "opportunity.view"],
   },
 ];
 

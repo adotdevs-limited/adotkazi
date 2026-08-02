@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { BriefcaseIcon, UsersIcon } from "lucide-react";
+import { BriefcaseIcon, ArrowRightIcon } from "lucide-react";
 
 import {
   requireCurrentUser,
   requireActiveMembership,
 } from "@/domains/platform/tenancy/active-organization";
+import { listOpportunitiesForOrganization } from "@/domains/recruitment/opportunities/opportunity.repository";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -13,6 +14,8 @@ export const metadata = { title: "Dashboard" };
 export default async function DashboardPage() {
   const user = await requireCurrentUser();
   const membership = await requireActiveMembership(user.id);
+
+  const opportunities = await listOpportunitiesForOrganization(membership.organizationId);
 
   return (
     <div className="grid gap-6">
@@ -28,19 +31,18 @@ export default async function DashboardPage() {
           <div className="bg-muted mb-2 flex size-12 items-center justify-center rounded-full">
             <BriefcaseIcon className="text-muted-foreground size-6" />
           </div>
-          <CardTitle>No opportunities yet</CardTitle>
+          <CardTitle>
+            {opportunities.length} {opportunities.length === 1 ? "opportunity" : "opportunities"}
+          </CardTitle>
           <CardDescription>
-            Recruitment and the Opportunity Engine ship in the next milestone. Once available,
-            published roles and applications will appear here.
+            {opportunities.length === 0
+              ? "Create your first job requisition to get started."
+              : "Job requisitions across your organization."}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex justify-center">
-          <Button
-            nativeButton={false}
-            variant="outline"
-            render={<Link href="/dashboard/members" />}
-          >
-            <UsersIcon /> Invite your team instead
+          <Button nativeButton={false} render={<Link href="/dashboard/opportunities" />}>
+            View opportunities <ArrowRightIcon />
           </Button>
         </CardContent>
       </Card>

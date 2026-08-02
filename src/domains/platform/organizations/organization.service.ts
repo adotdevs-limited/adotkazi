@@ -3,6 +3,7 @@ import "server-only";
 import { prisma } from "@/lib/db";
 import { recordAuditEvent } from "@/domains/platform/audit/audit.service";
 import { OWNER_ROLE_NAME } from "@/domains/platform/authorization/roles";
+import { createDefaultPipeline } from "@/domains/recruitment/pipelines/pipeline.repository";
 import type { CreateOrganizationInput } from "./organization.schema";
 import { createOrganizationRecord, isSlugTaken } from "./organization.repository";
 
@@ -58,6 +59,11 @@ export async function createOrganization(
         lastActiveAt: new Date(),
       },
     });
+
+    // Direct cross-bounded-context call (Platform → Recruitment) — no event
+    // bus/queue exists yet in this codebase. Move this to an
+    // OrganizationCreated event handler once real domain events exist.
+    await createDefaultPipeline(tx, org.id);
 
     await recordAuditEvent(
       {

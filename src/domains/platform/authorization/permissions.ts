@@ -71,6 +71,42 @@ export const PERMISSIONS = [
     description: "View the organization's audit history.",
     module: "administration",
   },
+  {
+    key: "opportunity.view",
+    name: "View opportunities",
+    description: "View opportunities.",
+    module: "recruitment",
+  },
+  {
+    key: "opportunity.create",
+    name: "Create opportunities",
+    description: "Create opportunities.",
+    module: "recruitment",
+  },
+  {
+    key: "opportunity.update",
+    name: "Edit opportunities",
+    description: "Edit opportunities.",
+    module: "recruitment",
+  },
+  {
+    key: "opportunity.publish",
+    name: "Publish opportunities",
+    description: "Publish, schedule, pause, and resume opportunities.",
+    module: "recruitment",
+  },
+  {
+    key: "opportunity.archive",
+    name: "Archive opportunities",
+    description: "Close, archive, and delete opportunities.",
+    module: "recruitment",
+  },
+  {
+    key: "pipeline.manage",
+    name: "Manage pipelines",
+    description: "Create and edit recruitment pipelines.",
+    module: "recruitment",
+  },
 ] as const;
 
 export type PermissionKey = (typeof PERMISSIONS)[number]["key"];

@@ -67,10 +67,7 @@ import type {
   ConnectionInfo,
   MappedError,
 } from "@prisma/driver-adapter-utils";
-import {
-  ColumnTypeEnum,
-  DriverAdapterError,
-} from "@prisma/driver-adapter-utils";
+import { ColumnTypeEnum, DriverAdapterError } from "@prisma/driver-adapter-utils";
 ```
 
 ## Interface Definitions
@@ -235,11 +232,7 @@ class MyTransaction extends MyQueryable<TClient> implements Transaction {
   readonly options: TransactionOptions;
   readonly #release: () => void;
 
-  constructor(
-    client: TClient,
-    options: TransactionOptions,
-    release: () => void,
-  ) {
+  constructor(client: TClient, options: TransactionOptions, release: () => void) {
     super(client);
     this.options = options;
     this.#release = release;
@@ -279,9 +272,7 @@ class MyAdapter extends MyQueryable<TClient> implements SqlDriverAdapter {
     }
   }
 
-  async startTransaction(
-    isolationLevel?: IsolationLevel,
-  ): Promise<Transaction> {
+  async startTransaction(isolationLevel?: IsolationLevel): Promise<Transaction> {
     // Validate isolation level for your database
     const validLevels = new Set<IsolationLevel>([
       "READ UNCOMMITTED",
@@ -305,9 +296,7 @@ class MyAdapter extends MyQueryable<TClient> implements SqlDriverAdapter {
     try {
       if (depth === 1) {
         // Issue BEGIN (with isolation level if specified)
-        const beginSql = isolationLevel
-          ? `BEGIN ISOLATION LEVEL ${isolationLevel}`
-          : "BEGIN";
+        const beginSql = isolationLevel ? `BEGIN ISOLATION LEVEL ${isolationLevel}` : "BEGIN";
         await this.client.query(beginSql);
       } else {
         // Nested: use savepoints
