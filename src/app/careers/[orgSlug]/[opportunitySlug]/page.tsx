@@ -81,9 +81,17 @@ export default async function CareersOpportunityPage({ params }: PageProps) {
               Applications closed
             </Button>
           ) : existingApplication ? (
-            <p className="text-sm font-medium">
-              You applied on {existingApplication.appliedAt.toLocaleDateString()}.
-            </p>
+            <div className="grid gap-2">
+              <p className="text-sm font-medium">
+                You applied on {existingApplication.appliedAt.toLocaleDateString()}.
+              </p>
+              <Link
+                href="/applications"
+                className="text-muted-foreground hover:text-foreground w-fit text-sm underline-offset-4 hover:underline"
+              >
+                View all your applications
+              </Link>
+            </div>
           ) : user ? (
             <ApplyForm organizationSlug={organization.slug} opportunitySlug={opportunity.slug} />
           ) : (

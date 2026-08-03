@@ -21,6 +21,7 @@ import { createOrganization } from "@/domains/platform/organizations/organizatio
 import type { CreateOpportunityInput } from "@/domains/recruitment/opportunities/opportunity.schema";
 import { createOpportunity, publishOpportunity } from "@/domains/recruitment/opportunities/opportunity.service";
 import { listStagesForPipeline } from "@/domains/recruitment/pipelines/pipeline.repository";
+import { listApplicationsForCandidate } from "./application.repository";
 import {
   AlreadyAppliedError,
   InvalidPipelineStageError,
@@ -303,6 +304,37 @@ describe("application.service", () => {
     });
     expect(rejectedEvent).not.toBeNull();
     expect(reactivatedEvent).not.toBeNull();
+  });
+
+  it("lists a candidate's own applications across organizations, most recent first", async () => {
+    const first = await createTestOrgWithOwner();
+    const firstOpportunity = await createPublishedOpportunity(first.organizationId, first.membership);
+    const second = await createTestOrgWithOwner();
+    const secondOpportunity = await createPublishedOpportunity(
+      second.organizationId,
+      second.membership,
+    );
+    const applicant = await createTestUser();
+
+    await submitTestApplication(first.organizationSlug, firstOpportunity.slug, applicant);
+    const secondApplication = await submitTestApplication(
+      second.organizationSlug,
+      secondOpportunity.slug,
+      applicant,
+    );
+
+    const otherApplicant = await createTestUser();
+    await submitTestApplication(first.organizationSlug, firstOpportunity.slug, otherApplicant);
+
+    const applications = await listApplicationsForCandidate(applicant.id);
+
+    expect(applications).toHaveLength(2);
+    expect(applications[0]!.id).toBe(secondApplication.id);
+    expect(applications.map((application) => application.opportunity.title)).toEqual([
+      secondOpportunity.title,
+      firstOpportunity.title,
+    ]);
+    expect(applications[0]!.opportunity.organization.slug).toBe(second.organizationSlug);
   });
 
   it("throws ForbiddenError when a Viewer tries to move a stage", async () => {

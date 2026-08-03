@@ -63,7 +63,7 @@ export function ApplicationReviewActions({
         </select>
       </div>
 
-      {status === "ACTIVE" ? (
+      {status === "ACTIVE" && (
         <Button
           variant="destructive"
           disabled={isPending}
@@ -71,7 +71,8 @@ export function ApplicationReviewActions({
         >
           Reject
         </Button>
-      ) : (
+      )}
+      {status === "REJECTED" && (
         <Button
           variant="outline"
           disabled={isPending}

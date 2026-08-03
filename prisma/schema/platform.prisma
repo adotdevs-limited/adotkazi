@@ -201,6 +201,10 @@ model Membership {
   updatedAt DateTime  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
+  interviewParticipations InterviewParticipant[]
+  interviewFeedback       InterviewFeedback[]
+  authoredNotes           ApplicationNote[]
+
   @@unique([organizationId, userId])
   @@index([organizationId, status])
   @@index([userId])

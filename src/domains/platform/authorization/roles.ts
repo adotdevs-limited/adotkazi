@@ -36,6 +36,8 @@ export const SYSTEM_ROLES: Array<{
       "pipeline.manage",
       "application.view",
       "application.update",
+      "interview.manage",
+      "interview.feedback",
     ],
   },
   {
@@ -60,6 +62,8 @@ export const SYSTEM_ROLES: Array<{
       "pipeline.manage",
       "application.view",
       "application.update",
+      "interview.manage",
+      "interview.feedback",
     ],
   },
   {
@@ -76,6 +80,8 @@ export const SYSTEM_ROLES: Array<{
       "opportunity.archive",
       "application.view",
       "application.update",
+      "interview.manage",
+      "interview.feedback",
     ],
   },
   {
@@ -92,13 +98,20 @@ export const SYSTEM_ROLES: Array<{
       "opportunity.update",
       "application.view",
       "application.update",
+      "interview.manage",
+      "interview.feedback",
     ],
   },
   {
     name: "Interviewer",
     description: "Conducts interviews and submits feedback.",
     isDefault: false,
-    permissions: ["organization.view", "opportunity.view", "application.view"],
+    permissions: [
+      "organization.view",
+      "opportunity.view",
+      "application.view",
+      "interview.feedback",
+    ],
   },
   {
     name: "Supervisor",

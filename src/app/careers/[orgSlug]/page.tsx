@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BriefcaseIcon } from "lucide-react";
 
+import { getCurrentUser } from "@/domains/platform/tenancy/active-organization";
 import { findOrganizationBySlug } from "@/domains/platform/organizations/organization.repository";
 import { listPublicOpportunitiesForOrganization } from "@/domains/recruitment/opportunities/opportunity.repository";
 import {
@@ -48,6 +50,8 @@ export default async function CareersPage({ params, searchParams }: PageProps) {
     notFound();
   }
 
+  const user = await getCurrentUser();
+
   const opportunityType = OPPORTUNITY_TYPE_OPTIONS.includes(type as OpportunityType)
     ? (type as OpportunityType)
     : undefined;
@@ -63,6 +67,15 @@ export default async function CareersPage({ params, searchParams }: PageProps) {
 
   return (
     <div className="mx-auto grid w-full max-w-3xl gap-8 px-4 py-16">
+      {user && (
+        <Link
+          href="/applications"
+          className="text-muted-foreground hover:text-foreground ml-auto text-sm underline-offset-4 hover:underline"
+        >
+          My Applications
+        </Link>
+      )}
+
       <div className="grid gap-3 text-center">
         <span className="bg-primary text-primary-foreground mx-auto flex size-12 items-center justify-center rounded-2xl text-xl font-bold">
           {organization.name.charAt(0).toUpperCase()}

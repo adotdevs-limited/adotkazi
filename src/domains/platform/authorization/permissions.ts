@@ -116,7 +116,20 @@ export const PERMISSIONS = [
   {
     key: "application.update",
     name: "Update applications",
-    description: "Move applications through pipeline stages, reject, and reactivate.",
+    description:
+      "Move applications through pipeline stages, reject, reactivate, and extend or withdraw offers.",
+    module: "recruitment",
+  },
+  {
+    key: "interview.manage",
+    name: "Manage interviews",
+    description: "Schedule, cancel, and complete interviews.",
+    module: "recruitment",
+  },
+  {
+    key: "interview.feedback",
+    name: "Submit interview feedback",
+    description: "Submit feedback for interviews you're assigned to.",
     module: "recruitment",
   },
 ] as const;

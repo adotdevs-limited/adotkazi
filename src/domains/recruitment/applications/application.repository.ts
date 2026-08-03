@@ -37,6 +37,27 @@ export function createApplication(data: CreateApplicationData) {
   return prisma.application.create({ data });
 }
 
+/** Read-only, candidate-facing: never creates a Candidate row, mirrors
+ *  findApplicationForUserAndOpportunity's "viewing isn't applying" rule. */
+export function listApplicationsForCandidate(userId: string) {
+  return prisma.application.findMany({
+    where: { candidate: { userId } },
+    include: {
+      opportunity: {
+        select: { title: true, slug: true, organization: { select: { slug: true, name: true } } },
+      },
+      currentStage: true,
+      offers: { where: { status: "SENT" }, take: 1 },
+      interviews: {
+        where: { status: "SCHEDULED", scheduledStart: { gte: new Date() } },
+        orderBy: { scheduledStart: "asc" },
+        take: 1,
+      },
+    },
+    orderBy: { appliedAt: "desc" },
+  });
+}
+
 export function listApplicationsForOpportunity(opportunityId: string) {
   return prisma.application.findMany({
     where: { opportunityId },
@@ -58,7 +79,15 @@ export function findApplicationById(id: string) {
     include: {
       candidate: { include: { user: { select: { name: true, email: true } } } },
       currentStage: true,
-      opportunity: { select: { id: true, title: true, organizationId: true, pipelineId: true } },
+      opportunity: {
+        select: {
+          id: true,
+          title: true,
+          organizationId: true,
+          pipelineId: true,
+          organization: { select: { name: true } },
+        },
+      },
     },
   });
 }

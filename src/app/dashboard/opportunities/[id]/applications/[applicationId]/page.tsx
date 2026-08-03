@@ -12,11 +12,18 @@ import {
   ApplicationNotFoundError,
 } from "@/domains/recruitment/applications/application.service";
 import { listStagesForPipeline } from "@/domains/recruitment/pipelines/pipeline.repository";
+import { listOffersForApplication } from "@/domains/recruitment/offers/offer.repository";
+import { listInterviewsForApplication } from "@/domains/recruitment/interviews/interview.repository";
+import { listNotesForApplication } from "@/domains/recruitment/notes/note.repository";
+import { listMembers } from "@/domains/platform/memberships/membership.repository";
 import { storageProvider } from "@/lib/storage";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ApplicationStatusBadge } from "@/components/applications/application-status-badge";
 import { ApplicationReviewActions } from "@/components/applications/application-review-actions";
+import { OfferPanel } from "@/components/applications/offer-panel";
+import { InterviewsPanel } from "@/components/applications/interviews-panel";
+import { NotesPanel } from "@/components/applications/notes-panel";
 
 export const metadata = { title: "Application" };
 
@@ -51,12 +58,21 @@ export default async function ApplicationDetailPage({
     throw error;
   }
 
-  const [stages, resumeUrl] = await Promise.all([
+  const [stages, resumeUrl, offers, interviews, notes, members] = await Promise.all([
     listStagesForPipeline(application.opportunity.pipelineId),
     resolveResumeUrl(application.resumeStoragePath),
+    listOffersForApplication(application.id),
+    listInterviewsForApplication(application.id),
+    listNotesForApplication(application.id),
+    listMembers(membership.organizationId),
   ]);
 
   const canUpdate = can(membership, "application.update");
+  const activeOffer = offers.find((offer) => offer.status === "SENT") ?? null;
+  const pastOffers = offers.filter((offer) => offer.id !== activeOffer?.id);
+  const orgMembers = members
+    .filter((member) => member.status === "ACTIVE")
+    .map((member) => ({ id: member.id, name: member.user.name }));
 
   return (
     <div className="grid gap-6">
@@ -103,6 +119,26 @@ export default async function ApplicationDetailPage({
           )}
         </CardContent>
       </Card>
+
+      <OfferPanel
+        applicationId={application.id}
+        opportunityId={id}
+        activeOffer={activeOffer}
+        pastOffers={pastOffers}
+        canManage={canUpdate}
+      />
+
+      <InterviewsPanel
+        applicationId={application.id}
+        opportunityId={id}
+        interviews={interviews}
+        orgMembers={orgMembers}
+        canManage={can(membership, "interview.manage")}
+        canGiveFeedback={can(membership, "interview.feedback")}
+        currentMembershipId={membership.membershipId}
+      />
+
+      <NotesPanel applicationId={application.id} opportunityId={id} notes={notes} />
 
       {application.coverNote && (
         <Card>
