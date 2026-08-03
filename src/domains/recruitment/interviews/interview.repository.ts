@@ -50,6 +50,25 @@ export function findInterviewById(id: string) {
   });
 }
 
+/** Candidate-facing: no `feedback`/`interviewers` — those are internal
+ *  recruiter-side records (INTERVIEWS.txt's private-notes/scorecard rule). */
+export function listCandidateInterviewsForApplication(applicationId: string) {
+  return prisma.interview.findMany({
+    where: { applicationId },
+    select: {
+      id: true,
+      interviewType: true,
+      scheduledStart: true,
+      scheduledEnd: true,
+      meetingProvider: true,
+      meetingLink: true,
+      location: true,
+      status: true,
+    },
+    orderBy: { scheduledStart: "desc" },
+  });
+}
+
 export function updateInterviewStatus(id: string, status: InterviewStatus) {
   return prisma.interview.update({ where: { id }, data: { status } });
 }

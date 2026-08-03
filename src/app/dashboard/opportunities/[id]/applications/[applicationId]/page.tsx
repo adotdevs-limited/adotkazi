@@ -15,6 +15,9 @@ import { listStagesForPipeline } from "@/domains/recruitment/pipelines/pipeline.
 import { listOffersForApplication } from "@/domains/recruitment/offers/offer.repository";
 import { listInterviewsForApplication } from "@/domains/recruitment/interviews/interview.repository";
 import { listNotesForApplication } from "@/domains/recruitment/notes/note.repository";
+import { findPlacementByApplicationId } from "@/domains/recruitment/placements/placement.repository";
+import { PLACEMENT_TRACK_OPPORTUNITY_TYPES } from "@/domains/recruitment/placements/placement.service";
+import { listDailyLogsForPlacement } from "@/domains/recruitment/daily-logs/daily-log.repository";
 import { listMembers } from "@/domains/platform/memberships/membership.repository";
 import { storageProvider } from "@/lib/storage";
 import { Button } from "@/components/ui/button";
@@ -24,10 +27,13 @@ import { ApplicationReviewActions } from "@/components/applications/application-
 import { OfferPanel } from "@/components/applications/offer-panel";
 import { InterviewsPanel } from "@/components/applications/interviews-panel";
 import { NotesPanel } from "@/components/applications/notes-panel";
+import { PlacementPanel } from "@/components/applications/placement-panel";
+import { DailyLogsPanel } from "@/components/applications/daily-logs-panel";
 
 export const metadata = { title: "Application" };
 
-async function resolveResumeUrl(path: string): Promise<string | null> {
+async function resolveDocumentUrl(path: string | null | undefined): Promise<string | null> {
+  if (!path) return null;
   try {
     return await storageProvider.getSignedUrl(path);
   } catch {
@@ -58,13 +64,26 @@ export default async function ApplicationDetailPage({
     throw error;
   }
 
-  const [stages, resumeUrl, offers, interviews, notes, members] = await Promise.all([
+  const [
+    stages,
+    resumeUrl,
+    academicTranscriptUrl,
+    recommendationLetterUrl,
+    offers,
+    interviews,
+    notes,
+    members,
+    placement,
+  ] = await Promise.all([
     listStagesForPipeline(application.opportunity.pipelineId),
-    resolveResumeUrl(application.resumeStoragePath),
+    resolveDocumentUrl(application.resumeStoragePath),
+    resolveDocumentUrl(application.academicTranscriptStoragePath),
+    resolveDocumentUrl(application.recommendationLetterStoragePath),
     listOffersForApplication(application.id),
     listInterviewsForApplication(application.id),
     listNotesForApplication(application.id),
     listMembers(membership.organizationId),
+    findPlacementByApplicationId(application.id),
   ]);
 
   const canUpdate = can(membership, "application.update");
@@ -73,6 +92,14 @@ export default async function ApplicationDetailPage({
   const orgMembers = members
     .filter((member) => member.status === "ACTIVE")
     .map((member) => ({ id: member.id, name: member.user.name }));
+  const isPlacementTrack = PLACEMENT_TRACK_OPPORTUNITY_TYPES.includes(
+    application.opportunity.opportunityType,
+  );
+  const dailyLogs = placement ? await listDailyLogsForPlacement(placement.id) : [];
+  const canReviewDailyLogs =
+    can(membership, "daily_log.review") &&
+    (placement?.supervisorMembershipId === membership.membershipId ||
+      can(membership, "placement.manage"));
 
   return (
     <div className="grid gap-6">
@@ -120,6 +147,42 @@ export default async function ApplicationDetailPage({
         </CardContent>
       </Card>
 
+      {application.institution && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-medium">Education</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-4">
+            <div className="grid gap-3 text-sm sm:grid-cols-2">
+              <Field label="Institution" value={application.institution} />
+              <Field label="Program" value={application.program ?? "—"} />
+              <Field label="Level of study" value={application.levelOfStudy ?? "—"} />
+              <Field label="Year of study" value={application.yearOfStudy?.toString() ?? "—"} />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {academicTranscriptUrl && (
+                <Button
+                  nativeButton={false}
+                  variant="outline"
+                  render={<a href={academicTranscriptUrl} target="_blank" />}
+                >
+                  <DownloadIcon /> {application.academicTranscriptFilename}
+                </Button>
+              )}
+              {recommendationLetterUrl && (
+                <Button
+                  nativeButton={false}
+                  variant="outline"
+                  render={<a href={recommendationLetterUrl} target="_blank" />}
+                >
+                  <DownloadIcon /> {application.recommendationLetterFilename}
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <OfferPanel
         applicationId={application.id}
         opportunityId={id}
@@ -127,6 +190,25 @@ export default async function ApplicationDetailPage({
         pastOffers={pastOffers}
         canManage={canUpdate}
       />
+
+      {(isPlacementTrack || placement) && (
+        <PlacementPanel
+          applicationId={application.id}
+          opportunityId={id}
+          placement={placement}
+          orgMembers={orgMembers}
+          canManage={can(membership, "placement.manage")}
+        />
+      )}
+
+      {placement && (
+        <DailyLogsPanel
+          applicationId={application.id}
+          opportunityId={id}
+          logs={dailyLogs}
+          canReview={canReviewDailyLogs}
+        />
+      )}
 
       <InterviewsPanel
         applicationId={application.id}
@@ -148,6 +230,15 @@ export default async function ApplicationDetailPage({
           <CardContent className="text-sm whitespace-pre-wrap">{application.coverNote}</CardContent>
         </Card>
       )}
+    </div>
+  );
+}
+
+function Field({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-muted-foreground text-xs">{label}</p>
+      <p className="font-medium">{value}</p>
     </div>
   );
 }

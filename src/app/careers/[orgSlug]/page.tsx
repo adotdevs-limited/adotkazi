@@ -68,12 +68,20 @@ export default async function CareersPage({ params, searchParams }: PageProps) {
   return (
     <div className="mx-auto grid w-full max-w-3xl gap-8 px-4 py-16">
       {user && (
-        <Link
-          href="/applications"
-          className="text-muted-foreground hover:text-foreground ml-auto text-sm underline-offset-4 hover:underline"
-        >
-          My Applications
-        </Link>
+        <div className="ml-auto flex gap-4">
+          <Link
+            href="/saved-opportunities"
+            className="text-muted-foreground hover:text-foreground text-sm underline-offset-4 hover:underline"
+          >
+            Saved Opportunities
+          </Link>
+          <Link
+            href="/applications"
+            className="text-muted-foreground hover:text-foreground text-sm underline-offset-4 hover:underline"
+          >
+            My Applications
+          </Link>
+        </div>
       )}
 
       <div className="grid gap-3 text-center">

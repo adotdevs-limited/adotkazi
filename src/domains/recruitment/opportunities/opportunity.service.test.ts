@@ -5,7 +5,10 @@ import { prisma } from "@/lib/db";
 import { loadActiveMembership, ForbiddenError } from "@/domains/platform/authorization/policy";
 import { createOrganization } from "@/domains/platform/organizations/organization.service";
 import type { CreateOpportunityInput } from "./opportunity.schema";
-import { listOpportunitiesForOrganization } from "./opportunity.repository";
+import {
+  listOpportunitiesForOrganization,
+  listPublicOpportunitiesForOrganization,
+} from "./opportunity.repository";
 import {
   archiveOpportunity,
   closeOpportunity,
@@ -135,6 +138,24 @@ describe("opportunity.service", () => {
       where: { entityType: "Opportunity", entityId: opportunity.id, action: "opportunity.created" },
     });
     expect(auditEvent).not.toBeNull();
+  });
+
+  it("creates and publishes an INDUSTRIAL_PRACTICAL_TRAINING opportunity, filterable via the public listing", async () => {
+    const { organizationId, membership } = await createTestOrgWithOwner();
+    const department = await createTestDepartment(organizationId);
+
+    const opportunity = await createOpportunity(
+      membership,
+      buildCreateInput(department.id, { opportunityType: "INDUSTRIAL_PRACTICAL_TRAINING" }),
+    );
+    expect(opportunity.opportunityType).toBe("INDUSTRIAL_PRACTICAL_TRAINING");
+
+    await publishOpportunity(membership, opportunity.id);
+
+    const publicResults = await listPublicOpportunitiesForOrganization(organizationId, {
+      opportunityType: "INDUSTRIAL_PRACTICAL_TRAINING",
+    });
+    expect(publicResults.map((o) => o.id)).toContain(opportunity.id);
   });
 
   it("rejects a duplicate slug within the same organization", async () => {

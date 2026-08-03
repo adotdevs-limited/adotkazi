@@ -21,6 +21,7 @@ import { createOrganization } from "@/domains/platform/organizations/organizatio
 import type { CreateOpportunityInput } from "@/domains/recruitment/opportunities/opportunity.schema";
 import { createOpportunity, publishOpportunity } from "@/domains/recruitment/opportunities/opportunity.service";
 import { submitApplication } from "@/domains/recruitment/applications/application.service";
+import { ApplicationNotFoundError } from "@/domains/recruitment/applications/application.service";
 import {
   FeedbackAlreadySubmittedError,
   InterviewNotActionableError,
@@ -28,6 +29,7 @@ import {
   NotAnInterviewerError,
   cancelInterview,
   completeInterview,
+  getInterviewsForCandidate,
   scheduleInterview,
   submitInterviewFeedback,
 } from "./interview.service";
@@ -270,6 +272,44 @@ describe("interview.service", () => {
     await expect(
       submitInterviewFeedback(interviewerMembership, interview.id, { recommendation: "NO" }),
     ).rejects.toThrow(FeedbackAlreadySubmittedError);
+  });
+
+  it("returns candidate-safe interview fields, excluding feedback and interviewers", async () => {
+    const org = await createTestOrgWithOwner();
+    const { application, applicant } = await createApplicationForNewCandidate(org);
+    const interviewerMembership = await createMembershipWithRole(org.organizationId, "Interviewer");
+    const scheduled = await scheduleInterview(
+      org.membership,
+      application.id,
+      scheduleInput([interviewerMembership.membershipId]),
+    );
+    await submitInterviewFeedback(interviewerMembership, scheduled.id, { recommendation: "YES" });
+
+    const { interviews } = await getInterviewsForCandidate(
+      { id: applicant.id, name: applicant.name, email: applicant.email, image: null },
+      application.id,
+    );
+
+    expect(interviews).toHaveLength(1);
+    expect(interviews[0]!.id).toBe(scheduled.id);
+    expect(interviews[0]!.meetingLink).toBe("https://meet.example.com/abc");
+    expect(interviews[0]).not.toHaveProperty("feedback");
+    expect(interviews[0]).not.toHaveProperty("interviewers");
+  });
+
+  it("rejects reading another candidate's interviews", async () => {
+    const org = await createTestOrgWithOwner();
+    const { application } = await createApplicationForNewCandidate(org);
+    await scheduleInterview(org.membership, application.id, scheduleInput([org.membership.membershipId]));
+
+    const intruder = await createTestUser();
+
+    await expect(
+      getInterviewsForCandidate(
+        { id: intruder.id, name: intruder.name, email: intruder.email, image: null },
+        application.id,
+      ),
+    ).rejects.toThrow(ApplicationNotFoundError);
   });
 
   it("rejects feedback from someone not assigned to the interview", async () => {

@@ -20,19 +20,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { InterviewStatusBadge } from "@/components/applications/interview-status-badge";
 
 const SELECT_CLASS =
   "border-input focus-visible:border-ring focus-visible:ring-ring/50 h-8 rounded-lg border bg-transparent px-2.5 text-sm outline-none focus-visible:ring-3";
 const TEXTAREA_CLASS =
   "border-input focus-visible:border-ring focus-visible:ring-ring/50 min-h-20 w-full rounded-lg border bg-transparent px-2.5 py-1.5 text-sm outline-none focus-visible:ring-3";
-
-const STATUS_VARIANT: Record<InterviewStatus, "default" | "secondary" | "destructive"> = {
-  SCHEDULED: "default",
-  COMPLETED: "secondary",
-  CANCELLED: "destructive",
-};
 
 const RECOMMENDATION_LABEL: Record<InterviewRecommendation, string> = {
   STRONG_YES: "Strong yes",
@@ -150,7 +144,7 @@ function InterviewRow({
   return (
     <div className="grid gap-2 border-b pb-4 last:border-b-0 last:pb-0">
       <div className="flex flex-wrap items-center gap-2">
-        <Badge variant={STATUS_VARIANT[interview.status]}>{interview.status}</Badge>
+        <InterviewStatusBadge status={interview.status} />
         <span className="text-sm font-medium">{interview.interviewType.replaceAll("_", " ")}</span>
         <span className="text-muted-foreground text-xs">
           {interview.scheduledStart.toLocaleString()} – {interview.scheduledEnd.toLocaleTimeString()}

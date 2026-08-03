@@ -25,6 +25,7 @@ import { listApplicationsForCandidate } from "./application.repository";
 import {
   AlreadyAppliedError,
   InvalidPipelineStageError,
+  MissingApplicationFieldsError,
   OpportunityNotAcceptingApplicationsError,
   moveApplicationStage,
   reactivateApplication,
@@ -163,6 +164,51 @@ describe("application.service", () => {
       { organizationSlug, opportunitySlug, resumeFile: resumeFile() },
     );
   }
+
+  it("requires university info and a transcript for a placement-track opportunity", async () => {
+    const { organizationId, organizationSlug, membership } = await createTestOrgWithOwner();
+    const opportunity = await createPublishedOpportunity(organizationId, membership, {
+      opportunityType: "INDUSTRIAL_PRACTICAL_TRAINING",
+    });
+    const applicant = await createTestUser();
+    const user = { id: applicant.id, name: applicant.name, email: applicant.email, image: null };
+
+    await expect(
+      submitApplication(user, {
+        organizationSlug,
+        opportunitySlug: opportunity.slug,
+        resumeFile: resumeFile(),
+      }),
+    ).rejects.toThrow(MissingApplicationFieldsError);
+
+    const application = await submitApplication(user, {
+      organizationSlug,
+      opportunitySlug: opportunity.slug,
+      resumeFile: resumeFile(),
+      institution: "University of Dar es Salaam",
+      program: "Computer Science",
+      levelOfStudy: "Undergraduate",
+      yearOfStudy: 3,
+      academicTranscriptFile: new File([new Uint8Array(1024)], "transcript.pdf", {
+        type: "application/pdf",
+      }),
+    });
+
+    expect(application.institution).toBe("University of Dar es Salaam");
+    expect(application.academicTranscriptFilename).toBe("transcript.pdf");
+    expect(application.recommendationLetterFilename).toBeNull();
+  });
+
+  it("doesn't require university info for a regular (non-placement-track) opportunity", async () => {
+    const { organizationId, organizationSlug, membership } = await createTestOrgWithOwner();
+    const opportunity = await createPublishedOpportunity(organizationId, membership);
+    const applicant = await createTestUser();
+
+    const application = await submitTestApplication(organizationSlug, opportunity.slug, applicant);
+
+    expect(application.institution).toBeNull();
+    expect(application.academicTranscriptFilename).toBeNull();
+  });
 
   it("creates a Candidate and Application on first submission", async () => {
     const { organizationId, organizationSlug, membership } = await createTestOrgWithOwner();

@@ -7,13 +7,20 @@ import {
   getActiveMembership,
 } from "@/domains/platform/tenancy/active-organization";
 import type { ActiveMembership } from "@/domains/platform/authorization/policy";
-import { submitApplicationSchema, validateResumeFile, InvalidResumeFileError } from "./application.schema";
+import {
+  submitApplicationSchema,
+  validateResumeFile,
+  validateAcademicTranscriptFile,
+  validateRecommendationLetterFile,
+  InvalidResumeFileError,
+} from "./application.schema";
 import {
   submitApplication,
   moveApplicationStage,
   rejectApplication,
   reactivateApplication,
   AlreadyAppliedError,
+  MissingApplicationFieldsError,
   OpportunityNotAcceptingApplicationsError,
 } from "./application.service";
 
@@ -33,14 +40,24 @@ export async function submitApplicationAction(
     organizationSlug: formData.get("organizationSlug"),
     opportunitySlug: formData.get("opportunitySlug"),
     coverNote: formData.get("coverNote"),
+    institution: formData.get("institution"),
+    program: formData.get("program"),
+    levelOfStudy: formData.get("levelOfStudy"),
+    yearOfStudy: formData.get("yearOfStudy"),
   });
   if (!parsed.success) {
     return { error: "Something went wrong. Please try again." };
   }
 
   let resumeFile: File;
+  let academicTranscriptFile: File | undefined;
+  let recommendationLetterFile: File | undefined;
   try {
     resumeFile = validateResumeFile(formData.get("resume"));
+    academicTranscriptFile = validateAcademicTranscriptFile(formData.get("academicTranscript"));
+    recommendationLetterFile = validateRecommendationLetterFile(
+      formData.get("recommendationLetter"),
+    );
   } catch (error) {
     if (error instanceof InvalidResumeFileError) {
       return { error: null, fieldErrors: { resume: error.message } };
@@ -49,9 +66,18 @@ export async function submitApplicationAction(
   }
 
   try {
-    await submitApplication(user, { ...parsed.data, resumeFile });
+    await submitApplication(user, {
+      ...parsed.data,
+      resumeFile,
+      academicTranscriptFile,
+      recommendationLetterFile,
+    });
   } catch (error) {
-    if (error instanceof AlreadyAppliedError || error instanceof OpportunityNotAcceptingApplicationsError) {
+    if (
+      error instanceof AlreadyAppliedError ||
+      error instanceof OpportunityNotAcceptingApplicationsError ||
+      error instanceof MissingApplicationFieldsError
+    ) {
       return { error: error.message };
     }
     return {

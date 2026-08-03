@@ -132,6 +132,24 @@ export const PERMISSIONS = [
     description: "Submit feedback for interviews you're assigned to.",
     module: "recruitment",
   },
+  {
+    key: "placement.manage",
+    name: "Manage placements",
+    description: "Approve placements, assign supervisors, and manage placement status.",
+    module: "recruitment",
+  },
+  {
+    key: "placement.view",
+    name: "View placements",
+    description: "View placement details, including placements you supervise.",
+    module: "recruitment",
+  },
+  {
+    key: "daily_log.review",
+    name: "Review daily logs",
+    description: "Approve or return students' daily activity logs for placements you supervise.",
+    module: "recruitment",
+  },
 ] as const;
 
 export type PermissionKey = (typeof PERMISSIONS)[number]["key"];

@@ -10,6 +10,7 @@ enum OpportunityType {
   PART_TIME
   CONTRACT
   INTERNSHIP
+  INDUSTRIAL_PRACTICAL_TRAINING
   GRADUATE_PROGRAM
   APPRENTICESHIP
   VOLUNTEER
@@ -88,6 +89,7 @@ model Opportunity {
 
   skillRequirements SkillRequirement[]
   applications      Application[]
+  savedByCandidates SavedOpportunity[]
 
   createdAt DateTime  @default(now()) @map("created_at")
   createdBy String?   @map("created_by") @db.Uuid
@@ -211,9 +213,29 @@ model Candidate {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  applications Application[]
+  applications       Application[]
+  savedOpportunities SavedOpportunity[]
 
   @@map("candidates")
+}
+
+/// A candidate's private bookmark of an Opportunity (CANDIDATE_PORTAL.txt
+/// "Saved Opportunities": "Save opportunities" / "Remove saved
+/// opportunities" / "Saved opportunities remain private"). Hard-deleted on
+/// unsave — a bookmark, not a business record needing an audit trail or
+/// soft-delete history (unlike Application/Offer/Interview).
+model SavedOpportunity {
+  id            String      @id @default(uuid(7)) @db.Uuid
+  candidateId   String      @map("candidate_id") @db.Uuid
+  candidate     Candidate   @relation(fields: [candidateId], references: [id])
+  opportunityId String      @map("opportunity_id") @db.Uuid
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([candidateId, opportunityId])
+  @@index([opportunityId])
+  @@map("saved_opportunities")
 }
 
 /// One candidate's submission to one opportunity. The resume is stored
@@ -244,6 +266,23 @@ model Application {
   resumeFilename    String  @map("resume_filename")
   resumeStoragePath String  @map("resume_storage_path")
 
+  /// IPT_MODULE.txt "Application Process": required for placement-track
+  /// opportunity types (see PLACEMENT_TRACK_OPPORTUNITY_TYPES), enforced
+  /// in application.service.ts — not at the DB level, since a regular
+  /// FULL_TIME application never fills these in. recommendationLetter is
+  /// the one doc-list field left optional even for placement-track
+  /// applications (commonly arrives after the initial application in
+  /// practice, per RECRUITMENT.txt's own "Organizations may customize
+  /// requirements").
+  institution                     String?
+  program                         String?
+  levelOfStudy                    String? @map("level_of_study")
+  yearOfStudy                     Int?    @map("year_of_study")
+  academicTranscriptFilename      String? @map("academic_transcript_filename")
+  academicTranscriptStoragePath   String? @map("academic_transcript_storage_path")
+  recommendationLetterFilename    String? @map("recommendation_letter_filename")
+  recommendationLetterStoragePath String? @map("recommendation_letter_storage_path")
+
   status ApplicationStatus @default(ACTIVE)
 
   appliedAt DateTime @default(now()) @map("applied_at")
@@ -253,6 +292,7 @@ model Application {
   offers     Offer[]
   interviews Interview[]
   notes      ApplicationNote[]
+  placement  Placement?
 
   @@unique([candidateId, opportunityId])
   @@index([organizationId])
@@ -399,4 +439,87 @@ model ApplicationNote {
 
   @@index([applicationId])
   @@map("application_notes")
+}
+
+/// IPT_MODULE.txt's lifecycle: "Application Review → Placement Approved →
+/// Supervisor Assigned → Training Begins → ... → Completion." A Placement
+/// is created from an accepted Application on an internship/IPT-track
+/// opportunity — the parallel of Offer for the training-track lifecycle,
+/// not a status field bolted onto Application, since it grows its own
+/// history (supervisor, dates, status) independent of the application
+/// review pipeline. department/branch deliberately not duplicated here —
+/// reachable via application.opportunity, and duplicating invites drift
+/// with no consumer yet. Capacity management (IPT_MODULE.txt's "capacity
+/// limits may be configured" for supervisors) is deliberately deferred —
+/// ambiguous in the source doc whether it's per-opportunity (which already
+/// has `openings`) or per-supervisor, and nothing enforces it yet either
+/// way.
+enum PlacementStatus {
+  PENDING
+  APPROVED
+  ACTIVE
+  SUSPENDED
+  COMPLETED
+  CANCELLED
+}
+
+model Placement {
+  id            String      @id @default(uuid(7)) @db.Uuid
+  applicationId String      @unique @map("application_id") @db.Uuid
+  application   Application @relation(fields: [applicationId], references: [id])
+
+  supervisorMembershipId String?     @map("supervisor_membership_id") @db.Uuid
+  supervisorMembership   Membership? @relation(fields: [supervisorMembershipId], references: [id])
+
+  status    PlacementStatus @default(PENDING)
+  startDate DateTime?       @map("start_date")
+  endDate   DateTime?       @map("end_date")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  createdBy String?  @map("created_by") @db.Uuid
+  updatedAt DateTime @updatedAt @map("updated_at")
+  updatedBy String?  @map("updated_by") @db.Uuid
+
+  dailyLogs DailyLog[]
+
+  @@index([supervisorMembershipId])
+  @@map("placements")
+}
+
+/// A student's daily activity record for an ACTIVE Placement
+/// (IPT_MODULE.txt "Daily Activity Logs" / "Daily Log Workflow": Submitted
+/// → Supervisor Review → Approved or Returned For Revision). One row per
+/// [placement, date]. `attachments` from the doc's field list deliberately
+/// not built this slice — no generic multi-file attachment infrastructure
+/// exists yet (Application's resume upload is a single required file, not
+/// a reusable pattern for N attachments).
+enum DailyLogStatus {
+  SUBMITTED
+  APPROVED
+  RETURNED
+}
+
+model DailyLog {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  placementId String    @map("placement_id") @db.Uuid
+  placement   Placement @relation(fields: [placementId], references: [id])
+
+  date                DateTime @db.Date
+  activityDescription String   @map("activity_description") @db.Text
+  skillsLearned       String?  @map("skills_learned") @db.Text
+  hoursWorked         Decimal  @map("hours_worked") @db.Decimal(4, 2)
+  notes               String?  @db.Text
+
+  status                 DailyLogStatus @default(SUBMITTED)
+  reviewComment          String?        @map("review_comment") @db.Text
+  reviewedByMembershipId String?        @map("reviewed_by_membership_id") @db.Uuid
+  reviewedByMembership   Membership?    @relation(fields: [reviewedByMembershipId], references: [id])
+  reviewedAt             DateTime?      @map("reviewed_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([placementId, date])
+  @@index([placementId])
+  @@map("daily_logs")
 }

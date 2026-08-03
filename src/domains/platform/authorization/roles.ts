@@ -3,8 +3,14 @@ import type { PermissionKey } from "./permissions";
 /**
  * Organization-scoped system roles, per AUTHORIZATION.md's permission
  * matrix. Recruitment-focused roles (Recruiter, Hiring Manager, Interviewer)
- * now carry their Opportunity Engine grants; Supervisor stays IPT-focused
- * and gains permissions once that bounded context is built.
+ * carry their Opportunity Engine grants; Supervisor gained `placement.view`
+ * + `daily_log.review` once the Placement/DailyLog bounded context
+ * shipped — still no `placement.manage`, since assigning/approving
+ * placements is a coordinator action, not something a supervisor does to
+ * their own placements. `daily_log.review` is deliberately scoped to
+ * Owner/Admin/Supervisor only (not Recruiter/Hiring Manager) — reviewing
+ * a student's daily work is a Supervisor responsibility per
+ * IPT_MODULE.txt, not a recruiting decision.
  */
 export const SYSTEM_ROLES: Array<{
   name: string;
@@ -38,6 +44,9 @@ export const SYSTEM_ROLES: Array<{
       "application.update",
       "interview.manage",
       "interview.feedback",
+      "placement.manage",
+      "placement.view",
+      "daily_log.review",
     ],
   },
   {
@@ -64,6 +73,9 @@ export const SYSTEM_ROLES: Array<{
       "application.update",
       "interview.manage",
       "interview.feedback",
+      "placement.manage",
+      "placement.view",
+      "daily_log.review",
     ],
   },
   {
@@ -82,6 +94,8 @@ export const SYSTEM_ROLES: Array<{
       "application.update",
       "interview.manage",
       "interview.feedback",
+      "placement.manage",
+      "placement.view",
     ],
   },
   {
@@ -100,6 +114,8 @@ export const SYSTEM_ROLES: Array<{
       "application.update",
       "interview.manage",
       "interview.feedback",
+      "placement.manage",
+      "placement.view",
     ],
   },
   {
@@ -115,9 +131,9 @@ export const SYSTEM_ROLES: Array<{
   },
   {
     name: "Supervisor",
-    description: "Supervises IPT/internship placements (permissions expand with the IPT module).",
+    description: "Supervises IPT/internship placements.",
     isDefault: false,
-    permissions: ["organization.view"],
+    permissions: ["organization.view", "placement.view", "daily_log.review"],
   },
   {
     name: "Viewer",
@@ -129,6 +145,7 @@ export const SYSTEM_ROLES: Array<{
       "audit.view",
       "opportunity.view",
       "application.view",
+      "placement.view",
     ],
   },
 ];

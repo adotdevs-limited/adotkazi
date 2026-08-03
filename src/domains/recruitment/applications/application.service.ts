@@ -10,6 +10,7 @@ import {
   findOpportunityById,
   findPublicOpportunityBySlug,
 } from "@/domains/recruitment/opportunities/opportunity.repository";
+import { PLACEMENT_TRACK_OPPORTUNITY_TYPES } from "@/domains/recruitment/opportunities/opportunity.schema";
 import { listStagesForPipeline } from "@/domains/recruitment/pipelines/pipeline.repository";
 import { storageProvider } from "@/lib/storage";
 import {
@@ -50,10 +51,31 @@ export class InvalidPipelineStageError extends Error {
   }
 }
 
+export class MissingApplicationFieldsError extends Error {
+  constructor() {
+    super(
+      "This opportunity requires your institution, program, level of study, year of study, and academic transcript.",
+    );
+    this.name = "MissingApplicationFieldsError";
+  }
+}
+
 /** Strips path separators and anything outside a conservative safe set. */
 function sanitizeFilename(filename: string): string {
   const base = filename.replace(/[/\\]/g, "_").replace(/[^a-zA-Z0-9._-]/g, "_");
   return base.slice(-140) || "resume";
+}
+
+async function uploadApplicationDocument(organizationId: string, file: File) {
+  const data = Buffer.from(await file.arrayBuffer());
+  const filename = `${randomUUID()}-${sanitizeFilename(file.name)}`;
+  const { path } = await storageProvider.upload({
+    organizationId,
+    filename,
+    data,
+    contentType: file.type || "application/octet-stream",
+  });
+  return { filename: file.name, path };
 }
 
 export async function submitApplication(
@@ -63,6 +85,12 @@ export async function submitApplication(
     opportunitySlug: string;
     coverNote?: string;
     resumeFile: File;
+    institution?: string;
+    program?: string;
+    levelOfStudy?: string;
+    yearOfStudy?: number;
+    academicTranscriptFile?: File;
+    recommendationLetterFile?: File;
   },
 ): Promise<Application> {
   const organization = await findOrganizationBySlug(input.organizationSlug);
@@ -78,6 +106,18 @@ export async function submitApplication(
     throw new OpportunityNotAcceptingApplicationsError();
   }
 
+  const isPlacementTrack = PLACEMENT_TRACK_OPPORTUNITY_TYPES.includes(opportunity.opportunityType);
+  if (
+    isPlacementTrack &&
+    (!input.institution ||
+      !input.program ||
+      !input.levelOfStudy ||
+      !input.yearOfStudy ||
+      !input.academicTranscriptFile)
+  ) {
+    throw new MissingApplicationFieldsError();
+  }
+
   const candidate = await findOrCreateCandidateForUser(user.id);
 
   const existingApplication = await findApplicationForCandidate(candidate.id, opportunity.id);
@@ -85,14 +125,13 @@ export async function submitApplication(
     throw new AlreadyAppliedError();
   }
 
-  const data = Buffer.from(await input.resumeFile.arrayBuffer());
-  const filename = `${randomUUID()}-${sanitizeFilename(input.resumeFile.name)}`;
-  const { path } = await storageProvider.upload({
-    organizationId: organization.id,
-    filename,
-    data,
-    contentType: input.resumeFile.type || "application/octet-stream",
-  });
+  const resume = await uploadApplicationDocument(organization.id, input.resumeFile);
+  const academicTranscript = input.academicTranscriptFile
+    ? await uploadApplicationDocument(organization.id, input.academicTranscriptFile)
+    : null;
+  const recommendationLetter = input.recommendationLetterFile
+    ? await uploadApplicationDocument(organization.id, input.recommendationLetterFile)
+    : null;
 
   const stages = await listStagesForPipeline(opportunity.pipelineId);
 
@@ -102,8 +141,16 @@ export async function submitApplication(
     candidateId: candidate.id,
     currentStageId: stages[0]?.id,
     coverNote: input.coverNote,
-    resumeFilename: input.resumeFile.name,
-    resumeStoragePath: path,
+    resumeFilename: resume.filename,
+    resumeStoragePath: resume.path,
+    institution: input.institution,
+    program: input.program,
+    levelOfStudy: input.levelOfStudy,
+    yearOfStudy: input.yearOfStudy,
+    academicTranscriptFilename: academicTranscript?.filename,
+    academicTranscriptStoragePath: academicTranscript?.path,
+    recommendationLetterFilename: recommendationLetter?.filename,
+    recommendationLetterStoragePath: recommendationLetter?.path,
   });
 
   await recordAuditEvent({

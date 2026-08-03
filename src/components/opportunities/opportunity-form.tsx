@@ -28,6 +28,7 @@ const OPTION_LABELS: Record<string, string> = {
   PART_TIME: "Part-time",
   CONTRACT: "Contract",
   INTERNSHIP: "Internship",
+  INDUSTRIAL_PRACTICAL_TRAINING: "Industrial practical training (IPT)",
   GRADUATE_PROGRAM: "Graduate program",
   APPRENTICESHIP: "Apprenticeship",
   VOLUNTEER: "Volunteer",

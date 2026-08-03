@@ -8,6 +8,7 @@ import {
   UsersIcon,
   SettingsIcon,
   WorkflowIcon,
+  GraduationCapIcon,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -16,6 +17,7 @@ const NAV_ITEMS = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboardIcon },
   { href: "/dashboard/opportunities", label: "Opportunities", icon: BriefcaseIcon },
   { href: "/dashboard/pipelines", label: "Pipelines", icon: WorkflowIcon },
+  { href: "/dashboard/supervision", label: "My Supervision", icon: GraduationCapIcon },
   { href: "/dashboard/members", label: "Members", icon: UsersIcon },
   { href: "/dashboard/settings", label: "Settings", icon: SettingsIcon },
 ];

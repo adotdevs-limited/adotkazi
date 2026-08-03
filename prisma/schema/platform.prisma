@@ -204,6 +204,8 @@ model Membership {
   interviewParticipations InterviewParticipant[]
   interviewFeedback       InterviewFeedback[]
   authoredNotes           ApplicationNote[]
+  supervisedPlacements    Placement[]
+  reviewedDailyLogs       DailyLog[]
 
   @@unique([organizationId, userId])
   @@index([organizationId, status])

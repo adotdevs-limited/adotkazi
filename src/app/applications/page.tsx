@@ -19,11 +19,19 @@ export default async function MyApplicationsPage() {
 
   return (
     <div className="mx-auto grid w-full max-w-3xl gap-6 px-4 py-16">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">My Applications</h1>
-        <p className="text-muted-foreground text-sm">
-          {applications.length} {applications.length === 1 ? "application" : "applications"}
-        </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">My Applications</h1>
+          <p className="text-muted-foreground text-sm">
+            {applications.length} {applications.length === 1 ? "application" : "applications"}
+          </p>
+        </div>
+        <Link
+          href="/saved-opportunities"
+          className="text-muted-foreground hover:text-foreground text-sm underline-offset-4 hover:underline"
+        >
+          Saved Opportunities
+        </Link>
       </div>
 
       <Card>
@@ -58,6 +66,22 @@ export default async function MyApplicationsPage() {
                 <span className="text-muted-foreground text-xs">
                   Interview: {application.interviews[0]!.scheduledStart.toLocaleString()}
                 </span>
+              )}
+              {application._count.interviews > 0 && (
+                <Link
+                  href={`/applications/${application.id}/interviews`}
+                  className="text-primary text-xs font-medium underline-offset-4 hover:underline"
+                >
+                  View interviews
+                </Link>
+              )}
+              {application.placement && (
+                <Link
+                  href={`/applications/${application.id}/daily-logs`}
+                  className="text-primary text-xs font-medium underline-offset-4 hover:underline"
+                >
+                  Daily logs
+                </Link>
               )}
               {application.offers.length > 0 && (
                 <Link

@@ -7,9 +7,12 @@ import { getCurrentUser } from "@/domains/platform/tenancy/active-organization";
 import { findOrganizationBySlug } from "@/domains/platform/organizations/organization.repository";
 import { findPublicOpportunityBySlug } from "@/domains/recruitment/opportunities/opportunity.repository";
 import { findApplicationForUserAndOpportunity } from "@/domains/recruitment/applications/application.repository";
+import { findSavedOpportunityForUser } from "@/domains/recruitment/saved-opportunities/saved-opportunity.repository";
+import { PLACEMENT_TRACK_OPPORTUNITY_TYPES } from "@/domains/recruitment/opportunities/opportunity.schema";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ApplyForm } from "@/components/careers/apply-form";
+import { SaveOpportunityButton } from "@/components/careers/save-opportunity-button";
 
 type PageProps = {
   params: Promise<{ orgSlug: string; opportunitySlug: string }>;
@@ -50,6 +53,9 @@ export default async function CareersOpportunityPage({ params }: PageProps) {
   const existingApplication = user
     ? await findApplicationForUserAndOpportunity(user.id, opportunity.id)
     : null;
+  const existingSave = user
+    ? await findSavedOpportunityForUser(user.id, opportunity.id)
+    : null;
 
   return (
     <div className="mx-auto grid w-full max-w-3xl gap-6 px-4 py-16">
@@ -63,7 +69,16 @@ export default async function CareersOpportunityPage({ params }: PageProps) {
       </Button>
 
       <div className="grid gap-2">
-        <h1 className="text-2xl font-semibold tracking-tight">{opportunity.title}</h1>
+        <div className="flex items-start justify-between gap-3">
+          <h1 className="text-2xl font-semibold tracking-tight">{opportunity.title}</h1>
+          {user && (
+            <SaveOpportunityButton
+              organizationSlug={organization.slug}
+              opportunitySlug={opportunity.slug}
+              savedOpportunityId={existingSave?.id ?? null}
+            />
+          )}
+        </div>
         <p className="text-muted-foreground text-sm">
           {opportunity.department.name} · {opportunity.opportunityType.replaceAll("_", " ")} ·{" "}
           {opportunity.workplaceType.replaceAll("_", " ")}
@@ -93,7 +108,13 @@ export default async function CareersOpportunityPage({ params }: PageProps) {
               </Link>
             </div>
           ) : user ? (
-            <ApplyForm organizationSlug={organization.slug} opportunitySlug={opportunity.slug} />
+            <ApplyForm
+              organizationSlug={organization.slug}
+              opportunitySlug={opportunity.slug}
+              isPlacementTrack={PLACEMENT_TRACK_OPPORTUNITY_TYPES.includes(
+                opportunity.opportunityType,
+              )}
+            />
           ) : (
             <div className="flex gap-2">
               <Button

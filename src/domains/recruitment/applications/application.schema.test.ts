@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { InvalidResumeFileError, submitApplicationSchema, validateResumeFile } from "./application.schema";
+import {
+  InvalidResumeFileError,
+  submitApplicationSchema,
+  validateAcademicTranscriptFile,
+  validateRecommendationLetterFile,
+  validateResumeFile,
+} from "./application.schema";
 
 function makeFile(name: string, sizeBytes: number, type: string): File {
   return new File([new Uint8Array(sizeBytes)], name, { type });
@@ -44,6 +50,35 @@ describe("submitApplicationSchema", () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it("accepts and coerces university info fields", () => {
+    const result = submitApplicationSchema.safeParse({
+      organizationSlug: "adotdevs",
+      opportunitySlug: "ipt-placement",
+      institution: "University of Dar es Salaam",
+      program: "Computer Science",
+      levelOfStudy: "Undergraduate",
+      yearOfStudy: "3",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.yearOfStudy).toBe(3);
+    }
+  });
+
+  it("treats empty university info fields as absent", () => {
+    const result = submitApplicationSchema.safeParse({
+      organizationSlug: "adotdevs",
+      opportunitySlug: "software-engineer",
+      institution: "",
+      yearOfStudy: "",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.institution).toBeUndefined();
+      expect(result.data.yearOfStudy).toBeUndefined();
+    }
+  });
 });
 
 describe("validateResumeFile", () => {
@@ -78,5 +113,25 @@ describe("validateResumeFile", () => {
 
   it("rejects a non-File value (e.g. a plain string field)", () => {
     expect(() => validateResumeFile("not-a-file")).toThrow(InvalidResumeFileError);
+  });
+});
+
+describe("validateAcademicTranscriptFile / validateRecommendationLetterFile", () => {
+  it("returns undefined for an absent transcript rather than throwing", () => {
+    expect(validateAcademicTranscriptFile(null)).toBeUndefined();
+  });
+
+  it("returns undefined for an absent recommendation letter rather than throwing", () => {
+    expect(validateRecommendationLetterFile(null)).toBeUndefined();
+  });
+
+  it("still validates type/size when a transcript is provided", () => {
+    const file = makeFile("transcript.png", 1024, "image/png");
+    expect(() => validateAcademicTranscriptFile(file)).toThrow(InvalidResumeFileError);
+  });
+
+  it("accepts a valid transcript", () => {
+    const file = makeFile("transcript.pdf", 1024, "application/pdf");
+    expect(validateAcademicTranscriptFile(file)).toBe(file);
   });
 });

@@ -2,6 +2,7 @@ import "server-only";
 
 import type { Interview, InterviewFeedback } from "@/generated/prisma/client";
 import { recordAuditEvent } from "@/domains/platform/audit/audit.service";
+import type { CurrentUser } from "@/domains/platform/tenancy/active-organization";
 import { requirePermission, type ActiveMembership } from "@/domains/platform/authorization/policy";
 import { findApplicationById } from "@/domains/recruitment/applications/application.repository";
 import { ApplicationNotFoundError } from "@/domains/recruitment/applications/application.service";
@@ -11,6 +12,7 @@ import {
   createInterview,
   createInterviewFeedback,
   findInterviewById,
+  listCandidateInterviewsForApplication,
   updateInterviewStatus,
 } from "./interview.repository";
 
@@ -128,6 +130,16 @@ export function cancelInterview(membership: ActiveMembership, interviewId: strin
 
 export function completeInterview(membership: ActiveMembership, interviewId: string) {
   return setInterviewStatus(membership, interviewId, "COMPLETED", "interview.completed");
+}
+
+export async function getInterviewsForCandidate(user: CurrentUser, applicationId: string) {
+  const application = await findApplicationById(applicationId);
+  if (!application || application.candidate.userId !== user.id) {
+    throw new ApplicationNotFoundError();
+  }
+
+  const interviews = await listCandidateInterviewsForApplication(applicationId);
+  return { application, interviews };
 }
 
 export async function submitInterviewFeedback(

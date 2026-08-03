@@ -31,6 +31,14 @@ export type CreateApplicationData = {
   coverNote?: string;
   resumeFilename: string;
   resumeStoragePath: string;
+  institution?: string;
+  program?: string;
+  levelOfStudy?: string;
+  yearOfStudy?: number;
+  academicTranscriptFilename?: string;
+  academicTranscriptStoragePath?: string;
+  recommendationLetterFilename?: string;
+  recommendationLetterStoragePath?: string;
 };
 
 export function createApplication(data: CreateApplicationData) {
@@ -53,6 +61,8 @@ export function listApplicationsForCandidate(userId: string) {
         orderBy: { scheduledStart: "asc" },
         take: 1,
       },
+      _count: { select: { interviews: true } },
+      placement: { select: { id: true } },
     },
     orderBy: { appliedAt: "desc" },
   });
@@ -85,6 +95,7 @@ export function findApplicationById(id: string) {
           title: true,
           organizationId: true,
           pipelineId: true,
+          opportunityType: true,
           organization: { select: { name: true } },
         },
       },

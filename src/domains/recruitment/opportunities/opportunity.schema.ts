@@ -5,6 +5,7 @@ const OPPORTUNITY_TYPES = [
   "PART_TIME",
   "CONTRACT",
   "INTERNSHIP",
+  "INDUSTRIAL_PRACTICAL_TRAINING",
   "GRADUATE_PROGRAM",
   "APPRENTICESHIP",
   "VOLUNTEER",
@@ -77,3 +78,15 @@ export const OPPORTUNITY_TYPE_OPTIONS = OPPORTUNITY_TYPES;
 export const WORKPLACE_TYPE_OPTIONS = WORKPLACE_TYPES;
 export const EXPERIENCE_LEVEL_OPTIONS = EXPERIENCE_LEVELS;
 export const OPPORTUNITY_VISIBILITY_OPTIONS = OPPORTUNITY_VISIBILITIES;
+
+/** Opportunity types that follow the training/placement lifecycle
+ *  (IPT_MODULE.txt) rather than (or alongside) a direct Offer. Lives here
+ *  rather than in the placements domain so both applications.service.ts
+ *  and placement.service.ts can depend on it without a cross-import
+ *  between those two domains. */
+export const PLACEMENT_TRACK_OPPORTUNITY_TYPES: Array<(typeof OPPORTUNITY_TYPES)[number]> = [
+  "INTERNSHIP",
+  "INDUSTRIAL_PRACTICAL_TRAINING",
+  "GRADUATE_PROGRAM",
+  "APPRENTICESHIP",
+];
