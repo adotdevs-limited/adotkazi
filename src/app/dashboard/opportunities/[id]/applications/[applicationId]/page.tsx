@@ -95,7 +95,12 @@ export default async function ApplicationDetailPage({
   const isPlacementTrack = PLACEMENT_TRACK_OPPORTUNITY_TYPES.includes(
     application.opportunity.opportunityType,
   );
-  const dailyLogs = placement ? await listDailyLogsForPlacement(placement.id) : [];
+  const dailyLogs = placement
+    ? (await listDailyLogsForPlacement(placement.id)).map((log) => ({
+        ...log,
+        hoursWorked: log.hoursWorked.toString(),
+      }))
+    : [];
   const canReviewDailyLogs =
     can(membership, "daily_log.review") &&
     (placement?.supervisorMembershipId === membership.membershipId ||

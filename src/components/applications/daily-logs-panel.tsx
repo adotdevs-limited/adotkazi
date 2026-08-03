@@ -15,6 +15,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DailyLogStatusBadge } from "@/components/applications/daily-log-status-badge";
 
+/** Prisma's Decimal isn't a plain object, so it can't be passed from a
+ *  Server Component into this Client Component — callers must serialize
+ *  hoursWorked to a string first. */
+export type SerializedDailyLog = Omit<DailyLog, "hoursWorked"> & { hoursWorked: string };
+
 const TEXTAREA_CLASS =
   "border-input focus-visible:border-ring focus-visible:ring-ring/50 min-h-16 w-full rounded-lg border bg-transparent px-2.5 py-1.5 text-sm outline-none focus-visible:ring-3";
 
@@ -26,7 +31,7 @@ export function DailyLogsPanel({
 }: {
   applicationId: string;
   opportunityId: string;
-  logs: DailyLog[];
+  logs: SerializedDailyLog[];
   canReview: boolean;
 }) {
   return (
@@ -58,7 +63,7 @@ function DailyLogRow({
   opportunityId,
   canReview,
 }: {
-  log: DailyLog;
+  log: SerializedDailyLog;
   applicationId: string;
   opportunityId: string;
   canReview: boolean;
@@ -83,7 +88,7 @@ function DailyLogRow({
       <div className="flex flex-wrap items-center gap-2">
         <DailyLogStatusBadge status={log.status} />
         <span className="text-sm font-medium">{log.date.toLocaleDateString()}</span>
-        <span className="text-muted-foreground text-xs">{log.hoursWorked.toString()}h</span>
+        <span className="text-muted-foreground text-xs">{log.hoursWorked}h</span>
       </div>
       <p className="text-sm whitespace-pre-wrap">{log.activityDescription}</p>
       {log.skillsLearned && (

@@ -42,7 +42,10 @@ export default async function SupervisedPlacementPage({
     redirect("/dashboard/supervision");
   }
 
-  const logs = await listDailyLogsForPlacement(placement.id);
+  const logs = (await listDailyLogsForPlacement(placement.id)).map((log) => ({
+    ...log,
+    hoursWorked: log.hoursWorked.toString(),
+  }));
   const canReview =
     can(membership, "daily_log.review") &&
     (placement.supervisorMembershipId === membership.membershipId ||
